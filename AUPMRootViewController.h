@@ -1,3 +1,0 @@
-@interface AUPMRootViewController : UITableViewController
-
-@end

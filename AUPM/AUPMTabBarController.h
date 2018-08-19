@@ -1,0 +1,3 @@
+@interface AUPMTabBarController : UITabBarController
+
+@end

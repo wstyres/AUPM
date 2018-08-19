@@ -1,0 +1,4 @@
+#!/bin/sh
+
+chown root:wheel /Applications/AUPM.app/supersling
+chmod 6755 /Applications/AUPM.app/supersling

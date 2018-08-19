@@ -1,0 +1,10 @@
+Package: xyz.willy.aupm
+Name: AUPM
+Architecture: iphoneos-arm
+Depends: dpkg, cydia
+Description: A Useless Package Manager
+Maintainer: Wilson Styres
+Author: Wilson Styres
+Section: Packaging
+Version: 0.0.1-2+debug
+Installed-Size: 560
