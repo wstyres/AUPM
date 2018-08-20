@@ -2,19 +2,12 @@
 
 A Useless Package Manager for iOS.
 
-I'm starting over because I forgot what I was doing and wanted to make AUPM better and work for more iOS versions.
-
 ## TODO
 
 - [ ] Sources
   - [ ] List sources
-  - [ ] Ability to manage sources
-  - [ ] List packages from each sources
-  - [ ] Source refresh
-    - [ ] Manually Refresh sources
-    - [ ] Import new repositories into database
-    - [ ] Import new packages into database
-  - [ ] Cache list of packages per repo
+  - [ ] Ability to add/remove a source and have it show up in Cydia
+  - [ ] List packages from each source and search through the repo
 - [ ] Packages
   - [ ] List installed packages
   - [ ] Ability to install packages from a repository
@@ -25,6 +18,7 @@ I'm starting over because I forgot what I was doing and wanted to make AUPM bett
   - [ ] Display package details on the depiction page
 - [ ] Search
 - [ ] Updates
+- [ ] Support for most modern iOS versions
 
 ## Installation
 
