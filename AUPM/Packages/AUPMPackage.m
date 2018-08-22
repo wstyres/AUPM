@@ -32,6 +32,10 @@
 }
 
 - (BOOL)isInstalled {
+    if (isLoadedInstall) {
+      return true;
+    }
+
     NSTask *task = [[NSTask alloc] init];
     [task setLaunchPath:@"/Applications/AUPM.app/supersling"];
     NSArray *arguments = [[NSArray alloc] initWithObjects: @"dpkg", @"-l", nil];
@@ -46,10 +50,20 @@
     NSData *data = [[out fileHandleForReading] readDataToEndOfFile];
     NSString *outputString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
 
+    HBLogInfo(@"Installed info: %@", outputString);
+
     if ([outputString rangeOfString:packageID].location != NSNotFound) {
         return true;
     }
     return false;
+}
+
+- (BOOL)isLoadedInstall {
+    return isLoadedInstall;
+}
+
+- (void)setLoadedInstall:(BOOL)inst {
+    isLoadedInstall = inst;
 }
 
 - (void)setPackageName:(NSString *)name {

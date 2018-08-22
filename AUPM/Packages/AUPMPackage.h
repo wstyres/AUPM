@@ -8,6 +8,7 @@
     NSString *description;
     NSURL *depictionURL;
     NSString *sum;
+    BOOL isLoadedInstall;
 }
 - (id)initWithPackageInformation:(NSDictionary *)information;
 - (id)initWithPackageName:(NSString *)name packageID:(NSString *)identifier version:(NSString *)vers section:(NSString *)sect description:(NSString *)desc depictionURL:(NSString *)url sum:(NSString *)md5;
@@ -19,6 +20,7 @@
 - (void)setDescription:(NSString *)description;
 - (void)setDepictionURL:(NSURL *)url;
 - (void)setSum:(NSString *)sum;
+- (void)setLoadedInstall:(BOOL)inst;
 - (NSString *)packageName;
 - (NSString *)packageIdentifier;
 - (NSString *)version;
@@ -26,4 +28,5 @@
 - (NSString *)description;
 - (NSURL *)depictionURL;
 - (NSString *)sum;
+- (BOOL)isLoadedInstall;
 @end

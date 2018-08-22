@@ -19,6 +19,7 @@ NSArray *packages_to_array(const char *path);
 
         if ([dict[@"Package"] rangeOfString:@"gsc"].location == NSNotFound && [dict[@"Package"] rangeOfString:@"cy+"].location == NSNotFound) {
             AUPMPackage *package = [[AUPMPackage alloc] initWithPackageInformation:dict];
+            [package setLoadedInstall:true];
             [installedPackageList addObject:package];
         }
     }
