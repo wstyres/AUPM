@@ -49,7 +49,7 @@
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
 
-    AUPMDatabaseManager *databaseManager = [[AUPMDatabaseManager alloc] initWithDatabaseFilename:@"aupmpackagedb.sql"];
+    AUPMDatabaseManager *databaseManager = [[AUPMDatabaseManager alloc] init];
     if (_action == 0) {
         [databaseManager firstLoadPopulation:^(BOOL success) {
             [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"firstSetupComplete"];

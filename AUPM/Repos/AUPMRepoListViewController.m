@@ -13,7 +13,7 @@
 - (void)loadView {
 	[super loadView];
 
-	AUPMDatabaseManager *databaseManager = [[AUPMDatabaseManager alloc] initWithDatabaseFilename:@"aupmpackagedb.sql"];
+	AUPMDatabaseManager *databaseManager = [[AUPMDatabaseManager alloc] init];
 	_objects = [[databaseManager cachedListOfRepositories] mutableCopy];
 
 	UIBarButtonItem *refreshItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(refreshPackages:)];
@@ -38,7 +38,7 @@
 - (void)viewWillAppear:(BOOL)animated {
 	[super viewWillAppear:animated];
 
-	AUPMDatabaseManager *databaseManager = [[AUPMDatabaseManager alloc] initWithDatabaseFilename:@"aupmpackagedb.sql"];
+	AUPMDatabaseManager *databaseManager = [[AUPMDatabaseManager alloc] init];
 	_objects = [[databaseManager cachedListOfRepositories] mutableCopy];
 
 	[[self tableView] reloadData];

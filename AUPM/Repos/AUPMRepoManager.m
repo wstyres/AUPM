@@ -204,8 +204,8 @@ NSArray *packages_to_array(const char *path);
         [updateListTask waitUntilExit];
     }
 
-    AUPMDatabaseManager *databaseManager = [[AUPMDatabaseManager alloc] initWithDatabaseFilename:@"aupmpackagedb.sql"];
-	sqlite3 *database = [databaseManager database];
+    AUPMDatabaseManager *databaseManager = [[AUPMDatabaseManager alloc] init];
+	  sqlite3 *database = [databaseManager database];
     [databaseManager deleteRepo:delRepo fromDatabase:database];
     sqlite3_close(database);
 }

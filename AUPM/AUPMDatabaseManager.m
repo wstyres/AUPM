@@ -7,47 +7,35 @@
 @interface AUPMDatabaseManager () {
     BOOL *databaseIsOpen;
 }
-@property (nonatomic, strong) NSString *documentsDirectory;
-@property (nonatomic, strong) NSString *databaseFilename;
+@property (nonatomic, strong) NSString *databasePath;
 @property (nonatomic, strong) NSMutableArray *arrResults;
 
-- (void)copyDatabaseIntoDocumentsDirectory;
+- (void)copyDatabase:(NSString *)database intoDocumentsDirectory:(NSString *)directory;
 @end
 
 @implementation AUPMDatabaseManager
 
 bool packages_file_changed(FILE* f1, FILE* f2);
 
-- (id)initWithDatabaseFilename:(NSString *)filename {
-    self = [super init];
-    if (self) {
-        NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-        self.documentsDirectory = [paths objectAtIndex:0];
-        self.databaseFilename = filename;
+- (id)init {
+  self = [super init];
+  if (self) {
+      NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+      NSString *documentsDirectory = [paths objectAtIndex:0];
+      NSString *databaseFilename = @"aupmpackagedb.sql";
+      self.databasePath = [documentsDirectory stringByAppendingPathComponent:databaseFilename];
 
-        [self copyDatabaseIntoDocumentsDirectory];
-    }
-    return self;
+      [self copyDatabase: databaseFilename intoDocumentsDirectory: documentsDirectory];
+  }
+  return self;
 }
 
 //Runs apt-get update and cahces all information from apt into a database
 - (void)firstLoadPopulation:(void (^)(BOOL success))completion {
     HBLogInfo(@"Beginning first load preparation");
-    NSString *databasePath = [self.documentsDirectory stringByAppendingPathComponent:self.databaseFilename];
     sqlite3 *database;
 
-    if (self.arrResults != nil) {
-        [self.arrResults removeAllObjects];
-        self.arrResults = nil;
-    }
-    self.arrResults = [[NSMutableArray alloc] init];
-
-    if (self.arrColumnNames != nil) {
-        [self.arrColumnNames removeAllObjects];
-        self.arrColumnNames = nil;
-    }
-    self.arrColumnNames = [[NSMutableArray alloc] init];
-    //Since this should only be called on the first load, lets nuke the database just in case... (I'll change this later)
+    //Since this should only be called on the first load, lets nuke the database
     [self purgeRecords];
 
     AUPMRepoManager *repoManager = [[AUPMRepoManager alloc] init];
@@ -66,8 +54,9 @@ bool packages_file_changed(FILE* f1, FILE* f2);
     static pthread_mutex_t mutex;
     pthread_mutex_init(&mutex,NULL);
 
-    sqlite3_open([databasePath UTF8String], &database);
+    sqlite3_open([_databasePath UTF8String], &database);
 
+    //Cache all information from APT
     for (AUPMRepo *repo in repoArray) {
         dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^ {
             sqlite3_stmt *repoStatement;
@@ -135,7 +124,6 @@ bool packages_file_changed(FILE* f1, FILE* f2);
 
 - (void)updatePopulation:(void (^)(BOOL success))completion {
     AUPMRepoManager *repoManager = [[AUPMRepoManager alloc] init];
-    NSString *databasePath = [self.documentsDirectory stringByAppendingPathComponent:self.databaseFilename];
 
     NSTask *cpTask = [[NSTask alloc] init];
     [cpTask setLaunchPath:@"/Applications/AUPM.app/supersling"];
@@ -186,7 +174,7 @@ bool packages_file_changed(FILE* f1, FILE* f2);
             pthread_mutex_init(&mutex,NULL);
             dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^ {
                 sqlite3 *sqlite3Database;
-                sqlite3_open([databasePath UTF8String], &sqlite3Database);
+                sqlite3_open([_databasePath UTF8String], &sqlite3Database);
                 sqlite3_stmt *repoStatement;
 
                 //Replace repo information
@@ -250,8 +238,7 @@ bool packages_file_changed(FILE* f1, FILE* f2);
 
 - (sqlite3 *)database {
     sqlite3 *database;
-    NSString *databasePath = [self.documentsDirectory stringByAppendingPathComponent:self.databaseFilename];
-    sqlite3_open([databasePath UTF8String], &database);
+    sqlite3_open([_databasePath UTF8String], &database);
     return database;
 }
 
@@ -267,8 +254,7 @@ bool packages_file_changed(FILE* f1, FILE* f2);
 - (NSArray *)cachedListOfRepositories {
     HBLogInfo(@"Getting cached list of repos");
     sqlite3 *database;
-    NSString *databasePath = [self.documentsDirectory stringByAppendingPathComponent:self.databaseFilename];
-    sqlite3_open([databasePath UTF8String], &database);
+    sqlite3_open([_databasePath UTF8String], &database);
 
     NSMutableArray *listOfRepositories = [[NSMutableArray alloc] init];
     NSString *query = @"SELECT * FROM repos";
@@ -305,8 +291,7 @@ bool packages_file_changed(FILE* f1, FILE* f2);
 - (NSArray *)cachedPackageListForRepo:(AUPMRepo *)repo {
     HBLogInfo(@"Getting installed pacakges for repo");
     sqlite3 *database;
-    NSString *databasePath = [self.documentsDirectory stringByAppendingPathComponent:self.databaseFilename];
-    sqlite3_open([databasePath UTF8String], &database);
+    sqlite3_open([_databasePath UTF8String], &database);
     NSMutableArray *listOfPackages = [[NSMutableArray alloc] init];
     NSString *query = @"SELECT * FROM packages WHERE repoID = ?";
     sqlite3_stmt *statement;
@@ -354,10 +339,10 @@ bool packages_file_changed(FILE* f1, FILE* f2);
     return [[repoManager cleanUpDuplicatePackages:listOfPackages] sortedArrayUsingDescriptors:sortDescriptors];
 }
 
-- (void)copyDatabaseIntoDocumentsDirectory {
-    NSString *destinationPath = [self.documentsDirectory stringByAppendingPathComponent:self.databaseFilename];
+- (void)copyDatabase:(NSString *)database intoDocumentsDirectory:(NSString *)directory {
+    NSString *destinationPath = [directory stringByAppendingPathComponent:database];
     if (![[NSFileManager defaultManager] fileExistsAtPath:destinationPath]) {
-        NSString *sourcePath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:self.databaseFilename];
+        NSString *sourcePath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:database];
         NSError *error;
         [[NSFileManager defaultManager] copyItemAtPath:sourcePath toPath:destinationPath error:&error];
 
@@ -369,8 +354,7 @@ bool packages_file_changed(FILE* f1, FILE* f2);
 
 - (void)purgeRecords {
     sqlite3 *database;
-    NSString *databasePath = [self.documentsDirectory stringByAppendingPathComponent:self.databaseFilename];
-    sqlite3_open([databasePath UTF8String], &database);
+    sqlite3_open([_databasePath UTF8String], &database);
     sqlite3_exec(database, "DELETE FROM REPOS", NULL, NULL, NULL);
     sqlite3_exec(database, "DELETE FROM PACKAGES", NULL, NULL, NULL);
     sqlite3_close(database);

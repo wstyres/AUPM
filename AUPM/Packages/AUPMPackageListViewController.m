@@ -22,7 +22,7 @@
 	[super loadView];
 
 	if (_repo != NULL) {
-		AUPMDatabaseManager *databaseManager = [[AUPMDatabaseManager alloc] initWithDatabaseFilename:@"aupmpackagedb.sql"];
+		AUPMDatabaseManager *databaseManager = [[AUPMDatabaseManager alloc] init];
 		_objects = [[databaseManager cachedPackageListForRepo:_repo] mutableCopy];
 
 		self.title = [_repo repoName];
