@@ -3,6 +3,7 @@
 #import "Repos/AUPMRepoManager.h"
 #import "Repos/AUPMRepo.h"
 #import "Packages/AUPMPackage.h"
+#import "Packages/AUPMPackageManager.h"
 
 @interface AUPMDatabaseManager () {
   BOOL *databaseIsOpen;
@@ -34,11 +35,9 @@ bool packages_file_changed(FILE* f1, FILE* f2);
 - (void)firstLoadPopulation:(void (^)(BOOL success))completion {
   HBLogInfo(@"Beginning first load preparation");
   sqlite3 *database;
-
-  //Since this should only be called on the first load, lets nuke the database
-  [self purgeRecords];
-
   AUPMRepoManager *repoManager = [[AUPMRepoManager alloc] init];
+
+  [self purgeRecords]; //Since this should only be called on the first load, lets nuke the database
 
   NSTask *task = [[NSTask alloc] init];
   [task setLaunchPath:@"/Applications/AUPM.app/supersling"];
@@ -118,8 +117,12 @@ bool packages_file_changed(FILE* f1, FILE* f2);
     });
   }
   dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
-  sqlite3_close(database);
-  completion(true);
+
+  //Cache installed packages
+  [self populateInstalledDatabase:^(BOOL success) {
+    sqlite3_close(database);
+    completion(true);
+  }];
 }
 
 - (void)updatePopulation:(void (^)(BOOL success))completion {
@@ -233,6 +236,47 @@ bool packages_file_changed(FILE* f1, FILE* f2);
     }
   }
   dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
+
+  [self populateInstalledDatabase:^(BOOL success) {
+    completion(true);
+  }];
+}
+
+- (void)populateInstalledDatabase:(void (^)(BOOL success))completion {
+  sqlite3 *database;
+  sqlite3_open([_databasePath UTF8String], &database);
+  sqlite3_config(SQLITE_CONFIG_SERIALIZED);
+
+  AUPMPackageManager *packageManager = [[AUPMPackageManager alloc] init];
+  NSArray *packagesArray = [packageManager installedPackageList];
+
+  //(name text, packageid text, version text, section text, desc text, url text)
+  //Might need to thread this process so that it doesn't freeze the UI but we will see how quick it is
+  HBLogInfo(@"Started to parse installed packages");
+  NSString *packageQuery = @"insert into installed(name, packageid, version, section, desc, url) values(?,?,?,?,?,?)";
+  sqlite3_stmt *packageStatement;
+  sqlite3_exec(database, "BEGIN TRANSACTION", NULL, NULL, NULL);
+  if (sqlite3_prepare_v2(database, [packageQuery UTF8String], -1, &packageStatement, nil) == SQLITE_OK) {
+    for (AUPMPackage *package in packagesArray) {
+      //Populate packages database with packages from repo
+      sqlite3_bind_text(packageStatement, 1, [[package packageName] UTF8String], -1, SQLITE_TRANSIENT);
+      sqlite3_bind_text(packageStatement, 2, [[package packageIdentifier] UTF8String], -1, SQLITE_TRANSIENT);
+      sqlite3_bind_text(packageStatement, 3, [[package version] UTF8String], -1, SQLITE_TRANSIENT);
+      sqlite3_bind_text(packageStatement, 4, [[package section] UTF8String], -1, SQLITE_TRANSIENT);
+      sqlite3_bind_text(packageStatement, 5, [[package description] UTF8String], -1, SQLITE_TRANSIENT);
+      sqlite3_bind_text(packageStatement, 6, [[package depictionURL].absoluteString UTF8String], -1, SQLITE_TRANSIENT);
+      sqlite3_step(packageStatement);
+      sqlite3_reset(packageStatement);
+      sqlite3_clear_bindings(packageStatement);
+    }
+    HBLogInfo(@"Finished installed packages");
+  }
+  else {
+    HBLogError(@"%s", sqlite3_errmsg(database));
+  }
+  sqlite3_finalize(packageStatement);
+  sqlite3_exec(database, "COMMIT TRANSACTION", NULL, NULL, NULL);
+  sqlite3_close(database);
   completion(true);
 }
 
