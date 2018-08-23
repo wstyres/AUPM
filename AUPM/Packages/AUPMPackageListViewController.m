@@ -55,9 +55,6 @@
 	}
 
 	NSString *section = [[package section] stringByReplacingOccurrencesOfString:@" " withString:@"_"];
-	if (_repo == NULL) {
-		section = [section substringToIndex:[section length] - 1]; //Remove null terminator
-	}
 	NSString *iconPath = [NSString stringWithFormat:@"/Applications/Cydia.app/Sections/%@.png", section];
 	UIImage *sectionImage = [UIImage imageWithContentsOfFile:iconPath];
 	if (sectionImage != NULL) {
