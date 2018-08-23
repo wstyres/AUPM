@@ -1,6 +1,7 @@
 #import "AUPMTabBarController.h"
 #import "Repos/AUPMRepoListViewController.h"
 #import "Packages/AUPMPackageListViewController.h"
+#import "AUPMDebugViewController.h"
 
 @implementation AUPMTabBarController
 
@@ -15,7 +16,11 @@
     UITabBarItem *packageIcon = [[UITabBarItem alloc] initWithTitle:@"Packages" image:[UIImage imageNamed:@"installed.png"] selectedImage:[UIImage imageNamed:@"installed-filled.png"]];
     [packagesNavController setTabBarItem:packageIcon];
 
-    self.viewControllers = [NSArray arrayWithObjects:reposNavController, packagesNavController,nil];
+    UINavigationController *debugNavController = [[UINavigationController alloc] initWithRootViewController:[[AUPMDebugViewController alloc] init]];
+    UITabBarItem *debugIcon = [[UITabBarItem alloc] initWithTitle:@"Nuke" image:[UIImage imageNamed:@"debug.png"] selectedImage:[UIImage imageNamed:@"debug-filled.png"]];
+    [debugNavController setTabBarItem:debugIcon];
+
+    self.viewControllers = [NSArray arrayWithObjects:reposNavController, packagesNavController, debugNavController, nil];
 }
 
 @end
