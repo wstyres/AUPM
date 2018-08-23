@@ -25,7 +25,6 @@ bool packages_file_changed(FILE* f1, FILE* f2);
     NSString *documentsDirectory = [paths objectAtIndex:0];
     NSString *databaseFilename = @"aupmpackagedb.sql";
     self.databasePath = [documentsDirectory stringByAppendingPathComponent:databaseFilename];
-
     [self copyDatabase: databaseFilename intoDocumentsDirectory: documentsDirectory];
   }
   return self;
@@ -245,6 +244,7 @@ bool packages_file_changed(FILE* f1, FILE* f2);
 - (void)populateInstalledDatabase:(void (^)(BOOL success))completion {
   sqlite3 *database;
   sqlite3_open([_databasePath UTF8String], &database);
+  sqlite3_exec(database, "DELETE FROM INSTALLED", NULL, NULL, NULL); //Delete all packages so we don't end up with duplicates
   sqlite3_config(SQLITE_CONFIG_SERIALIZED);
 
   AUPMPackageManager *packageManager = [[AUPMPackageManager alloc] init];
@@ -448,10 +448,12 @@ bool packages_file_changed(FILE* f1, FILE* f2);
 
 - (void)copyDatabase:(NSString *)database intoDocumentsDirectory:(NSString *)directory {
   NSString *destinationPath = [directory stringByAppendingPathComponent:database];
+  HBLogError(@"Dest Path: %@", destinationPath);
   if (![[NSFileManager defaultManager] fileExistsAtPath:destinationPath]) {
     NSString *sourcePath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:database];
     NSError *error;
     [[NSFileManager defaultManager] copyItemAtPath:sourcePath toPath:destinationPath error:&error];
+    HBLogError(@"Source Path: %@ Dest Path: %@", sourcePath, destinationPath);
 
     if (error != nil) {
       HBLogError(@"%@", [error localizedDescription]);
