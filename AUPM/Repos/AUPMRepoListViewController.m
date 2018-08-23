@@ -16,7 +16,7 @@
 	AUPMDatabaseManager *databaseManager = [[AUPMDatabaseManager alloc] init];
 	_objects = [[databaseManager cachedListOfRepositories] mutableCopy];
 
-	UIBarButtonItem *refreshItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(refreshPackages:)];
+	UIBarButtonItem *refreshItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(refreshPackages)];
 	self.navigationItem.rightBarButtonItem = refreshItem;
 
 	UIBarButtonItem *addItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(showAddRepoAlert)];
@@ -25,12 +25,14 @@
 	self.title = @"Sources";
 }
 
-- (void)refreshPackages:(BOOL)full {
-	int action = 1;
-	if (full) {
-		action = 0;
-	}
-	AUPMRefreshViewController *dataLoadViewController = [[AUPMRefreshViewController alloc] initWithAction:action];
+- (void)refreshPackages {
+	AUPMRefreshViewController *dataLoadViewController = [[AUPMRefreshViewController alloc] initWithAction:1];
+
+	[self presentViewController:dataLoadViewController animated:true completion:nil];
+}
+
+- (void)fullRefresh {
+	AUPMRefreshViewController *dataLoadViewController = [[AUPMRefreshViewController alloc] initWithAction:0];
 
 	[self presentViewController:dataLoadViewController animated:true completion:nil];
 }
@@ -76,7 +78,7 @@
 
 	AUPMRepoManager *repoManager = [[AUPMRepoManager alloc] init];
 	[repoManager addSource:url];
-	[self refreshPackages:true];
+	[self fullRefresh];
 }
 
 #pragma mark - Table View Data Source
