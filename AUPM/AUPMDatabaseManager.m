@@ -304,12 +304,12 @@ bool packages_file_changed(FILE* f1, FILE* f2);
   sqlite3_stmt *statement;
   if (sqlite3_prepare_v2(database, [query UTF8String], -1, &statement, nil) == SQLITE_OK) {
     while (sqlite3_step(statement) == SQLITE_ROW) {
-      const char *packageNameChars = (const char *)sqlite3_column_text(statement, 1);
-      const char *packageIDChars = (const char *)sqlite3_column_text(statement, 2);
-      const char *versionChars = (const char *)sqlite3_column_text(statement, 3);
-      const char *sectionChars = (const char *)sqlite3_column_text(statement, 4);
-      const char *descriptionChars = (const char *)sqlite3_column_text(statement, 5);
-      const char *depictionChars = (const char *)sqlite3_column_text(statement, 6);
+      const char *packageNameChars = (const char *)sqlite3_column_text(statement, 0);
+      const char *packageIDChars = (const char *)sqlite3_column_text(statement, 1);
+      const char *versionChars = (const char *)sqlite3_column_text(statement, 2);
+      const char *sectionChars = (const char *)sqlite3_column_text(statement, 3);
+      const char *descriptionChars = (const char *)sqlite3_column_text(statement, 4);
+      const char *depictionChars = (const char *)sqlite3_column_text(statement, 5);
 
       NSString *packageName;
       NSString *packageID = [[NSString alloc] initWithUTF8String:packageIDChars];
