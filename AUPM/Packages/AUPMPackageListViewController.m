@@ -28,8 +28,8 @@
 		self.title = [_repo repoName];
 	}
 	else {
-		AUPMPackageManager *packageManager = [[AUPMPackageManager alloc] init];
-		_objects = [[packageManager installedPackageList] mutableCopy];
+		AUPMDatabaseManager *databaseManager = [[AUPMDatabaseManager alloc] init];
+		_objects = [[databaseManager cachedListOfInstalledPackages] mutableCopy];
 
 		self.title = @"Packages";
 	}
