@@ -49,9 +49,7 @@
 
     NSData *data = [[out fileHandleForReading] readDataToEndOfFile];
     NSString *outputString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-
-    HBLogInfo(@"Installed info: %@", outputString);
-
+    
     if ([outputString rangeOfString:packageID].location != NSNotFound) {
         return true;
     }
