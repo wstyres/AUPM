@@ -32,7 +32,7 @@ bool packages_file_changed(FILE* f1, FILE* f2);
 
 //Runs apt-get update and cahces all information from apt into a database
 - (void)firstLoadPopulation:(void (^)(BOOL success))completion {
-  HBLogInfo(@"Beginning first load preparation");
+  HBLogInfo(@"Performing full database population...");
   sqlite3 *database;
   AUPMRepoManager *repoManager = [[AUPMRepoManager alloc] init];
 
@@ -125,6 +125,7 @@ bool packages_file_changed(FILE* f1, FILE* f2);
 }
 
 - (void)updatePopulation:(void (^)(BOOL success))completion {
+  HBLogInfo(@"Performing partial database population...");
   AUPMRepoManager *repoManager = [[AUPMRepoManager alloc] init];
 
   NSTask *cpTask = [[NSTask alloc] init];
@@ -150,7 +151,6 @@ bool packages_file_changed(FILE* f1, FILE* f2);
     NSString *aptPackagesFile = [NSString stringWithFormat:@"/var/lib/apt/lists/%@_Packages", [repo repoBaseFileName]];
     if (![[NSFileManager defaultManager] fileExistsAtPath:aptPackagesFile]) {
       aptPackagesFile = [NSString stringWithFormat:@"/var/lib/apt/lists/%@_main_binary-iphoneos-arm_Packages", [repo repoBaseFileName]]; //Do some funky package file with the default repos
-      HBLogInfo(@"Default Repo Packages File: %@", aptPackagesFile);
     }
 
     NSString *cachedPackagesFile = [NSString stringWithFormat:@"/var/mobile/Library/Caches/com.xtm3x.aupm/lists/%@_Packages", [repo repoBaseFileName]];
@@ -166,8 +166,6 @@ bool packages_file_changed(FILE* f1, FILE* f2);
       FILE *aptFile = fopen([aptPackagesFile UTF8String], "r");
       FILE *cachedFile = fopen([cachedPackagesFile UTF8String], "r");
       needsUpdate = packages_file_changed(aptFile, cachedFile);
-
-      HBLogInfo(@"packaged file changed: %@", needsUpdate ? @"true" : @"false");
     }
 
     if (needsUpdate) {
@@ -204,7 +202,6 @@ bool packages_file_changed(FILE* f1, FILE* f2);
         [self deletePackagesFromRepo:repo inDatabase:sqlite3Database];
 
         NSArray *packagesArray = [repoManager packageListForRepo:repo];
-        HBLogInfo(@"Started to parse packages for repo %@", [repo repoName]);
         NSString *packageQuery = @"insert into packages(repoID, packageName, packageIdentifier, version, section, description, depictionURL) values(?,?,?,?,?,?,?)";
         sqlite3_stmt *packageStatement;
         pthread_mutex_lock(&mutex);
@@ -223,7 +220,6 @@ bool packages_file_changed(FILE* f1, FILE* f2);
             sqlite3_reset(packageStatement);
             sqlite3_clear_bindings(packageStatement);
           }
-          HBLogInfo(@"Finished packages for repo %@", [repo repoName]);
         }
         else {
           HBLogError(@"%s", sqlite3_errmsg(sqlite3Database));
@@ -448,12 +444,10 @@ bool packages_file_changed(FILE* f1, FILE* f2);
 
 - (void)copyDatabase:(NSString *)database intoDocumentsDirectory:(NSString *)directory {
   NSString *destinationPath = [directory stringByAppendingPathComponent:database];
-  HBLogError(@"Dest Path: %@", destinationPath);
   if (![[NSFileManager defaultManager] fileExistsAtPath:destinationPath]) {
     NSString *sourcePath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:database];
     NSError *error;
     [[NSFileManager defaultManager] copyItemAtPath:sourcePath toPath:destinationPath error:&error];
-    HBLogError(@"Source Path: %@ Dest Path: %@", sourcePath, destinationPath);
 
     if (error != nil) {
       HBLogError(@"%@", [error localizedDescription]);

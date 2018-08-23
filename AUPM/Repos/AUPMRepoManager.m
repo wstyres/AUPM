@@ -109,11 +109,9 @@ NSArray *packages_to_array(const char *path);
 }
 
 - (NSArray *)packageListForRepo:(AUPMRepo *)repo {
-    HBLogInfo(@"Package List For Repo: %@", [repo repoName]);
     NSString *cachedPackagesFile = [NSString stringWithFormat:@"/var/lib/apt/lists/%@_Packages", [repo repoBaseFileName]];
     if (![[NSFileManager defaultManager] fileExistsAtPath:cachedPackagesFile]) {
         cachedPackagesFile = [NSString stringWithFormat:@"/var/lib/apt/lists/%@_main_binary-iphoneos-arm_Packages", [repo repoBaseFileName]]; //Do some funky package file with the default repos
-        HBLogInfo(@"Default Repo Packages File: %@", cachedPackagesFile);
     }
 
     NSArray *packageArray = packages_to_array([cachedPackagesFile UTF8String]);

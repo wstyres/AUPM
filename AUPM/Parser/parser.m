@@ -19,7 +19,6 @@ bool packages_file_changed(FILE* f1, FILE* f2) {
 
 NSArray *packages_to_array(const char *path)
 {
-    NSDate *methodStart = [NSDate date];
     CFMutableArrayRef packages = CFArrayCreateMutable(kCFAllocatorDefault, 10, &kCFTypeArrayCallBacks);
 
     FILE* file = fopen(path, "r");
@@ -48,9 +47,6 @@ NSArray *packages_to_array(const char *path)
     }
 
     fclose(file);
-    NSDate *methodFinish = [NSDate date];
-    NSTimeInterval executionTime = [methodFinish timeIntervalSinceDate:methodStart];
-    HBLogInfo(@"Parsed %s in %f seconds.", path, executionTime);
 
     return (__bridge NSArray*)packages;
 }
