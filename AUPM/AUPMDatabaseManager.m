@@ -126,7 +126,7 @@ bool packages_file_changed(FILE* f1, FILE* f2);
 
 - (void)updatePopulation:(void (^)(BOOL success))completion {
   HBLogInfo(@"Performing partial database population...");
-  AUPMRepoManager *repoManager = [[AUPMRepoManager alloc] init];
+
 
   NSTask *cpTask = [[NSTask alloc] init];
   [cpTask setLaunchPath:@"/Applications/AUPM.app/supersling"];
@@ -144,8 +144,83 @@ bool packages_file_changed(FILE* f1, FILE* f2);
   [refreshTask launch];
   [refreshTask waitUntilExit];
 
-  NSArray *repoArray = [repoManager managedRepoList];
   dispatch_group_t group = dispatch_group_create();
+
+  NSArray *bill = [self billOfReposToUpdate];
+  for (AUPMRepo *repo in bill) {
+    sqlite3_config(SQLITE_CONFIG_SERIALIZED);
+    static pthread_mutex_t mutex;
+    pthread_mutex_init(&mutex,NULL);
+    dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^ {
+      sqlite3 *sqlite3Database;
+      sqlite3_open([_databasePath UTF8String], &sqlite3Database);
+      sqlite3_stmt *repoStatement;
+
+      //Replace repo information
+      int repoID = [repo repoIdentifier];
+      HBLogInfo(@"Removing information about repo %d (%@)", repoID, [repo repoName]);
+      NSString *repoUpdateQuery = @"UPDATE repos SET repoName = ?, repoBaseFileName = ?, description = ?, repoURL = ?, icon = ? WHERE repoID = ?";
+
+      //Update repo
+      pthread_mutex_lock(&mutex);
+      if (sqlite3_prepare_v2(sqlite3Database, [repoUpdateQuery UTF8String], -1, &repoStatement, nil) == SQLITE_OK) {
+        sqlite3_bind_text(repoStatement, 1, [[repo repoName] UTF8String], -1, SQLITE_TRANSIENT);
+        sqlite3_bind_text(repoStatement, 2, [[repo repoBaseFileName] UTF8String], -1, SQLITE_TRANSIENT);
+        sqlite3_bind_text(repoStatement, 3, [[repo description] UTF8String], -1, SQLITE_TRANSIENT);
+        sqlite3_bind_text(repoStatement, 4, [[repo repoURL] UTF8String], -1, SQLITE_TRANSIENT);
+        sqlite3_bind_blob(repoStatement, 5, (__bridge const void *)[repo icon], -1, SQLITE_TRANSIENT);
+        sqlite3_bind_int(repoStatement, 6, repoID);
+        sqlite3_step(repoStatement);
+      }
+      else {
+        HBLogError(@"%s", sqlite3_errmsg(sqlite3Database));
+      }
+      sqlite3_finalize(repoStatement);
+      pthread_mutex_unlock(&mutex);
+
+      [self deletePackagesFromRepo:repo inDatabase:sqlite3Database];
+
+      NSArray *packagesArray = [repoManager packageListForRepo:repo];
+      NSString *packageQuery = @"insert into packages(repoID, packageName, packageIdentifier, version, section, description, depictionURL) values(?,?,?,?,?,?,?)";
+      sqlite3_stmt *packageStatement;
+      pthread_mutex_lock(&mutex);
+      sqlite3_exec(sqlite3Database, "BEGIN TRANSACTION", NULL, NULL, NULL);
+      if (sqlite3_prepare_v2(sqlite3Database, [packageQuery UTF8String], -1, &packageStatement, nil) == SQLITE_OK) {
+        for (AUPMPackage *package in packagesArray) {
+          //Populate packages database with packages from repo
+          sqlite3_bind_int(packageStatement, 1, repoID);
+          sqlite3_bind_text(packageStatement, 2, [[package packageName] UTF8String], -1, SQLITE_TRANSIENT);
+          sqlite3_bind_text(packageStatement, 3, [[package packageIdentifier] UTF8String], -1, SQLITE_TRANSIENT);
+          sqlite3_bind_text(packageStatement, 4, [[package version] UTF8String], -1, SQLITE_TRANSIENT);
+          sqlite3_bind_text(packageStatement, 5, [[package section] UTF8String], -1, SQLITE_TRANSIENT);
+          sqlite3_bind_text(packageStatement, 6, [[package description] UTF8String], -1, SQLITE_TRANSIENT);
+          sqlite3_bind_text(packageStatement, 7, [[package depictionURL].absoluteString UTF8String], -1, SQLITE_TRANSIENT);
+          sqlite3_step(packageStatement);
+          sqlite3_reset(packageStatement);
+          sqlite3_clear_bindings(packageStatement);
+        }
+      }
+      else {
+        HBLogError(@"%s", sqlite3_errmsg(sqlite3Database));
+      }
+      sqlite3_finalize(packageStatement);
+      sqlite3_exec(sqlite3Database, "COMMIT TRANSACTION", NULL, NULL, NULL);
+      pthread_mutex_unlock(&mutex);
+    });
+  }
+
+  dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
+
+  [self populateInstalledDatabase:^(BOOL success) {
+    completion(true);
+  }];
+}
+
+- (NSArray *)billOfReposToUpdate {
+  AUPMRepoManager *repoManager = [[AUPMRepoManager alloc] init];
+  NSArray *repoArray = [repoManager managedRepoList];
+  NSMutableArray *bill = [NSMutableArray new];
+
   for (AUPMRepo *repo in repoArray) {
     BOOL needsUpdate = false;
     NSString *aptPackagesFile = [NSString stringWithFormat:@"/var/lib/apt/lists/%@_Packages", [repo repoBaseFileName]];
@@ -169,72 +244,18 @@ bool packages_file_changed(FILE* f1, FILE* f2);
     }
 
     if (needsUpdate) {
-      sqlite3_config(SQLITE_CONFIG_SERIALIZED);
-      static pthread_mutex_t mutex;
-      pthread_mutex_init(&mutex,NULL);
-      dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^ {
-        sqlite3 *sqlite3Database;
-        sqlite3_open([_databasePath UTF8String], &sqlite3Database);
-        sqlite3_stmt *repoStatement;
-
-        //Replace repo information
-        int repoID = [repo repoIdentifier];
-        HBLogInfo(@"Removing information about repo %d (%@)", repoID, [repo repoName]);
-        NSString *repoUpdateQuery = @"UPDATE repos SET repoName = ?, repoBaseFileName = ?, description = ?, repoURL = ?, icon = ? WHERE repoID = ?";
-
-        //Update repo
-        pthread_mutex_lock(&mutex);
-        if (sqlite3_prepare_v2(sqlite3Database, [repoUpdateQuery UTF8String], -1, &repoStatement, nil) == SQLITE_OK) {
-          sqlite3_bind_text(repoStatement, 1, [[repo repoName] UTF8String], -1, SQLITE_TRANSIENT);
-          sqlite3_bind_text(repoStatement, 2, [[repo repoBaseFileName] UTF8String], -1, SQLITE_TRANSIENT);
-          sqlite3_bind_text(repoStatement, 3, [[repo description] UTF8String], -1, SQLITE_TRANSIENT);
-          sqlite3_bind_text(repoStatement, 4, [[repo repoURL] UTF8String], -1, SQLITE_TRANSIENT);
-          sqlite3_bind_blob(repoStatement, 5, (__bridge const void *)[repo icon], -1, SQLITE_TRANSIENT);
-          sqlite3_bind_int(repoStatement, 6, repoID);
-          sqlite3_step(repoStatement);
-        }
-        else {
-          HBLogError(@"%s", sqlite3_errmsg(sqlite3Database));
-        }
-        sqlite3_finalize(repoStatement);
-        pthread_mutex_unlock(&mutex);
-
-        [self deletePackagesFromRepo:repo inDatabase:sqlite3Database];
-
-        NSArray *packagesArray = [repoManager packageListForRepo:repo];
-        NSString *packageQuery = @"insert into packages(repoID, packageName, packageIdentifier, version, section, description, depictionURL) values(?,?,?,?,?,?,?)";
-        sqlite3_stmt *packageStatement;
-        pthread_mutex_lock(&mutex);
-        sqlite3_exec(sqlite3Database, "BEGIN TRANSACTION", NULL, NULL, NULL);
-        if (sqlite3_prepare_v2(sqlite3Database, [packageQuery UTF8String], -1, &packageStatement, nil) == SQLITE_OK) {
-          for (AUPMPackage *package in packagesArray) {
-            //Populate packages database with packages from repo
-            sqlite3_bind_int(packageStatement, 1, repoID);
-            sqlite3_bind_text(packageStatement, 2, [[package packageName] UTF8String], -1, SQLITE_TRANSIENT);
-            sqlite3_bind_text(packageStatement, 3, [[package packageIdentifier] UTF8String], -1, SQLITE_TRANSIENT);
-            sqlite3_bind_text(packageStatement, 4, [[package version] UTF8String], -1, SQLITE_TRANSIENT);
-            sqlite3_bind_text(packageStatement, 5, [[package section] UTF8String], -1, SQLITE_TRANSIENT);
-            sqlite3_bind_text(packageStatement, 6, [[package description] UTF8String], -1, SQLITE_TRANSIENT);
-            sqlite3_bind_text(packageStatement, 7, [[package depictionURL].absoluteString UTF8String], -1, SQLITE_TRANSIENT);
-            sqlite3_step(packageStatement);
-            sqlite3_reset(packageStatement);
-            sqlite3_clear_bindings(packageStatement);
-          }
-        }
-        else {
-          HBLogError(@"%s", sqlite3_errmsg(sqlite3Database));
-        }
-        sqlite3_finalize(packageStatement);
-        sqlite3_exec(sqlite3Database, "COMMIT TRANSACTION", NULL, NULL, NULL);
-        pthread_mutex_unlock(&mutex);
-      });
+      [bill addObject:repo];
     }
   }
-  dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
 
-  [self populateInstalledDatabase:^(BOOL success) {
-    completion(true);
-  }];
+  if ([bill count] > 0) {
+    HBLogInfo(@"Bill of Repositories that require an update: %@", bill);
+  }
+  else {
+    HBLogInfo(@"No repositories need an update");
+  }
+
+  return (NSArray *)bill;
 }
 
 - (void)populateInstalledDatabase:(void (^)(BOOL success))completion {
@@ -292,7 +313,7 @@ bool packages_file_changed(FILE* f1, FILE* f2);
 }
 
 - (NSArray *)cachedListOfInstalledPackages {
-  HBLogInfo(@"Getting installed pacakges");
+  HBLogInfo(@"Getting cached list of installed pacakges");
   sqlite3 *database;
   sqlite3_open([_databasePath UTF8String], &database);
   NSMutableArray *listOfPackages = [[NSMutableArray alloc] init];
