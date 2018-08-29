@@ -49,7 +49,7 @@
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
 
-    AUPMDatabaseManager *databaseManager = [[AUPMDatabaseManager alloc] init];
+    AUPMDatabaseManager *databaseManager = [(AUPMTabBarController *)self.tabBarController databaseManager];
     if (_action == 0) {
         [databaseManager firstLoadPopulation:^(BOOL success) {
             [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"firstSetupComplete"];
@@ -74,9 +74,9 @@
         [self dismissViewControllerAnimated:true completion:nil];
     }
     else {
-        AUPMTabBarController *tabController = [[AUPMTabBarController alloc] init];
+        AUPMTabBarController *tabBarController = [[AUPMTabBarController alloc] init];
 
-        [[UIApplication sharedApplication] keyWindow].rootViewController = tabController;
+        [[UIApplication sharedApplication] keyWindow].rootViewController = tabBarController;
     }
 }
 

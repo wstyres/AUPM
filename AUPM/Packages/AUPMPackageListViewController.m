@@ -4,6 +4,7 @@
 #import "AUPMPackageViewController.h"
 #import "../AUPMDatabaseManager.h"
 #import "../Repos/AUPMRepo.h"
+#import "../AUPMTabBarController.h"
 
 @implementation AUPMPackageListViewController {
 	NSMutableArray *_objects;
@@ -22,13 +23,13 @@
 	[super loadView];
 
 	if (_repo != NULL) {
-		AUPMDatabaseManager *databaseManager = [[AUPMDatabaseManager alloc] init];
+		AUPMDatabaseManager *databaseManager = [(AUPMTabBarController *)self.tabBarController databaseManager];
 		_objects = [[databaseManager cachedPackageListForRepo:_repo] mutableCopy];
 
 		self.title = [_repo repoName];
 	}
 	else {
-		AUPMDatabaseManager *databaseManager = [[AUPMDatabaseManager alloc] init];
+		AUPMDatabaseManager *databaseManager = [(AUPMTabBarController *)self.tabBarController databaseManager];
 		_objects = [[databaseManager cachedListOfInstalledPackages] mutableCopy];
 
 		self.title = @"Packages";

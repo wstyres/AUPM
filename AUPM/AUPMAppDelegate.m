@@ -1,5 +1,4 @@
 #import "AUPMAppDelegate.h"
-#import "AUPMDatabaseManager.h"
 #import "Repos/AUPMRepoListViewController.h"
 #import "Packages/AUPMPackageListViewController.h"
 #import "AUPMRefreshViewController.h"
