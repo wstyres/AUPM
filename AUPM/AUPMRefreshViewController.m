@@ -50,11 +50,7 @@
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
 
-<<<<<<< HEAD
     AUPMDatabaseManager *databaseManager = ((AUPMAppDelegate *)[[UIApplication sharedApplication] delegate]).databaseManager;
-=======
-    AUPMDatabaseManager *databaseManager = [(AUPMTabBarController *)self.tabBarController databaseManager];
->>>>>>> 5f5c8c314e55e9cadb2f16539f06f39c19eed705
     if (_action == 0) {
         [databaseManager firstLoadPopulation:^(BOOL success) {
             [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"firstSetupComplete"];

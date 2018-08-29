@@ -5,11 +5,7 @@
 #import "../AUPMRefreshViewController.h"
 #import "../Packages/AUPMPackageListViewController.h"
 #import "../AUPMDatabaseManager.h"
-<<<<<<< HEAD
 #import "../AUPMAppDelegate.h"
-=======
-#import "../AUPMTabBarController.h"
->>>>>>> 5f5c8c314e55e9cadb2f16539f06f39c19eed705
 
 @implementation AUPMRepoListViewController {
 	NSMutableArray *_objects;
@@ -18,11 +14,7 @@
 - (void)loadView {
 	[super loadView];
 
-<<<<<<< HEAD
 	AUPMDatabaseManager *databaseManager = ((AUPMAppDelegate *)[[UIApplication sharedApplication] delegate]).databaseManager;
-=======
-	AUPMDatabaseManager *databaseManager = [(AUPMTabBarController *)self.tabBarController databaseManager];
->>>>>>> 5f5c8c314e55e9cadb2f16539f06f39c19eed705
 	_objects = [[databaseManager cachedListOfRepositories] mutableCopy];
 
 	UIBarButtonItem *refreshItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(refreshPackages)];
@@ -49,11 +41,7 @@
 - (void)viewWillAppear:(BOOL)animated {
 	[super viewWillAppear:animated];
 
-<<<<<<< HEAD
 	AUPMDatabaseManager *databaseManager = ((AUPMAppDelegate *)[[UIApplication sharedApplication] delegate]).databaseManager;
-=======
-	AUPMDatabaseManager *databaseManager = [(AUPMTabBarController *)self.tabBarController databaseManager];
->>>>>>> 5f5c8c314e55e9cadb2f16539f06f39c19eed705
 	_objects = [[databaseManager cachedListOfRepositories] mutableCopy];
 
 	[[self tableView] reloadData];
