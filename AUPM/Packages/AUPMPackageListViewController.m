@@ -4,7 +4,11 @@
 #import "AUPMPackageViewController.h"
 #import "../AUPMDatabaseManager.h"
 #import "../Repos/AUPMRepo.h"
+<<<<<<< HEAD
 #import "../AUPMAppDelegate.h"
+=======
+#import "../AUPMTabBarController.h"
+>>>>>>> 5f5c8c314e55e9cadb2f16539f06f39c19eed705
 
 @implementation AUPMPackageListViewController {
 	NSMutableArray *_objects;
@@ -24,11 +28,19 @@
 
 	AUPMDatabaseManager *databaseManager = ((AUPMAppDelegate *)[[UIApplication sharedApplication] delegate]).databaseManager;
 	if (_repo != NULL) {
+<<<<<<< HEAD
+=======
+		AUPMDatabaseManager *databaseManager = [(AUPMTabBarController *)self.tabBarController databaseManager];
+>>>>>>> 5f5c8c314e55e9cadb2f16539f06f39c19eed705
 		_objects = [[databaseManager cachedPackageListForRepo:_repo] mutableCopy];
 
 		self.title = [_repo repoName];
 	}
 	else {
+<<<<<<< HEAD
+=======
+		AUPMDatabaseManager *databaseManager = [(AUPMTabBarController *)self.tabBarController databaseManager];
+>>>>>>> 5f5c8c314e55e9cadb2f16539f06f39c19eed705
 		_objects = [[databaseManager cachedListOfInstalledPackages] mutableCopy];
 
 		self.title = @"Packages";

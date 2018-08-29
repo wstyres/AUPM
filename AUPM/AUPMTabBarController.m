@@ -2,8 +2,21 @@
 #import "Repos/AUPMRepoListViewController.h"
 #import "Packages/AUPMPackageListViewController.h"
 #import "AUPMDebugViewController.h"
+#import "AUPMDatabaseManager.h"
 
 @implementation AUPMTabBarController
+
+- (id)init {
+  self = [super init];
+  if (self) {
+    _databaseManager = [[AUPMDatabaseManager alloc] init];
+  }
+  return self;
+}
+
+- (AUPMDatabaseManager *)databaseManager {
+  return _databaseManager;
+}
 
 - (void)viewDidLoad {
     [super viewDidLoad];
