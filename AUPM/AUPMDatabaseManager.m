@@ -180,6 +180,7 @@ bool packages_file_changed(FILE* f1, FILE* f2);
 
       [self deletePackagesFromRepo:repo inDatabase:sqlite3Database];
 
+      AUPMRepoManager *repoManager = [[AUPMRepoManager alloc] init];
       NSArray *packagesArray = [repoManager packageListForRepo:repo];
       NSString *packageQuery = @"insert into packages(repoID, packageName, packageIdentifier, version, section, description, depictionURL) values(?,?,?,?,?,?,?)";
       sqlite3_stmt *packageStatement;

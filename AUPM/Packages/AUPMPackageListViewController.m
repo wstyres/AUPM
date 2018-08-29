@@ -4,6 +4,7 @@
 #import "AUPMPackageViewController.h"
 #import "../AUPMDatabaseManager.h"
 #import "../Repos/AUPMRepo.h"
+#import "../AUPMAppDelegate.h"
 
 @implementation AUPMPackageListViewController {
 	NSMutableArray *_objects;
@@ -21,14 +22,13 @@
 - (void)loadView {
 	[super loadView];
 
+	AUPMDatabaseManager *databaseManager = ((AUPMAppDelegate *)[[UIApplication sharedApplication] delegate]).databaseManager;
 	if (_repo != NULL) {
-		AUPMDatabaseManager *databaseManager = [[AUPMDatabaseManager alloc] init];
 		_objects = [[databaseManager cachedPackageListForRepo:_repo] mutableCopy];
 
 		self.title = [_repo repoName];
 	}
 	else {
-		AUPMDatabaseManager *databaseManager = [[AUPMDatabaseManager alloc] init];
 		_objects = [[databaseManager cachedListOfInstalledPackages] mutableCopy];
 
 		self.title = @"Packages";

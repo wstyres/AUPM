@@ -10,6 +10,7 @@
 	self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
 	self.window.backgroundColor = [UIColor whiteColor]; //Fixes a weird visual issue after pushing a vc
 
+	self.databaseManager = [[AUPMDatabaseManager alloc] init];
 
 	if ([[NSUserDefaults standardUserDefaults] boolForKey:@"firstSetupComplete"]) {
 		AUPMRefreshViewController *refreshViewController = [[AUPMRefreshViewController alloc] initWithAction:1];

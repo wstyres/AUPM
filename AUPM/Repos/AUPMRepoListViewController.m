@@ -5,6 +5,7 @@
 #import "../AUPMRefreshViewController.h"
 #import "../Packages/AUPMPackageListViewController.h"
 #import "../AUPMDatabaseManager.h"
+#import "../AUPMAppDelegate.h"
 
 @implementation AUPMRepoListViewController {
 	NSMutableArray *_objects;
@@ -13,7 +14,7 @@
 - (void)loadView {
 	[super loadView];
 
-	AUPMDatabaseManager *databaseManager = [[AUPMDatabaseManager alloc] init];
+	AUPMDatabaseManager *databaseManager = ((AUPMAppDelegate *)[[UIApplication sharedApplication] delegate]).databaseManager;
 	_objects = [[databaseManager cachedListOfRepositories] mutableCopy];
 
 	UIBarButtonItem *refreshItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(refreshPackages)];
@@ -40,7 +41,7 @@
 - (void)viewWillAppear:(BOOL)animated {
 	[super viewWillAppear:animated];
 
-	AUPMDatabaseManager *databaseManager = [[AUPMDatabaseManager alloc] init];
+	AUPMDatabaseManager *databaseManager = ((AUPMAppDelegate *)[[UIApplication sharedApplication] delegate]).databaseManager;
 	_objects = [[databaseManager cachedListOfRepositories] mutableCopy];
 
 	[[self tableView] reloadData];
