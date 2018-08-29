@@ -1,3 +1,5 @@
+@class AUPMDatabaseManager;
+
 @interface AUPMAppDelegate : UIResponder <UITabBarControllerDelegate>
 
 @property (nonatomic, retain) UIWindow *window;
