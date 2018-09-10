@@ -7,11 +7,11 @@
 @property (nonatomic) long long lastInsertedRowID;
 
 - (void)firstLoadPopulation:(void (^)(BOOL success))completion;
-- (void)updatePopulation:(void (^)(BOOL success))completion;
-- (NSArray *)cachedListOfRepositories;
-- (NSArray *)cachedPackageListForRepo:(AUPMRepo *)repo;
-- (sqlite3 *)database;
-- (void)deletePackagesFromRepo:(AUPMRepo *)repo inDatabase:(sqlite3 *)database;
-- (void)deleteRepo:(AUPMRepo *)repo fromDatabase:(sqlite3 *)database;
-- (NSArray *)cachedListOfInstalledPackages;
+// - (void)updatePopulation:(void (^)(BOOL success))completion;
+// - (NSArray *)cachedListOfRepositories;
+// - (NSArray *)cachedPackageListForRepo:(AUPMRepo *)repo;
+// - (sqlite3 *)database;
+// - (void)deletePackagesFromRepo:(AUPMRepo *)repo inDatabase:(sqlite3 *)database;
+// - (void)deleteRepo:(AUPMRepo *)repo fromDatabase:(sqlite3 *)database;
+// - (NSArray *)cachedListOfInstalledPackages;
 @end

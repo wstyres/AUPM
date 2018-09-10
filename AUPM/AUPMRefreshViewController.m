@@ -60,9 +60,15 @@
         }];
     }
     else if (_action == 1) {
-        [databaseManager updatePopulation:^(BOOL success) {
-            [self goAway];
-        }];
+      [databaseManager firstLoadPopulation:^(BOOL success) {
+          [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"firstSetupComplete"];
+          [[NSUserDefaults standardUserDefaults] synchronize];
+
+          [self goAway];
+      }];
+        // [databaseManager updatePopulation:^(BOOL success) {
+        //     [self goAway];
+        // }];
     }
     else {
         HBLogInfo(@"Invalid action...");

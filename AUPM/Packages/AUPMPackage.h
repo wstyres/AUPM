@@ -10,5 +10,6 @@
 @property NSString *description;
 @property NSURL *depictionURL;
 @property BOOL installed;
+@property AUPMRepo *repo;
 @end
 RLM_ARRAY_TYPE(AUPMPackage)

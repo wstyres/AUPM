@@ -14,6 +14,7 @@
 @property NSString *fullURL;
 @property NSData *icon;
 @property NSURL *iconURL;
+@property RLMArray<AUPMPackage *> *packages;
 @end
 RLM_ARRAY_TYPE(AUPMRepo)
 
