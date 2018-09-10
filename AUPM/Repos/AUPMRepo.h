@@ -13,6 +13,7 @@
 @property NSString *components;
 @property NSString *fullURL;
 @property NSData *icon;
+@property NSURL *iconURL;
 @end
 RLM_ARRAY_TYPE(AUPMRepo)
 
