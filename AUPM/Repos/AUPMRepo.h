@@ -7,16 +7,13 @@
 @property NSString *repoBaseFileName;
 @property NSString *repoDescription;
 @property NSString *repoURL;
-@property int *repoIdentifier;
-@property BOOL *defaultRepo;
+@property int repoIdentifier;
+@property BOOL defaultRepo;
 @property NSString *suite;
 @property NSString *components;
 @property NSString *fullURL;
 @property NSData *icon;
 @property NSURL *iconURL;
-@property RLMArray<AUPMPackage *> *packages;
+@property NSArray<AUPMPackage *> *packages;
 @end
 RLM_ARRAY_TYPE(AUPMRepo)
-
-@implementation AUPMRepo
-@end

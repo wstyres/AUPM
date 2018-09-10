@@ -77,9 +77,9 @@
     }
 	HBLogInfo(@"Adding repo: %@", urlString);
 
-	AUPMRepoManager *repoManager = [[AUPMRepoManager alloc] init];
-	[repoManager addSource:url];
-	[self fullRefresh];
+	// AUPMRepoManager *repoManager = [[AUPMRepoManager alloc] init];
+	// [repoManager addSource:url];
+	// [self fullRefresh];
 }
 
 #pragma mark - Table View Data Source
@@ -131,8 +131,8 @@
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
-		AUPMRepoManager *repoManager = [[AUPMRepoManager alloc] init];
-		[repoManager deleteSource:[_objects objectAtIndex:indexPath.row]];
+		//AUPMRepoManager *repoManager = [[AUPMRepoManager alloc] init];
+		//[repoManager deleteSource:[_objects objectAtIndex:indexPath.row]];
 		[_objects removeObjectAtIndex:indexPath.row];
 		[tableView reloadData];
     }

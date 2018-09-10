@@ -7,7 +7,7 @@
 @property NSString *packageIdentifier;
 @property NSString *version;
 @property NSString *section;
-@property NSString *description;
+@property NSString *packageDescription;
 @property NSURL *depictionURL;
 @property BOOL installed;
 @property AUPMRepo *repo;
