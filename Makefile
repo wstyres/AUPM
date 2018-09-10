@@ -3,6 +3,7 @@ include $(THEOS)/makefiles/common.mk
 APPLICATION_NAME = AUPM
 AUPM_FILES = $(wildcard AUPM/*.m) $(wildcard AUPM/*/*.m) $(wildcard AUPM/Parser/*.c)
 AUPM_FRAMEWORKS = UIKit CoreGraphics WebKit
+AUPM_EXTRA_FRAMEWORKS = Realm
 AUPM_BUNDLE_RESOURCES = AUPM/Resources/
 AUPM_CODESIGN_FLAGS = -SAUPM/ent.plist
 AUPM_CFLAGS = -fobjc-arc

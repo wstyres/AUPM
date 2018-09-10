@@ -1,32 +1,14 @@
-#import "../NSTask.h"
+#import <Realm/Realm.h>
 
-@interface AUPMPackage : NSObject {
-    NSString *packageName;
-    NSString *packageID;
-    NSString *version;
-    NSString *section;
-    NSString *description;
-    NSURL *depictionURL;
-    NSString *sum;
-    BOOL isLoadedInstall;
-}
-- (id)initWithPackageInformation:(NSDictionary *)information;
-- (id)initWithPackageName:(NSString *)name packageID:(NSString *)identifier version:(NSString *)vers section:(NSString *)sect description:(NSString *)desc depictionURL:(NSString *)url sum:(NSString *)md5;
-- (BOOL)isInstalled;
-- (void)setPackageName:(NSString *)name;
-- (void)setPackageIdentifier:(NSString *)identifier;
-- (void)setPackageVersion:(NSString *)version;
-- (void)setSection:(NSString *)section;
-- (void)setDescription:(NSString *)description;
-- (void)setDepictionURL:(NSURL *)url;
-- (void)setSum:(NSString *)sum;
-- (void)setLoadedInstall:(BOOL)inst;
-- (NSString *)packageName;
-- (NSString *)packageIdentifier;
-- (NSString *)version;
-- (NSString *)section;
-- (NSString *)description;
-- (NSURL *)depictionURL;
-- (NSString *)sum;
-- (BOOL)isLoadedInstall;
+@class AUPMRepo;
+
+@interface AUPMPackage : RLMObject
+@property NSString *packageName;
+@property NSString *packageIdentifier;
+@property NSString *version;
+@property NSString *section;
+@property NSString *description;
+@property NSURL *depictionURL;
+@property BOOL installed;
 @end
+RLM_ARRAY_TYPE(AUPMPackage)
