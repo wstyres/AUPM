@@ -33,13 +33,13 @@ NSArray *packages_to_array(const char *path);
 
 - (NSArray *)managedRepoList {
     NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSString *aptListDirectory = @"/var/lib/apt/lists";
+    NSString *aptListDirectory = @"/var/lib/aupm/lists";
     NSArray *listOfFiles = [fileManager contentsOfDirectoryAtPath:aptListDirectory error:nil];
     NSMutableArray *managedRepoList = [[NSMutableArray alloc] init];
 
     for (NSString *path in listOfFiles) {
         if (([path rangeOfString:@"Release"].location != NSNotFound) && ([path rangeOfString:@".gpg"].location == NSNotFound)) {
-            NSString *fullPath = [NSString stringWithFormat:@"/var/lib/apt/lists/%@", path];
+            NSString *fullPath = [NSString stringWithFormat:@"/var/lib/aupm/lists/%@", path];
             NSString *content = [NSString stringWithContentsOfFile:fullPath encoding:NSUTF8StringEncoding error:NULL];
 
             NSString *trimmedString = [content stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
@@ -119,9 +119,9 @@ NSArray *packages_to_array(const char *path);
 
 - (NSArray<AUPMPackage *> *)packageListForRepo:(AUPMRepo *)repo {
     NSDate *methodStart = [NSDate date];
-    NSString *cachedPackagesFile = [NSString stringWithFormat:@"/var/lib/apt/lists/%@_Packages", [repo repoBaseFileName]];
+    NSString *cachedPackagesFile = [NSString stringWithFormat:@"/var/lib/aupm/lists/%@_Packages", [repo repoBaseFileName]];
     if (![[NSFileManager defaultManager] fileExistsAtPath:cachedPackagesFile]) {
-        cachedPackagesFile = [NSString stringWithFormat:@"/var/lib/apt/lists/%@_main_binary-iphoneos-arm_Packages", [repo repoBaseFileName]]; //Do some funky package file with the default repos
+        cachedPackagesFile = [NSString stringWithFormat:@"/var/lib/aupm/lists/%@_main_binary-iphoneos-arm_Packages", [repo repoBaseFileName]]; //Do some funky package file with the default repos
     }
 
     NSArray *packageArray = packages_to_array([cachedPackagesFile UTF8String]);
