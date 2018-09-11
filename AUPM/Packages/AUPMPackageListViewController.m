@@ -7,7 +7,7 @@
 #import "../AUPMAppDelegate.h"
 
 @implementation AUPMPackageListViewController {
-	NSMutableArray *_objects;
+	RLMArray<AUPMPackage *> *_objects;
 	AUPMRepo *_repo;
 }
 
@@ -24,15 +24,15 @@
 
 	AUPMDatabaseManager *databaseManager = ((AUPMAppDelegate *)[[UIApplication sharedApplication] delegate]).databaseManager;
 	if (_repo != NULL) {
-		_objects = [[databaseManager cachedPackageListForRepo:_repo] mutableCopy];
+		_objects = [databaseManager cachedPackageListForRepo:_repo];
 
 		self.title = [_repo repoName];
 	}
-	else {
-		_objects = [[databaseManager cachedListOfInstalledPackages] mutableCopy];
-
-		self.title = @"Packages";
-	}
+	// else {
+	// 	_objects = [[databaseManager cachedListOfInstalledPackages] mutableCopy];
+	//
+	// 	self.title = @"Packages";
+	// }
 }
 
 #pragma mark - Table View Data Source

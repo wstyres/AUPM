@@ -11,15 +11,25 @@ NSArray *packages_to_array(const char *path);
     NSArray *packageArray = packages_to_array([dbPath UTF8String]);
     NSMutableArray *installedPackageList = [[NSMutableArray alloc] init];
 
-    for (NSDictionary *pack in packageArray) {
-        NSMutableDictionary *dict = [pack mutableCopy];
+    for (NSDictionary *dict in packageArray) {
+        AUPMPackage *package = [[AUPMPackage alloc] init];
         if (dict[@"Name"] == NULL) {
-            dict[@"Name"] = dict[@"Package"];
+          package.packageName = dict[@"Package"];
+        }
+        else {
+          package.packageName = dict[@"Name"];
         }
 
+        package.packageIdentifier = dict[@"Package"];
+        package.version = dict[@"Version"];
+        package.section = dict[@"Section"];
+        package.packageDescription = dict[@"Description"];
+
+        NSString *urlString = [dict[@"Depiction"] stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
+        urlString = [urlString substringToIndex:[urlString length] - 3]; //idk why this is here
+        package.depictionURL = urlString;
+
         if ([dict[@"Package"] rangeOfString:@"gsc"].location == NSNotFound && [dict[@"Package"] rangeOfString:@"cy+"].location == NSNotFound) {
-            AUPMPackage *package = [[AUPMPackage alloc] initWithPackageInformation:dict];
-            [package setLoadedInstall:true];
             [installedPackageList addObject:package];
         }
     }

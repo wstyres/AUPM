@@ -54,11 +54,20 @@ NSArray *packages_to_array(const char *path);
                 dict[[keyValues.firstObject stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]] = [keyValues.lastObject stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
             }
 
+            AUPMRepo *repo = [[AUPMRepo alloc] init];
+
+            repo.repoName = dict[@"Origin"];
+            repo.repoDescription = dict[@"Description"];
+            repo.suite = dict[@"Suite"];
+            repo.components = dict[@"Components"];
+
             NSString *baseFileName = [path stringByReplacingOccurrencesOfString:@"_Release" withString:@""];
-            dict[@"baseFileName"] = baseFileName;
+            repo.repoBaseFileName = baseFileName;
+
             NSString *fullRepoURL = baseFileName;
             fullRepoURL = [fullRepoURL stringByReplacingOccurrencesOfString:@"_" withString:@"/"];
-            dict[@"fullURL"] = fullRepoURL; //Store full URL for cydia icon
+            repo.fullURL = fullRepoURL; //Store full URL for cydia icon
+
             NSString *repoURL = [fullRepoURL copy];
             if ([repoURL rangeOfString:@"dists"].location != NSNotFound) {
                 NSArray *urlsep = [repoURL componentsSeparatedByString:@"dists"];
@@ -67,13 +76,13 @@ NSArray *packages_to_array(const char *path);
             }
             repoURL = [NSString stringWithFormat:@"http://%@", repoURL];
             repoURL = [repoURL substringToIndex:[repoURL length] - 1];
-            dict[@"URL"] = repoURL;
+            repo.repoURL = repoURL;
+
             if ([baseFileName rangeOfString:@"saurik"].location != NSNotFound || [baseFileName rangeOfString:@"bigboss"].location != NSNotFound || [baseFileName rangeOfString:@"zodttd"].location != NSNotFound) {
-                dict[@"default"] = [NSNumber numberWithBool:true];
+                repo.defaultRepo = true;
             }
 
-            AUPMRepo *source = [[AUPMRepo alloc] initWithRepoInformation:dict];
-            [managedRepoList addObject:source];
+            [managedRepoList addObject:repo];
         }
     }
 
@@ -108,104 +117,121 @@ NSArray *packages_to_array(const char *path);
     return (NSArray *)cleanedPackageList;
 }
 
-- (NSArray *)packageListForRepo:(AUPMRepo *)repo {
+- (NSArray<AUPMPackage *> *)packageListForRepo:(AUPMRepo *)repo {
+    NSDate *methodStart = [NSDate date];
     NSString *cachedPackagesFile = [NSString stringWithFormat:@"/var/lib/apt/lists/%@_Packages", [repo repoBaseFileName]];
     if (![[NSFileManager defaultManager] fileExistsAtPath:cachedPackagesFile]) {
         cachedPackagesFile = [NSString stringWithFormat:@"/var/lib/apt/lists/%@_main_binary-iphoneos-arm_Packages", [repo repoBaseFileName]]; //Do some funky package file with the default repos
     }
 
     NSArray *packageArray = packages_to_array([cachedPackagesFile UTF8String]);
-    NSMutableArray *packageListForRepo = [[NSMutableArray alloc] init];
+    NSMutableArray<AUPMPackage *> *packageListForRepo = [[NSMutableArray alloc] init];
 
-    for (NSDictionary *package in packageArray) {
-        NSMutableDictionary *dict = [package mutableCopy];
+    for (NSDictionary *dict in packageArray) {
+        AUPMPackage *package = [[AUPMPackage alloc] init];
         if (dict[@"Name"] == NULL) {
-            dict[@"Name"] = dict[@"Package"];
+          package.packageName = dict[@"Package"];
+        }
+        else {
+          package.packageName = dict[@"Name"];
         }
 
-        if ([dict[@"Package"] rangeOfString:@"gsc"].location == NSNotFound && [dict[@"Package"] rangeOfString:@"cy+"].location == NSNotFound) {                AUPMPackage *package = [[AUPMPackage alloc] initWithPackageInformation:dict];
+        package.packageIdentifier = dict[@"Package"];
+        package.version = dict[@"Version"];
+        package.section = dict[@"Section"];
+        package.packageDescription = dict[@"Description"];
+
+        NSString *urlString = [dict[@"Depiction"] stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
+        urlString = [urlString substringToIndex:[urlString length] - 3]; //idk why this is here
+        package.depictionURL = urlString;
+
+        if ([dict[@"Package"] rangeOfString:@"gsc"].location == NSNotFound && [dict[@"Package"] rangeOfString:@"cy+"].location == NSNotFound) {
             [packageListForRepo addObject:package];
         }
     }
 
-    return packageListForRepo;
+    NSDate *methodFinish = [NSDate date];
+    NSTimeInterval executionTime = [methodFinish timeIntervalSinceDate:methodStart];
+    NSLog(@"[AUPM] Time to parse %@ package files: %f seconds", [repo repoName], executionTime);
+
+    return (NSArray *)packageListForRepo;
 }
 
-- (void)addSource:(NSURL *)sourceURL {
-    NSString *URL = [sourceURL absoluteString];
-    NSString *output = @"";
-
-    for (AUPMRepo *repo in _repos) {
-        if ([repo defaultRepo]) {
-            if ([[repo repoName] isEqual:@"Cydia/Telesphoreo"]) {
-                output = [output stringByAppendingFormat:@"deb http://apt.saurik.com/ ios/%.2f main\n",kCFCoreFoundationVersionNumber];
-            }
-            else {
-                output = [output stringByAppendingFormat:@"deb %@ %@ %@\n", [repo repoURL], [repo suite], [repo components]];
-            }
-        }
-        else {
-            output = [output stringByAppendingFormat:@"deb %@ ./\n", [repo repoURL]];
-        }
-    }
-    output = [output stringByAppendingFormat:@"deb %@/ ./\n", URL];
-
-    NSError *error;
-    [output writeToFile:@"/var/mobile/Library/Caches/com.xtm3x.aupm/newsources.list" atomically:TRUE encoding:NSUTF8StringEncoding error:&error];
-    if (error != NULL) {
-        HBLogError(@"Error while writing sources to file: %@", error);
-    }
-    else {
-        NSTask *updateListTask = [[NSTask alloc] init];
-        [updateListTask setLaunchPath:@"/Applications/AUPM.app/supersling"];
-        NSArray *updateArgs = [[NSArray alloc] initWithObjects:@"cp", @"/var/mobile/Library/Caches/com.xtm3x.aupm/newsources.list", @"/etc/apt/sources.list.d/cydia.list", nil];
-        [updateListTask setArguments:updateArgs];
-
-        [updateListTask launch];
-        [updateListTask waitUntilExit];
-    }
-}
-
-- (void)deleteSource:(AUPMRepo *)delRepo {
-    NSString *output = @"";
-    for (AUPMRepo *repo in _repos) {
-        if ([[delRepo repoBaseFileName] isEqual:[repo repoBaseFileName]]) {
-            [_repos removeObject:repo];
-        }
-        else {
-            if ([repo defaultRepo]) {
-                if ([[repo repoName] isEqual:@"Cydia/Telesphoreo"]) {
-                    output = [output stringByAppendingFormat:@"deb http://apt.saurik.com/ ios/%.2f main\n",kCFCoreFoundationVersionNumber];
-                }
-                else {
-                    output = [output stringByAppendingFormat:@"deb %@ %@ %@\n", [repo repoURL], [repo suite], [repo components]];
-                }
-            }
-            else {
-                output = [output stringByAppendingFormat:@"deb %@ ./\n", [repo repoURL]];
-            }
-        }
-    }
-
-    NSError *error;
-    [output writeToFile:@"/var/mobile/Library/Caches/com.xtm3x.aupm/newsources.list" atomically:TRUE encoding:NSUTF8StringEncoding error:&error];
-    if (error != NULL) {
-        HBLogError(@"Error while writing sources to file: %@", error);
-    }
-    else {
-        NSTask *updateListTask = [[NSTask alloc] init];
-        [updateListTask setLaunchPath:@"/Applications/AUPM.app/supersling"];
-        NSArray *updateArgs = [[NSArray alloc] initWithObjects:@"cp", @"/var/mobile/Library/Caches/com.xtm3x.aupm/newsources.list", @"/etc/apt/sources.list.d/cydia.list", nil];
-        [updateListTask setArguments:updateArgs];
-
-        [updateListTask launch];
-        [updateListTask waitUntilExit];
-    }
-
-    AUPMDatabaseManager *databaseManager = [[AUPMDatabaseManager alloc] init];
-	  sqlite3 *database = [databaseManager database];
-    [databaseManager deleteRepo:delRepo fromDatabase:database];
-    sqlite3_close(database);
-}
+// - (void)addSource:(NSURL *)sourceURL {
+//     NSString *URL = [sourceURL absoluteString];
+//     NSString *output = @"";
+//
+//     for (AUPMRepo *repo in _repos) {
+//         if ([repo defaultRepo]) {
+//             if ([[repo repoName] isEqual:@"Cydia/Telesphoreo"]) {
+//                 output = [output stringByAppendingFormat:@"deb http://apt.saurik.com/ ios/%.2f main\n",kCFCoreFoundationVersionNumber];
+//             }
+//             else {
+//                 output = [output stringByAppendingFormat:@"deb %@ %@ %@\n", [repo repoURL], [repo suite], [repo components]];
+//             }
+//         }
+//         else {
+//             output = [output stringByAppendingFormat:@"deb %@ ./\n", [repo repoURL]];
+//         }
+//     }
+//     output = [output stringByAppendingFormat:@"deb %@/ ./\n", URL];
+//
+//     NSError *error;
+//     [output writeToFile:@"/var/mobile/Library/Caches/com.xtm3x.aupm/newsources.list" atomically:TRUE encoding:NSUTF8StringEncoding error:&error];
+//     if (error != NULL) {
+//         HBLogError(@"Error while writing sources to file: %@", error);
+//     }
+//     else {
+//         NSTask *updateListTask = [[NSTask alloc] init];
+//         [updateListTask setLaunchPath:@"/Applications/AUPM.app/supersling"];
+//         NSArray *updateArgs = [[NSArray alloc] initWithObjects:@"cp", @"/var/mobile/Library/Caches/com.xtm3x.aupm/newsources.list", @"/etc/apt/sources.list.d/cydia.list", nil];
+//         [updateListTask setArguments:updateArgs];
+//
+//         [updateListTask launch];
+//         [updateListTask waitUntilExit];
+//     }
+// }
+//
+// - (void)deleteSource:(AUPMRepo *)delRepo {
+//     NSString *output = @"";
+//     for (AUPMRepo *repo in _repos) {
+//         if ([[delRepo repoBaseFileName] isEqual:[repo repoBaseFileName]]) {
+//             [_repos removeObject:repo];
+//         }
+//         else {
+//             if ([repo defaultRepo]) {
+//                 if ([[repo repoName] isEqual:@"Cydia/Telesphoreo"]) {
+//                     output = [output stringByAppendingFormat:@"deb http://apt.saurik.com/ ios/%.2f main\n",kCFCoreFoundationVersionNumber];
+//                 }
+//                 else {
+//                     output = [output stringByAppendingFormat:@"deb %@ %@ %@\n", [repo repoURL], [repo suite], [repo components]];
+//                 }
+//             }
+//             else {
+//                 output = [output stringByAppendingFormat:@"deb %@ ./\n", [repo repoURL]];
+//             }
+//         }
+//     }
+//
+//     NSError *error;
+//     [output writeToFile:@"/var/mobile/Library/Caches/com.xtm3x.aupm/newsources.list" atomically:TRUE encoding:NSUTF8StringEncoding error:&error];
+//     if (error != NULL) {
+//         HBLogError(@"Error while writing sources to file: %@", error);
+//     }
+//     else {
+//         NSTask *updateListTask = [[NSTask alloc] init];
+//         [updateListTask setLaunchPath:@"/Applications/AUPM.app/supersling"];
+//         NSArray *updateArgs = [[NSArray alloc] initWithObjects:@"cp", @"/var/mobile/Library/Caches/com.xtm3x.aupm/newsources.list", @"/etc/apt/sources.list.d/cydia.list", nil];
+//         [updateListTask setArguments:updateArgs];
+//
+//         [updateListTask launch];
+//         [updateListTask waitUntilExit];
+//     }
+//
+//     AUPMDatabaseManager *databaseManager = [[AUPMDatabaseManager alloc] init];
+// 	  sqlite3 *database = [databaseManager database];
+//     [databaseManager deleteRepo:delRepo fromDatabase:database];
+//     sqlite3_close(database);
+// }
 
 @end

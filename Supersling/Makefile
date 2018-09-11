@@ -1,3 +1,4 @@
+TARGET = iphone::10.3:8.0
 include $(THEOS)/makefiles/common.mk
 
 TOOL_NAME = supersling

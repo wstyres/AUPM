@@ -30,7 +30,7 @@
 	CGFloat height = [[UIApplication sharedApplication] statusBarFrame].size.height + self.navigationController.navigationBar.frame.size.height + self.tabBarController.tabBar.frame.size.height;
 	_webView = [[WKWebView alloc] initWithFrame:CGRectMake(0,0, self.view.frame.size.width, self.view.frame.size.height - height)];
     [_webView setNavigationDelegate:self];
-	NSURL *depictionURL = [_package depictionURL];
+	NSURL *depictionURL = [NSURL URLWithString: [_package depictionURL]];
     if (depictionURL != NULL) {
 		[_webView loadRequest:[[NSURLRequest alloc] initWithURL:depictionURL]];
 	}
@@ -58,14 +58,14 @@
 }
 
 - (void)configureNavButton {
-	if ([_package isInstalled]) {
-		UIBarButtonItem *removeButton = [[UIBarButtonItem alloc] initWithTitle:@"Remove" style:UIBarButtonItemStylePlain target:self action:@selector(removePackage)];
-  		self.navigationItem.rightBarButtonItem = removeButton;
-	}
-	else {
+	// if ([_package isInstalled]) {
+	// 	UIBarButtonItem *removeButton = [[UIBarButtonItem alloc] initWithTitle:@"Remove" style:UIBarButtonItemStylePlain target:self action:@selector(removePackage)];
+  // 		self.navigationItem.rightBarButtonItem = removeButton;
+	// }
+	// else {
 		UIBarButtonItem *installButton = [[UIBarButtonItem alloc] initWithTitle:@"Install" style:UIBarButtonItemStylePlain target:self action:@selector(installPackage)];
 		self.navigationItem.rightBarButtonItem = installButton;
-	}
+	//}
 }
 
 - (void)installPackage {

@@ -52,17 +52,33 @@
 
     AUPMDatabaseManager *databaseManager = ((AUPMAppDelegate *)[[UIApplication sharedApplication] delegate]).databaseManager;
     if (_action == 0) {
+        NSDate *methodStart = [NSDate date];
         [databaseManager firstLoadPopulation:^(BOOL success) {
             [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"firstSetupComplete"];
             [[NSUserDefaults standardUserDefaults] synchronize];
+
+            NSDate *methodFinish = [NSDate date];
+            NSTimeInterval executionTime = [methodFinish timeIntervalSinceDate:methodStart];
+            NSLog(@"[AUPM] Completed in %f seconds", executionTime);
 
             [self goAway];
         }];
     }
     else if (_action == 1) {
-        [databaseManager updatePopulation:^(BOOL success) {
-            [self goAway];
-        }];
+      NSDate *methodStart = [NSDate date];
+      [databaseManager firstLoadPopulation:^(BOOL success) {
+          [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"firstSetupComplete"];
+          [[NSUserDefaults standardUserDefaults] synchronize];
+
+          NSDate *methodFinish = [NSDate date];
+          NSTimeInterval executionTime = [methodFinish timeIntervalSinceDate:methodStart];
+          NSLog(@"[AUPM] Completed in %f seconds", executionTime);
+
+          [self goAway];
+      }];
+        // [databaseManager updatePopulation:^(BOOL success) {
+        //     [self goAway];
+        // }];
     }
     else {
         HBLogInfo(@"Invalid action...");
