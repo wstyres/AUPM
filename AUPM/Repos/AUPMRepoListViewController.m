@@ -8,14 +8,13 @@
 #import "../AUPMAppDelegate.h"
 
 @implementation AUPMRepoListViewController {
-	NSMutableArray *_objects;
+	RLMResults *_objects;
 }
 
 - (void)loadView {
 	[super loadView];
 
-	AUPMDatabaseManager *databaseManager = ((AUPMAppDelegate *)[[UIApplication sharedApplication] delegate]).databaseManager;
-	_objects = [[databaseManager cachedListOfRepositories] mutableCopy];
+	_objects = [AUPMRepo allObjects];
 
 	UIBarButtonItem *refreshItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(refreshPackages)];
 	self.navigationItem.rightBarButtonItem = refreshItem;
@@ -41,8 +40,7 @@
 - (void)viewWillAppear:(BOOL)animated {
 	[super viewWillAppear:animated];
 
-	AUPMDatabaseManager *databaseManager = ((AUPMAppDelegate *)[[UIApplication sharedApplication] delegate]).databaseManager;
-	_objects = [[databaseManager cachedListOfRepositories] mutableCopy];
+	_objects = [AUPMRepo allObjects];
 
 	[[self tableView] reloadData];
 }
@@ -133,7 +131,7 @@
     if (editingStyle == UITableViewCellEditingStyleDelete) {
 		//AUPMRepoManager *repoManager = [[AUPMRepoManager alloc] init];
 		//[repoManager deleteSource:[_objects objectAtIndex:indexPath.row]];
-		[_objects removeObjectAtIndex:indexPath.row];
+		//[_objects removeObjectAtIndex:indexPath.row];
 		[tableView reloadData];
     }
 }

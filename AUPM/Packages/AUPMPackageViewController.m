@@ -30,7 +30,7 @@
 	CGFloat height = [[UIApplication sharedApplication] statusBarFrame].size.height + self.navigationController.navigationBar.frame.size.height + self.tabBarController.tabBar.frame.size.height;
 	_webView = [[WKWebView alloc] initWithFrame:CGRectMake(0,0, self.view.frame.size.width, self.view.frame.size.height - height)];
     [_webView setNavigationDelegate:self];
-	NSURL *depictionURL = [_package depictionURL];
+	NSURL *depictionURL = [NSURL URLWithString: [_package depictionURL]];
     if (depictionURL != NULL) {
 		[_webView loadRequest:[[NSURLRequest alloc] initWithURL:depictionURL]];
 	}

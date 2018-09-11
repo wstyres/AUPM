@@ -27,8 +27,7 @@ NSArray *packages_to_array(const char *path);
 
         NSString *urlString = [dict[@"Depiction"] stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
         urlString = [urlString substringToIndex:[urlString length] - 3]; //idk why this is here
-        NSURL *url = [NSURL URLWithString:urlString];
-        package.depictionURL = url;
+        package.depictionURL = urlString;
 
         if ([dict[@"Package"] rangeOfString:@"gsc"].location == NSNotFound && [dict[@"Package"] rangeOfString:@"cy+"].location == NSNotFound) {
             [installedPackageList addObject:package];

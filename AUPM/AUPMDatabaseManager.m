@@ -5,43 +5,52 @@
 #import "Packages/AUPMPackage.h"
 #import "Packages/AUPMPackageManager.h"
 
-@interface AUPMDatabaseManager ()
-@property (nonatomic, strong) RLMRealm *realm;
-@end
-
 @implementation AUPMDatabaseManager
 
 bool packages_file_changed(FILE* f1, FILE* f2);
 
-- (id)init {
-  self = [super init];
-  if (self) {
-    _realm = [RLMRealm defaultRealm];
-  }
-  return self;
-}
-
 //Runs apt-get update and cahces all information from apt into a database
 - (void)firstLoadPopulation:(void (^)(BOOL success))completion {
-  HBLogInfo(@"Performing full database population...");
+  NSLog(@"[AUPM] Performing full database population...");
   AUPMRepoManager *repoManager = [[AUPMRepoManager alloc] init];
 
-  NSTask *task = [[NSTask alloc] init];
-  [task setLaunchPath:@"/Applications/AUPM.app/supersling"];
-  NSArray *arguments = [[NSArray alloc] initWithObjects: @"apt-get", @"update", nil];
-  [task setArguments:arguments];
+  RLMRealm *realm = [RLMRealm defaultRealm];
+  [realm transactionWithBlock:^{
+    [realm deleteAllObjects];
+  }];
 
-  [task launch];
-  [task waitUntilExit];
+  // NSTask *task = [[NSTask alloc] init];
+  // [task setLaunchPath:@"/Applications/AUPM.app/supersling"];
+  // NSArray *arguments = [[NSArray alloc] initWithObjects: @"apt-get", @"update", nil];
+  // [task setArguments:arguments];
+  //
+  // [task launch];
+  // [task waitUntilExit];
+
+  dispatch_group_t group = dispatch_group_create();
 
   NSArray *repoArray = [repoManager managedRepoList];
   for (AUPMRepo *repo in repoArray) {
-    NSArray<AUPMPackage *> *packagesArray = [repoManager packageListForRepo:repo];
-    repo.packages = packagesArray;
-    [_realm transactionWithBlock:^{
-      [_realm addObject:repo];
-    }];
+    dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^ {
+      NSDate *methodStart = [NSDate date];
+      RLMRealm *realm = [RLMRealm defaultRealm];
+      NSArray<AUPMPackage *> *packagesArray = [repoManager packageListForRepo:repo];
+      for (AUPMPackage *package in packagesArray) {
+        package.repo = repo;
+        [repo.packages addObject:package];
+      }
+      [realm beginWriteTransaction];
+      [realm addObject:repo];
+      [realm commitWriteTransaction];
+
+      NSDate *methodFinish = [NSDate date];
+      NSTimeInterval executionTime = [methodFinish timeIntervalSinceDate:methodStart];
+      NSLog(@"[AUPM] Time to add %@ to database: %f seconds", [repo repoName], executionTime);
+    });
   }
+
+  dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
+  completion(true);
 
   // //Cache installed packages
   // [self populateInstalledDatabase:^(BOOL success) {
@@ -340,7 +349,7 @@ bool packages_file_changed(FILE* f1, FILE* f2);
 //   return (NSArray*)[listOfRepositories sortedArrayUsingDescriptors:sortDescriptors];
 }
 //
-- (NSArray<AUPMPackage *> *)cachedPackageListForRepo:(AUPMRepo *)repo {
+- (RLMArray<AUPMPackage *> *)cachedPackageListForRepo:(AUPMRepo *)repo {
   return repo.packages;
 }
 //

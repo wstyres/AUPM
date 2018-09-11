@@ -1,6 +1,7 @@
 #import <Realm/Realm.h>
 
 @class AUPMRepo;
+@protocol AUPMRepo;
 
 @interface AUPMPackage : RLMObject
 @property NSString *packageName;
@@ -8,7 +9,7 @@
 @property NSString *version;
 @property NSString *section;
 @property NSString *packageDescription;
-@property NSURL *depictionURL;
+@property NSString *depictionURL;
 @property BOOL installed;
 @property AUPMRepo *repo;
 @end

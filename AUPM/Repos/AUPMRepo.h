@@ -1,6 +1,7 @@
 #import <Realm/Realm.h>
 
 @class AUPMPackage;
+@protocol AUPMPackage;
 
 @interface AUPMRepo : RLMObject
 @property NSString *repoName;
@@ -13,7 +14,7 @@
 @property NSString *components;
 @property NSString *fullURL;
 @property NSData *icon;
-@property NSURL *iconURL;
-@property NSArray<AUPMPackage *> *packages;
+@property NSString *iconURL;
+@property RLMArray<AUPMPackage *><AUPMPackage> *packages;
 @end
 RLM_ARRAY_TYPE(AUPMRepo)

@@ -118,6 +118,7 @@ NSArray *packages_to_array(const char *path);
 }
 
 - (NSArray<AUPMPackage *> *)packageListForRepo:(AUPMRepo *)repo {
+    NSDate *methodStart = [NSDate date];
     NSString *cachedPackagesFile = [NSString stringWithFormat:@"/var/lib/apt/lists/%@_Packages", [repo repoBaseFileName]];
     if (![[NSFileManager defaultManager] fileExistsAtPath:cachedPackagesFile]) {
         cachedPackagesFile = [NSString stringWithFormat:@"/var/lib/apt/lists/%@_main_binary-iphoneos-arm_Packages", [repo repoBaseFileName]]; //Do some funky package file with the default repos
@@ -142,13 +143,16 @@ NSArray *packages_to_array(const char *path);
 
         NSString *urlString = [dict[@"Depiction"] stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
         urlString = [urlString substringToIndex:[urlString length] - 3]; //idk why this is here
-        NSURL *url = [NSURL URLWithString:urlString];
-        package.depictionURL = url;
+        package.depictionURL = urlString;
 
         if ([dict[@"Package"] rangeOfString:@"gsc"].location == NSNotFound && [dict[@"Package"] rangeOfString:@"cy+"].location == NSNotFound) {
             [packageListForRepo addObject:package];
         }
     }
+
+    NSDate *methodFinish = [NSDate date];
+    NSTimeInterval executionTime = [methodFinish timeIntervalSinceDate:methodStart];
+    NSLog(@"[AUPM] Time to parse %@ package files: %f seconds", [repo repoName], executionTime);
 
     return (NSArray *)packageListForRepo;
 }
