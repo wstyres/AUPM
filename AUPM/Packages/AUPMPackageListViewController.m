@@ -55,23 +55,31 @@
 	}
 
 	NSString *section = [[package section] stringByReplacingOccurrencesOfString:@" " withString:@"_"];
+	section = [section substringToIndex:[section length] - 1];
 	NSString *iconPath = [NSString stringWithFormat:@"/Applications/Cydia.app/Sections/%@.png", section];
-	UIImage *sectionImage = [UIImage imageWithContentsOfFile:iconPath];
+	NSError *error;
+	NSData *data = [NSData dataWithContentsOfFile:iconPath options:0 error:&error];
+	UIImage *sectionImage = [UIImage imageWithData:data];
 	if (sectionImage != NULL) {
 		cell.imageView.image = sectionImage;
 	}
 	else if (_repo != NULL) {
 		cell.imageView.image = [UIImage imageWithData:[_repo icon]];
 	}
+
+	if (error != nil) {
+		NSLog(@"[AUPM] %@", error);
+	}
+
 	cell.textLabel.text = [package packageName];
 	cell.detailTextLabel.text = [NSString stringWithFormat:@"%@ (%@)", [package packageIdentifier], [package version]];
 
 	CGSize itemSize = CGSizeMake(35, 35);
-    UIGraphicsBeginImageContextWithOptions(itemSize, NO, UIScreen.mainScreen.scale);
-    CGRect imageRect = CGRectMake(0.0, 0.0, itemSize.width, itemSize.height);
-    [cell.imageView.image drawInRect:imageRect];
-    cell.imageView.image = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
+  UIGraphicsBeginImageContextWithOptions(itemSize, NO, UIScreen.mainScreen.scale);
+  CGRect imageRect = CGRectMake(0.0, 0.0, itemSize.width, itemSize.height);
+  [cell.imageView.image drawInRect:imageRect];
+  cell.imageView.image = UIGraphicsGetImageFromCurrentImageContext();
+  UIGraphicsEndImageContext();
 
 	return cell;
 }

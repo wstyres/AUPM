@@ -12,23 +12,34 @@ bool packages_file_changed(FILE* f1, FILE* f2);
 //Runs apt-get update and cahces all information from apt into a database
 - (void)firstLoadPopulation:(void (^)(BOOL success))completion {
   NSLog(@"[AUPM] Performing full database population...");
-  AUPMRepoManager *repoManager = [[AUPMRepoManager alloc] init];
 
+  //Delete all information in the realm if it exists.
   RLMRealm *realm = [RLMRealm defaultRealm];
   [realm transactionWithBlock:^{
     [realm deleteAllObjects];
   }];
 
-  // NSTask *task = [[NSTask alloc] init];
-  // [task setLaunchPath:@"/Applications/AUPM.app/supersling"];
-  // NSArray *arguments = [[NSArray alloc] initWithObjects: @"apt-get", @"update", nil];
-  // [task setArguments:arguments];
-  //
-  // [task launch];
-  // [task waitUntilExit];
+  //Update APT
+  NSTask *task = [[NSTask alloc] init];
+  [task setLaunchPath:@"/Applications/AUPM.app/supersling"];
+  NSArray *arguments = [[NSArray alloc] initWithObjects: @"apt-get", @"update", @"-o", @"Dir::Etc::SourceList=/var/lib/aupm/aupm.list", @"-o", @"Dir::State::Lists=/var/lib/aupm/lists", @"-o", @"Dir::Etc::SourceParts=/var/lib/aupm/lists/partial/false", nil];
+  // apt-get update -o Dir::Etc::SourceList "/etc/apt/sources.list.d/aupm.list" -o Dir::State::Lists "/var/lib/aupm/lists"
+  [task setArguments:arguments];
+
+  NSPipe *pipe = [NSPipe pipe];
+  [task setStandardOutput:pipe];
+  [task setStandardError:pipe];
+
+  NSFileHandle *output = [pipe fileHandleForReading];
+  [output waitForDataInBackgroundAndNotify];
+  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receivedData:) name:NSFileHandleDataAvailableNotification object:output];
+
+  [task launch];
+  [task waitUntilExit];
 
   dispatch_group_t group = dispatch_group_create();
 
+  AUPMRepoManager *repoManager = [[AUPMRepoManager alloc] init];
   NSArray *repoArray = [repoManager managedRepoList];
   for (AUPMRepo *repo in repoArray) {
     dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^ {
@@ -56,6 +67,17 @@ bool packages_file_changed(FILE* f1, FILE* f2);
   // [self populateInstalledDatabase:^(BOOL success) {
   //   completion(true);
   // }];
+}
+
+- (void)receivedData:(NSNotification *)notif {
+    NSFileHandle *fh = [notif object];
+    NSData *data = [fh availableData];
+
+    if (data.length > 0) {
+        [fh waitForDataInBackgroundAndNotify];
+        NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+        NSLog(@"[AUPM] APT: %@", str);
+    }
 }
 
 // - (void)updatePopulation:(void (^)(BOOL success))completion {
