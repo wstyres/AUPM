@@ -52,7 +52,7 @@
 		HBLogError(@"Error reading file: %@", error);
 	}
 
-	NSString *html = [NSString stringWithFormat:rawDepiction, [_package packageName], [_package packageName], [_package packageIdentifier], [_package version], [_package description]];
+	NSString *html = [NSString stringWithFormat:rawDepiction, [_package packageName], [_package packageName], [_package packageIdentifier], [_package version], [_package packageDescription]];
 
 	return html;
 }
