@@ -22,14 +22,15 @@
 - (void)loadView {
 	[super loadView];
 
-	AUPMDatabaseManager *databaseManager = ((AUPMAppDelegate *)[[UIApplication sharedApplication] delegate]).databaseManager;
 	if (_repo != NULL) {
-		_objects = [databaseManager cachedPackageListForRepo:_repo];
+		_objects = _repo.packages;
 
 		self.title = [_repo repoName];
 	}
 	else {
-		_objects = (RLMArray *)[databaseManager cachedListOfInstalledPackages];
+		_objects = (RLMArray *)[[AUPMPackage objectsWhere:@"installed = true"] sortedResultsUsingDescriptors:@[
+	    [RLMSortDescriptor sortDescriptorWithKeyPath:@"packageName" ascending:YES]
+	  ]];
 
 		self.title = @"Packages";
 	}

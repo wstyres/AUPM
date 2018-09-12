@@ -14,7 +14,9 @@
 - (void)loadView {
 	[super loadView];
 
-	_objects = [AUPMRepo allObjects];
+	_objects = [[AUPMRepo allObjects] sortedResultsUsingDescriptors:@[
+    [RLMSortDescriptor sortDescriptorWithKeyPath:@"repoName" ascending:YES]
+  ]];
 
 	UIBarButtonItem *refreshItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(refreshPackages)];
 	self.navigationItem.rightBarButtonItem = refreshItem;

@@ -220,17 +220,5 @@ bool packages_file_changed(FILE* f1, FILE* f2);
 //   sqlite3_exec(database, [[NSString stringWithFormat:@"DELETE FROM repos WHERE repoID = %d", [repo repoIdentifier]] UTF8String], NULL, NULL, NULL);
 // }
 //
-- (RLMResults<AUPMPackage *> *)cachedListOfInstalledPackages {
-  RLMResults<AUPMPackage *> *installedPackages = [AUPMPackage objectsWhere:@"installed = true"];
-  return installedPackages;
-}
-
-- (RLMResults *)cachedListOfRepositories {
-  return [AUPMRepo allObjects];
-}
-
-- (RLMArray<AUPMPackage *> *)cachedPackageListForRepo:(AUPMRepo *)repo {
-  return repo.packages;
-}
 
 @end
