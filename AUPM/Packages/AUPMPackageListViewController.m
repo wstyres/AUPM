@@ -55,7 +55,6 @@
 	}
 
 	NSString *section = [[package section] stringByReplacingOccurrencesOfString:@" " withString:@"_"];
-	section = [section substringToIndex:[section length] - 1];
 	NSString *iconPath = [NSString stringWithFormat:@"/Applications/Cydia.app/Sections/%@.png", section];
 	NSError *error;
 	NSData *data = [NSData dataWithContentsOfFile:iconPath options:0 error:&error];

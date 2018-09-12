@@ -130,16 +130,16 @@ NSArray *packages_to_array(const char *path);
     for (NSDictionary *dict in packageArray) {
         AUPMPackage *package = [[AUPMPackage alloc] init];
         if (dict[@"Name"] == NULL) {
-          package.packageName = dict[@"Package"];
+          package.packageName = [dict[@"Package"] substringToIndex:[dict[@"Package"] length] - 1];
         }
         else {
-          package.packageName = dict[@"Name"];
+          package.packageName = [dict[@"Name"] substringToIndex:[dict[@"Name"] length] - 1];
         }
 
-        package.packageIdentifier = dict[@"Package"];
-        package.version = dict[@"Version"];
-        package.section = dict[@"Section"];
-        package.packageDescription = dict[@"Description"];
+        package.packageIdentifier = [dict[@"Package"] substringToIndex:[dict[@"Package"] length] - 1];
+        package.version = [dict[@"Version"] substringToIndex:[dict[@"Version"] length] - 1];
+        package.section = [dict[@"Section"] substringToIndex:[dict[@"Section"] length] - 1];
+        package.packageDescription = [dict[@"Description"] substringToIndex:[dict[@"Description"] length] - 1];
 
         NSString *urlString = [dict[@"Depiction"] stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
         urlString = [urlString substringToIndex:[urlString length] - 3]; //idk why this is here
