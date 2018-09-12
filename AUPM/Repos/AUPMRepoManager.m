@@ -78,6 +78,14 @@ NSArray *packages_to_array(const char *path);
             repoURL = [repoURL substringToIndex:[repoURL length] - 1];
             repo.repoURL = repoURL;
 
+            NSError *error;
+            NSURL *iconURL = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@/CydiaIcon.png", fullRepoURL]];
+            NSData *iconData = [NSData dataWithContentsOfURL:iconURL options:NSDataReadingUncached error:&error];
+            if (error != nil) {
+              HBLogError(@"error while getting icon: %@", error);
+            }
+            repo.icon = iconData;
+
             if ([baseFileName rangeOfString:@"saurik"].location != NSNotFound || [baseFileName rangeOfString:@"bigboss"].location != NSNotFound || [baseFileName rangeOfString:@"zodttd"].location != NSNotFound) {
                 repo.defaultRepo = true;
             }
