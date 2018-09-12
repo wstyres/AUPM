@@ -24,10 +24,12 @@ NSArray *packages_to_array(const char *path);
         package.version = dict[@"Version"];
         package.section = dict[@"Section"];
         package.packageDescription = dict[@"Description"];
+        package.versionidentifier = [NSString stringWithFormat:@"%@~%@", dict[@"Version"], dict[@"Package"]];
 
         NSString *urlString = [dict[@"Depiction"] stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
         urlString = [urlString substringToIndex:[urlString length] - 3]; //idk why this is here
         package.depictionURL = urlString;
+        package.installed = true;
 
         if ([dict[@"Package"] rangeOfString:@"gsc"].location == NSNotFound && [dict[@"Package"] rangeOfString:@"cy+"].location == NSNotFound) {
             [installedPackageList addObject:package];

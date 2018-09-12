@@ -28,11 +28,11 @@
 
 		self.title = [_repo repoName];
 	}
-	// else {
-	// 	_objects = [[databaseManager cachedListOfInstalledPackages] mutableCopy];
-	//
-	// 	self.title = @"Packages";
-	// }
+	else {
+		_objects = (RLMArray *)[databaseManager cachedListOfInstalledPackages];
+
+		self.title = @"Packages";
+	}
 }
 
 #pragma mark - Table View Data Source

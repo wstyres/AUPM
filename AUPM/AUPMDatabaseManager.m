@@ -26,14 +26,6 @@ bool packages_file_changed(FILE* f1, FILE* f2);
   // apt-get update -o Dir::Etc::SourceList "/etc/apt/sources.list.d/aupm.list" -o Dir::State::Lists "/var/lib/aupm/lists"
   [task setArguments:arguments];
 
-  NSPipe *pipe = [NSPipe pipe];
-  [task setStandardOutput:pipe];
-  [task setStandardError:pipe];
-
-  NSFileHandle *output = [pipe fileHandleForReading];
-  [output waitForDataInBackgroundAndNotify];
-  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receivedData:) name:NSFileHandleDataAvailableNotification object:output];
-
   [task launch];
   [task waitUntilExit];
 
@@ -61,23 +53,11 @@ bool packages_file_changed(FILE* f1, FILE* f2);
   }
 
   dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
-  completion(true);
 
-  // //Cache installed packages
-  // [self populateInstalledDatabase:^(BOOL success) {
-  //   completion(true);
-  // }];
-}
-
-- (void)receivedData:(NSNotification *)notif {
-    NSFileHandle *fh = [notif object];
-    NSData *data = [fh availableData];
-
-    if (data.length > 0) {
-        [fh waitForDataInBackgroundAndNotify];
-        NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-        NSLog(@"[AUPM] APT: %@", str);
-    }
+  //Cache installed packages
+  [self populateInstalledDatabase:^(BOOL success) {
+    completion(true);
+  }];
 }
 
 // - (void)updatePopulation:(void (^)(BOOL success))completion {
@@ -214,50 +194,22 @@ bool packages_file_changed(FILE* f1, FILE* f2);
 //   return (NSArray *)bill;
 // }
 //
-// - (void)populateInstalledDatabase:(void (^)(BOOL success))completion {
-//   sqlite3 *database;
-//   sqlite3_open([_databasePath UTF8String], &database);
-//   sqlite3_exec(database, "DELETE FROM INSTALLED", NULL, NULL, NULL); //Delete all packages so we don't end up with duplicates
-//   sqlite3_config(SQLITE_CONFIG_SERIALIZED);
-//
-//   AUPMPackageManager *packageManager = [[AUPMPackageManager alloc] init];
-//   NSArray *packagesArray = [packageManager installedPackageList];
-//
-//   //(name text, packageid text, version text, section text, desc text, url text)
-//   //Might need to thread this process so that it doesn't freeze the UI but we will see how quick it is
-//   HBLogInfo(@"Started to parse installed packages");
-//   NSString *packageQuery = @"insert into installed(name, packageid, version, section, desc, url) values(?,?,?,?,?,?)";
-//   sqlite3_stmt *packageStatement;
-//   sqlite3_exec(database, "BEGIN TRANSACTION", NULL, NULL, NULL);
-//   if (sqlite3_prepare_v2(database, [packageQuery UTF8String], -1, &packageStatement, nil) == SQLITE_OK) {
-//     for (AUPMPackage *package in packagesArray) {
-//       //Populate packages database with packages from repo
-//       sqlite3_bind_text(packageStatement, 1, [[package packageName] UTF8String], -1, SQLITE_TRANSIENT);
-//       sqlite3_bind_text(packageStatement, 2, [[package packageIdentifier] UTF8String], -1, SQLITE_TRANSIENT);
-//       sqlite3_bind_text(packageStatement, 3, [[package version] UTF8String], -1, SQLITE_TRANSIENT);
-//       sqlite3_bind_text(packageStatement, 4, [[package section] UTF8String], -1, SQLITE_TRANSIENT);
-//       sqlite3_bind_text(packageStatement, 5, [[package description] UTF8String], -1, SQLITE_TRANSIENT);
-//       sqlite3_bind_text(packageStatement, 6, [[package depictionURL].absoluteString UTF8String], -1, SQLITE_TRANSIENT);
-//       sqlite3_step(packageStatement);
-//       sqlite3_reset(packageStatement);
-//       sqlite3_clear_bindings(packageStatement);
-//     }
-//     HBLogInfo(@"Finished installed packages");
-//   }
-//   else {
-//     HBLogError(@"%s", sqlite3_errmsg(database));
-//   }
-//   sqlite3_finalize(packageStatement);
-//   sqlite3_exec(database, "COMMIT TRANSACTION", NULL, NULL, NULL);
-//   sqlite3_close(database);
-//   completion(true);
-// }
-//
-// - (sqlite3 *)database {
-//   sqlite3 *database;
-//   sqlite3_open([_databasePath UTF8String], &database);
-//   return database;
-// }
+- (void)populateInstalledDatabase:(void (^)(BOOL success))completion {
+  AUPMPackageManager *packageManager = [[AUPMPackageManager alloc] init];
+  NSArray *packagesArray = [packageManager installedPackageList];
+
+  //(name text, packageid text, version text, section text, desc text, url text)
+  HBLogInfo(@"Started to parse installed packages");
+
+  for (AUPMPackage *package in packagesArray) {
+    RLMRealm *realm = [RLMRealm defaultRealm];
+    [realm beginWriteTransaction];
+    [realm addOrUpdateObject:package];
+    [realm commitWriteTransaction];
+  }
+
+  completion(true);
+}
 //
 // - (void)deletePackagesFromRepo:(AUPMRepo *)repo inDatabase:(sqlite3 *)database {
 //   sqlite3_exec(database, [[NSString stringWithFormat:@"DELETE FROM packages WHERE repoID = %d", [repo repoIdentifier]] UTF8String], NULL, NULL, NULL);
@@ -268,132 +220,17 @@ bool packages_file_changed(FILE* f1, FILE* f2);
 //   sqlite3_exec(database, [[NSString stringWithFormat:@"DELETE FROM repos WHERE repoID = %d", [repo repoIdentifier]] UTF8String], NULL, NULL, NULL);
 // }
 //
-- (NSArray *)cachedListOfInstalledPackages {
-  AUPMPackageManager *packageManager = [[AUPMPackageManager alloc] init];
-  return [packageManager installedPackageList];
-//   HBLogInfo(@"Getting cached list of installed pacakges");
-//   sqlite3 *database;
-//   sqlite3_open([_databasePath UTF8String], &database);
-//   NSMutableArray *listOfPackages = [[NSMutableArray alloc] init];
-//   NSString *query = @"SELECT * FROM installed";
-//   sqlite3_stmt *statement;
-//   if (sqlite3_prepare_v2(database, [query UTF8String], -1, &statement, nil) == SQLITE_OK) {
-//     while (sqlite3_step(statement) == SQLITE_ROW) {
-//       const char *packageNameChars = (const char *)sqlite3_column_text(statement, 0);
-//       const char *packageIDChars = (const char *)sqlite3_column_text(statement, 1);
-//       const char *versionChars = (const char *)sqlite3_column_text(statement, 2);
-//       const char *sectionChars = (const char *)sqlite3_column_text(statement, 3);
-//       const char *descriptionChars = (const char *)sqlite3_column_text(statement, 4);
-//       const char *depictionChars = (const char *)sqlite3_column_text(statement, 5);
-//
-//       NSString *packageName;
-//       NSString *packageID = [[NSString alloc] initWithUTF8String:packageIDChars];
-//       if (packageNameChars == NULL)
-//       {
-//         packageName = packageID;
-//       }
-//       else
-//       {
-//         packageName = [[NSString alloc] initWithUTF8String:packageNameChars];
-//       }
-//       NSString *version = [[NSString alloc] initWithUTF8String:versionChars];
-//       NSString *section = [[NSString alloc] initWithUTF8String:sectionChars];
-//       NSString *description;
-//       if (description == NULL)
-//       {
-//         description = @"No Description";
-//       }
-//       else
-//       {
-//         description = [[NSString alloc] initWithUTF8String:descriptionChars];
-//       }
-//       NSString *depictionURL;
-//       if (depictionChars == NULL)
-//       {
-//         depictionURL = nil;
-//       }
-//       else
-//       {
-//         depictionURL = [[NSString alloc] initWithUTF8String:depictionChars];
-//       }
-//       //NSString *md5sum = [[NSString alloc] initWithUTF8String:sumChars];
-//
-//       AUPMPackage *package = [[AUPMPackage alloc] initWithPackageName:packageName packageID:packageID version:version section:section description:description depictionURL:depictionURL sum:nil];
-//       [listOfPackages addObject:package];
-//     }
-//     sqlite3_finalize(statement);
-//   }
-//   else {
-//     HBLogError(@"%s", sqlite3_errmsg(database));
-//   }
-//   sqlite3_close(database);
-//   NSSortDescriptor *sortByPackageName = [NSSortDescriptor sortDescriptorWithKey:@"packageName" ascending:YES];
-//   NSArray *sortDescriptors = [NSArray arrayWithObject:sortByPackageName];
-//
-//   return [listOfPackages sortedArrayUsingDescriptors:sortDescriptors];
+- (RLMResults<AUPMPackage *> *)cachedListOfInstalledPackages {
+  RLMResults<AUPMPackage *> *installedPackages = [AUPMPackage objectsWhere:@"installed = true"];
+  return installedPackages;
 }
-//
+
 - (RLMResults *)cachedListOfRepositories {
   return [AUPMRepo allObjects];
-//   HBLogInfo(@"Getting cached list of repos");
-//   sqlite3 *database;
-//   sqlite3_open([_databasePath UTF8String], &database);
-//
-//   NSMutableArray *listOfRepositories = [[NSMutableArray alloc] init];
-//   NSString *query = @"SELECT * FROM repos";
-//   sqlite3_stmt *statement;
-//   //packageName, packageIdentifier, version, section, description, depictionURL
-//   if (sqlite3_prepare_v2(database, [query UTF8String], -1, &statement, nil) == SQLITE_OK) {
-//     while (sqlite3_step(statement) == SQLITE_ROW) {
-//       int uniqueId = sqlite3_column_int(statement, 0);
-//       const char *repoNameChars = (const char *)sqlite3_column_text(statement, 1);
-//       const char *repoFileNameChars = (const char *)sqlite3_column_text(statement, 2);
-//       const char *descriptionChars = (const char *)sqlite3_column_text(statement, 3);
-//       const char *repoURLChars = (const char *)sqlite3_column_text(statement, 4);
-//       NSString *repoName = [[NSString alloc] initWithUTF8String:repoNameChars];
-//       NSString *repoBaseFileName = [[NSString alloc] initWithUTF8String:repoFileNameChars];
-//       NSString *description = [[NSString alloc] initWithUTF8String:descriptionChars];
-//       NSString *repoURL = [[NSString alloc] initWithUTF8String:repoURLChars];
-//       NSData *repoIcon = [[NSData alloc] initWithBytes:sqlite3_column_blob(statement, 5) length:sqlite3_column_bytes(statement, 5)];
-//       AUPMRepo *repo = [[AUPMRepo alloc] initWithRepoID:uniqueId name:repoName baseFileName:repoBaseFileName description:description url:repoURL icon:repoIcon];
-//       [listOfRepositories addObject:repo];
-//     }
-//     sqlite3_finalize(statement);
-//   }
-//   else {
-//     HBLogError(@"%s", sqlite3_errmsg(database));
-//   }
-//   sqlite3_close(database);
-//
-//   NSSortDescriptor *sortByRepoName = [NSSortDescriptor sortDescriptorWithKey:@"repoName" ascending:YES];
-//   NSArray *sortDescriptors = [NSArray arrayWithObject:sortByRepoName];
-//
-//   return (NSArray*)[listOfRepositories sortedArrayUsingDescriptors:sortDescriptors];
 }
-//
+
 - (RLMArray<AUPMPackage *> *)cachedPackageListForRepo:(AUPMRepo *)repo {
   return repo.packages;
 }
-//
-// - (void)copyDatabase:(NSString *)database intoDocumentsDirectory:(NSString *)directory {
-//   NSString *destinationPath = [directory stringByAppendingPathComponent:database];
-//   if (![[NSFileManager defaultManager] fileExistsAtPath:destinationPath]) {
-//     NSString *sourcePath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:database];
-//     NSError *error;
-//     [[NSFileManager defaultManager] copyItemAtPath:sourcePath toPath:destinationPath error:&error];
-//
-//     if (error != nil) {
-//       HBLogError(@"%@", [error localizedDescription]);
-//     }
-//   }
-// }
-//
-// - (void)purgeRecords {
-//   sqlite3 *database;
-//   sqlite3_open([_databasePath UTF8String], &database);
-//   sqlite3_exec(database, "DELETE FROM REPOS", NULL, NULL, NULL);
-//   sqlite3_exec(database, "DELETE FROM PACKAGES", NULL, NULL, NULL);
-//   sqlite3_close(database);
-// }
 
 @end

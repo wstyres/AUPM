@@ -148,6 +148,7 @@ NSArray *packages_to_array(const char *path);
         package.version = [dict[@"Version"] substringToIndex:[dict[@"Version"] length] - 1];
         package.section = [dict[@"Section"] substringToIndex:[dict[@"Section"] length] - 1];
         package.packageDescription = [dict[@"Description"] substringToIndex:[dict[@"Description"] length] - 1];
+        package.versionidentifier = [NSString stringWithFormat:@"%@~%@", dict[@"Version"], dict[@"Package"]];
 
         NSString *urlString = [dict[@"Depiction"] stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
         urlString = [urlString substringToIndex:[urlString length] - 3]; //idk why this is here
