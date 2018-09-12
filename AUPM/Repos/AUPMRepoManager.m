@@ -162,7 +162,7 @@ NSArray *packages_to_array(const char *path);
     NSTimeInterval executionTime = [methodFinish timeIntervalSinceDate:methodStart];
     NSLog(@"[AUPM] Time to parse %@ package files: %f seconds", [repo repoName], executionTime);
 
-    return (NSArray *)packageListForRepo;
+    return (NSArray *)[self cleanUpDuplicatePackages:packageListForRepo];
 }
 
 // - (void)addSource:(NSURL *)sourceURL {
