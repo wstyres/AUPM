@@ -71,10 +71,12 @@ bool packages_file_changed(FILE* f1, FILE* f2);
   [cpTask launch];
   [cpTask waitUntilExit];
 
+  //Update APT
   NSTask *refreshTask = [[NSTask alloc] init];
   [refreshTask setLaunchPath:@"/Applications/AUPM.app/supersling"];
-  NSArray *refArgs = [[NSArray alloc] initWithObjects: @"apt-get", @"update", nil];
-  [refreshTask setArguments:refArgs];
+  NSArray *arguments = [[NSArray alloc] initWithObjects: @"apt-get", @"update", @"-o", @"Dir::Etc::SourceList=/var/lib/aupm/aupm.list", @"-o", @"Dir::State::Lists=/var/lib/aupm/lists", @"-o", @"Dir::Etc::SourceParts=/var/lib/aupm/lists/partial/false", nil];
+  // apt-get update -o Dir::Etc::SourceList "/etc/apt/sources.list.d/aupm.list" -o Dir::State::Lists "/var/lib/aupm/lists"
+  [refreshTask setArguments:arguments];
 
   [refreshTask launch];
   [refreshTask waitUntilExit];
@@ -126,7 +128,7 @@ bool packages_file_changed(FILE* f1, FILE* f2);
     if (![[NSFileManager defaultManager] fileExistsAtPath:cachedPackagesFile]) {
       cachedPackagesFile = [NSString stringWithFormat:@"/var/mobile/Library/Caches/com.xtm3x.aupm/lists/%@_main_binary-iphoneos-arm_Packages", [repo repoBaseFileName]]; //Do some funky package file with the default repos
       if (![[NSFileManager defaultManager] fileExistsAtPath:cachedPackagesFile]) {
-        HBLogInfo(@"There is no cache file for %@ so it needs an update", [repo repoName]);
+        NSLog(@"[AUPM] There is no cache file for %@ so it needs an update", [repo repoName]);
         needsUpdate = true; //There isn't a cache for this so we need to parse it
       }
     }
@@ -143,10 +145,10 @@ bool packages_file_changed(FILE* f1, FILE* f2);
   }
 
   if ([bill count] > 0) {
-    HBLogInfo(@"Bill of Repositories that require an update: %@", bill);
+    NSLog(@"[AUPM] Bill of Repositories that require an update: %@", bill);
   }
   else {
-    HBLogInfo(@"No repositories need an update");
+    NSLog(@"[AUPM] No repositories need an update");
   }
 
   return (NSArray *)bill;
