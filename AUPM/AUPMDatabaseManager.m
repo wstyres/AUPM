@@ -93,7 +93,7 @@ bool packages_file_changed(FILE* f1, FILE* f2);
         [repo.packages addObject:package];
       }
       [realm beginWriteTransaction];
-      [realm addObject:repo];
+      [realm addOrUpdateObject:repo];
       [realm commitWriteTransaction];
 
       NSDate *methodFinish = [NSDate date];
