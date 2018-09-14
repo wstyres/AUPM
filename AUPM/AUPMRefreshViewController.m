@@ -66,19 +66,13 @@
     }
     else if (_action == 1) {
       NSDate *methodStart = [NSDate date];
-      [databaseManager firstLoadPopulation:^(BOOL success) {
-          [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"firstSetupComplete"];
-          [[NSUserDefaults standardUserDefaults] synchronize];
+      [databaseManager updatePopulation:^(BOOL success) {
+        NSDate *methodFinish = [NSDate date];
+        NSTimeInterval executionTime = [methodFinish timeIntervalSinceDate:methodStart];
+        NSLog(@"[AUPM] Completed in %f seconds", executionTime);
 
-          NSDate *methodFinish = [NSDate date];
-          NSTimeInterval executionTime = [methodFinish timeIntervalSinceDate:methodStart];
-          NSLog(@"[AUPM] Completed in %f seconds", executionTime);
-
-          [self goAway];
+        [self goAway];
       }];
-        // [databaseManager updatePopulation:^(BOOL success) {
-        //     [self goAway];
-        // }];
     }
     else {
         HBLogInfo(@"Invalid action...");
