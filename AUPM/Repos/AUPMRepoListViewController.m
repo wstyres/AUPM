@@ -47,8 +47,8 @@
 	UIBarButtonItem *refreshItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(refreshPackages)];
 	self.navigationItem.rightBarButtonItem = refreshItem;
 
-	// UIBarButtonItem *addItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(showAddRepoAlert)];
-	// self.navigationItem.leftBarButtonItem = addItem;
+	UIBarButtonItem *addItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(showAddRepoAlert)];
+	self.navigationItem.leftBarButtonItem = addItem;
 }
 
 - (void)refreshPackages {
@@ -62,40 +62,40 @@
 // 	[self presentViewController:dataLoadViewController animated:true completion:nil];
 // }
 
-// - (void)showAddRepoAlert {
-// 	UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Enter URL"
-// 	message:nil
-// 	preferredStyle:UIAlertControllerStyleAlert];
-//
-// 	[alertController addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil]];
-// 	[alertController addAction:[UIAlertAction actionWithTitle:@"Add"
-// 	style:UIAlertActionStyleDefault
-// 	handler:^(UIAlertAction * _Nonnull action) {
-// 		UITextField *textField = alertController.textFields[0];
-// 		[self addSourceWithURL:textField.text];
-// 	}]];
-// 	[alertController addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
-// 		textField.text = @"http://";
-// 		textField.autocapitalizationType = UITextAutocapitalizationTypeNone;
-// 		textField.autocorrectionType = UITextAutocorrectionTypeNo;
-// 		textField.keyboardType = UIKeyboardTypeURL;
-// 		textField.returnKeyType = UIReturnKeyNext;
-// 	}];
-// 	[self presentViewController:alertController animated:true completion:nil];
-// }
-//
-// - (void)addSourceWithURL:(NSString *)urlString {
-// 	NSURL *url = [NSURL URLWithString:urlString];
-// 	if (!url) {
-// 		HBLogError(@"invalid URL: %@", urlString);
-// 		return;
-// 	}
-// 	HBLogInfo(@"Adding repo: %@", urlString);
-//
-// 	// AUPMRepoManager *repoManager = [[AUPMRepoManager alloc] init];
-// 	// [repoManager addSource:url];
-// 	// [self fullRefresh];
-// }
+- (void)showAddRepoAlert {
+	UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Enter URL"
+	message:nil
+	preferredStyle:UIAlertControllerStyleAlert];
+
+	[alertController addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil]];
+	[alertController addAction:[UIAlertAction actionWithTitle:@"Add"
+	style:UIAlertActionStyleDefault
+	handler:^(UIAlertAction * _Nonnull action) {
+		UITextField *textField = alertController.textFields[0];
+		[self addSourceWithURL:textField.text];
+	}]];
+	[alertController addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
+		textField.text = @"http://";
+		textField.autocapitalizationType = UITextAutocapitalizationTypeNone;
+		textField.autocorrectionType = UITextAutocorrectionTypeNo;
+		textField.keyboardType = UIKeyboardTypeURL;
+		textField.returnKeyType = UIReturnKeyNext;
+	}];
+	[self presentViewController:alertController animated:true completion:nil];
+}
+
+- (void)addSourceWithURL:(NSString *)urlString { //Need to verify if this is an actual APT repo before adding
+	NSURL *url = [NSURL URLWithString:urlString];
+	if (!url) {
+		HBLogError(@"invalid URL: %@", urlString);
+		return;
+	}
+	HBLogInfo(@"Adding repo: %@", urlString);
+
+	AUPMRepoManager *repoManager = [[AUPMRepoManager alloc] init];
+	[repoManager addSource:url];
+	[self refreshPackages];
+}
 
 #pragma mark - Table View Data Source
 
