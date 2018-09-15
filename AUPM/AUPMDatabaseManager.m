@@ -65,7 +65,7 @@ bool packages_file_changed(FILE* f1, FILE* f2);
 
   NSTask *cpTask = [[NSTask alloc] init];
   [cpTask setLaunchPath:@"/Applications/AUPM.app/supersling"];
-  NSArray *cpArgs = [[NSArray alloc] initWithObjects: @"cp", @"-fR", @"/var/lib/aupm/lists", @"/var/mobile/Library/Caches/com.xtm3x.aupm/", nil];
+  NSArray *cpArgs = [[NSArray alloc] initWithObjects: @"cp", @"-fR", @"/var/lib/aupm/lists", @"/var/mobile/Library/Caches/xyz.willy.aupm/", nil];
   [cpTask setArguments:cpArgs];
 
   [cpTask launch];
@@ -124,9 +124,9 @@ bool packages_file_changed(FILE* f1, FILE* f2);
       aptPackagesFile = [NSString stringWithFormat:@"/var/lib/aupm/lists/%@_main_binary-iphoneos-arm_Packages", [repo repoBaseFileName]]; //Do some funky package file with the default repos
     }
 
-    NSString *cachedPackagesFile = [NSString stringWithFormat:@"/var/mobile/Library/Caches/com.xtm3x.aupm/lists/%@_Packages", [repo repoBaseFileName]];
+    NSString *cachedPackagesFile = [NSString stringWithFormat:@"/var/mobile/Library/Caches/xyz.willy.aupm/lists/%@_Packages", [repo repoBaseFileName]];
     if (![[NSFileManager defaultManager] fileExistsAtPath:cachedPackagesFile]) {
-      cachedPackagesFile = [NSString stringWithFormat:@"/var/mobile/Library/Caches/com.xtm3x.aupm/lists/%@_main_binary-iphoneos-arm_Packages", [repo repoBaseFileName]]; //Do some funky package file with the default repos
+      cachedPackagesFile = [NSString stringWithFormat:@"/var/mobile/Library/Caches/xyz.willy.aupm/lists/%@_main_binary-iphoneos-arm_Packages", [repo repoBaseFileName]]; //Do some funky package file with the default repos
       if (![[NSFileManager defaultManager] fileExistsAtPath:cachedPackagesFile]) {
         NSLog(@"[AUPM] There is no cache file for %@ so it needs an update", [repo repoName]);
         needsUpdate = true; //There isn't a cache for this so we need to parse it

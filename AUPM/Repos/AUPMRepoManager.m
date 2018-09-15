@@ -240,6 +240,15 @@ NSArray *packages_to_array(const char *path);
 
     [updateListTask launch];
     [updateListTask waitUntilExit];
+
+    NSTask *deleteCacheTask = [[NSTask alloc] init];
+    [deleteCacheTask setLaunchPath:@"/Applications/AUPM.app/supersling"];
+    NSArray *arguments = [[NSArray alloc] initWithObjects: @"rm", @"-rf", [NSString stringWithFormat:@"/var/mobile/Library/Caches/xyz.willy.aupm/lists/%@*", [delRepo repoBaseFileName]], nil];
+    // apt-get update -o Dir::Etc::SourceList "/etc/apt/sources.list.d/aupm.list" -o Dir::State::Lists "/var/lib/aupm/lists"
+    [deleteCacheTask setArguments:arguments];
+
+    [deleteCacheTask launch];
+    [deleteCacheTask waitUntilExit];
   }
 
   AUPMDatabaseManager *databaseManager = ((AUPMAppDelegate *)[[UIApplication sharedApplication] delegate]).databaseManager;

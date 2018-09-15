@@ -6,6 +6,7 @@
 #import "../Packages/AUPMPackageListViewController.h"
 #import "../AUPMDatabaseManager.h"
 #import "../AUPMAppDelegate.h"
+#import "../AUPMTabBarController.h"
 #import <Realm/Realm.h>
 
 @interface AUPMRepoListViewController ()
@@ -51,16 +52,8 @@
 }
 
 - (void)refreshPackages {
-	[self updateDatabaseInBackground];
-}
-
-- (void)updateDatabaseInBackground {
-	[[self navigationController] tabBarItem].badgeValue = @"⏳";
-
-	AUPMDatabaseManager *databaseManager = ((AUPMAppDelegate *)[[UIApplication sharedApplication] delegate]).databaseManager;
-	[databaseManager updatePopulation:^(BOOL success) {
-		[[self navigationController] tabBarItem].badgeValue = @"";
-	}];
+	AUPMTabBarController *tabController = (AUPMTabBarController *)self.tabBarController;
+	[tabController performBackgroundRefresh];
 }
 
 // - (void)fullRefresh {
