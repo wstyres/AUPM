@@ -11,5 +11,5 @@
 - (NSArray<AUPMPackage *> *)packageListForRepo:(AUPMRepo *)repo;
 - (NSArray *)cleanUpDuplicatePackages:(NSArray *)packageList;
 // - (void)addSource:(NSURL *)sourceURL;
-// - (void)deleteSource:(AUPMRepo *)delRepo;
+- (void)deleteSource:(AUPMRepo *)delRepo;
 @end

@@ -170,15 +170,12 @@ bool packages_file_changed(FILE* f1, FILE* f2);
 
   completion(true);
 }
-//
-// - (void)deletePackagesFromRepo:(AUPMRepo *)repo inDatabase:(sqlite3 *)database {
-//   sqlite3_exec(database, [[NSString stringWithFormat:@"DELETE FROM packages WHERE repoID = %d", [repo repoIdentifier]] UTF8String], NULL, NULL, NULL);
-// }
-//
-// - (void)deleteRepo:(AUPMRepo *)repo fromDatabase:(sqlite3 *)database {
-//   sqlite3_exec(database, [[NSString stringWithFormat:@"DELETE FROM packages WHERE repoID = %d", [repo repoIdentifier]] UTF8String], NULL, NULL, NULL);
-//   sqlite3_exec(database, [[NSString stringWithFormat:@"DELETE FROM repos WHERE repoID = %d", [repo repoIdentifier]] UTF8String], NULL, NULL, NULL);
-// }
-//
+
+- (void)deleteRepo:(AUPMRepo *)repo {
+  RLMRealm *realm = [RLMRealm defaultRealm];
+  [realm beginWriteTransaction];
+  [realm deleteObject:repo];
+  [realm commitWriteTransaction];
+}
 
 @end
