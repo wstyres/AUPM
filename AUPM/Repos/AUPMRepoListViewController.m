@@ -56,47 +56,6 @@
 	[tabController performBackgroundRefresh];
 }
 
-// - (void)fullRefresh {
-// 	AUPMRefreshViewController *dataLoadViewController = [[AUPMRefreshViewController alloc] initWithAction:0];
-//
-// 	[self presentViewController:dataLoadViewController animated:true completion:nil];
-// }
-
-- (void)showAddRepoAlert {
-	UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Enter URL"
-	message:nil
-	preferredStyle:UIAlertControllerStyleAlert];
-
-	[alertController addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil]];
-	[alertController addAction:[UIAlertAction actionWithTitle:@"Add"
-	style:UIAlertActionStyleDefault
-	handler:^(UIAlertAction * _Nonnull action) {
-		UITextField *textField = alertController.textFields[0];
-		[self addSourceWithURL:textField.text];
-	}]];
-	[alertController addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
-		textField.text = @"http://";
-		textField.autocapitalizationType = UITextAutocapitalizationTypeNone;
-		textField.autocorrectionType = UITextAutocorrectionTypeNo;
-		textField.keyboardType = UIKeyboardTypeURL;
-		textField.returnKeyType = UIReturnKeyNext;
-	}];
-	[self presentViewController:alertController animated:true completion:nil];
-}
-
-- (void)addSourceWithURL:(NSString *)urlString { //Need to verify if this is an actual APT repo before adding
-	NSURL *url = [NSURL URLWithString:urlString];
-	if (!url) {
-		HBLogError(@"invalid URL: %@", urlString);
-		return;
-	}
-	HBLogInfo(@"Adding repo: %@", urlString);
-
-	AUPMRepoManager *repoManager = [[AUPMRepoManager alloc] init];
-	[repoManager addSource:url];
-	[self refreshPackages];
-}
-
 #pragma mark - Table View Data Source
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
@@ -149,6 +108,89 @@
 		AUPMRepoManager *repoManager = [[AUPMRepoManager alloc] init];
 		[repoManager deleteSource:[_objects objectAtIndex:indexPath.row]];
 	}
+}
+
+#pragma mark - Adding Repos
+
+- (void)showAddRepoAlert {
+	UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Enter URL" message:nil preferredStyle:UIAlertControllerStyleAlert];
+
+	[alertController addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil]];
+	[alertController addAction:[UIAlertAction actionWithTitle:@"Add"
+	style:UIAlertActionStyleDefault
+	handler:^(UIAlertAction * _Nonnull action) {
+		UITextField *textField = alertController.textFields[0];
+		[self addSourceWithURL:textField.text];
+	}
+	]];
+	[alertController addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
+		textField.text = @"http://";
+		textField.autocapitalizationType = UITextAutocapitalizationTypeNone;
+		textField.autocorrectionType = UITextAutocorrectionTypeNo;
+		textField.keyboardType = UIKeyboardTypeURL;
+		textField.returnKeyType = UIReturnKeyNext;
+	}];
+	[self presentViewController:alertController animated:true completion:nil];
+}
+
+- (void)addSourceWithURL:(NSString *)urlString {
+	NSURL *url = [NSURL URLWithString:urlString];
+	if (!url) {
+		NSLog(@"invalid URL: %@", urlString);
+		return;
+	}
+
+	[self verifySourceExists:[url URLByAppendingPathComponent:@"Packages.bz2"]];
+}
+
+- (void)verifySourceExists:(NSURL *)url {
+	NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
+	NSURLSession *session = [NSURLSession sessionWithConfiguration:configuration];
+
+	NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:10];
+	request.HTTPMethod = @"HEAD";
+
+	NSURLSessionDataTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+		dispatch_async(dispatch_get_main_queue(), ^{
+			[self receivedPackageVerification:response error:error];
+		});
+	}];
+	[task resume];
+}
+
+- (void)receivedPackageVerification:(NSURLResponse *)response error:(NSError *)error {
+	if (error) {
+		NSLog(@"[AUPM] Error verifying repository: %@", error);
+		[self presentVerificationFailedAlert:error.localizedDescription];
+		return;
+	}
+
+	NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
+
+	NSURL *url = [httpResponse.URL URLByDeletingLastPathComponent];
+	if (httpResponse.statusCode != 200) {
+		NSString *errorMessage = [NSString stringWithFormat:@"Expected status from url %@, received: %d", url, (int)httpResponse.statusCode];
+		NSLog(@"[AUPM] %@", errorMessage);
+		[self presentVerificationFailedAlert:errorMessage];
+		return;
+	}
+
+	NSLog(@"[AUPM] Verified source %@", url);
+	[self addRepository:url];
+}
+
+- (void)presentVerificationFailedAlert:(NSString *)message {
+	UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Unable to verify Repo" message:message preferredStyle:UIAlertControllerStyleAlert];
+
+	[alertController addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleCancel handler:nil]];
+
+	[self presentViewController:alertController animated:true completion:nil];
+}
+
+- (void)addRepository:(NSURL *)sourceURL {
+	NSLog(@"[AUPM] Adding %@ to database", sourceURL);
+	AUPMRepoManager *repoManager = [[AUPMRepoManager alloc] init];
+	[repoManager addSource:sourceURL];
 }
 
 @end

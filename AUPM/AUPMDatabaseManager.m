@@ -173,8 +173,11 @@ bool packages_file_changed(FILE* f1, FILE* f2);
 
 - (void)deleteRepo:(AUPMRepo *)repo {
   RLMRealm *realm = [RLMRealm defaultRealm];
+
+  AUPMRepo *delRepo = [[AUPMRepo objectsWhere:@"repoBaseFileName == %@", [repo repoBaseFileName]] firstObject];
+
   [realm beginWriteTransaction];
-  [realm deleteObject:repo];
+  [realm deleteObject:delRepo];
   [realm commitWriteTransaction];
 }
 
