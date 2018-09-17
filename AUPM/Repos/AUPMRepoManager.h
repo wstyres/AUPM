@@ -10,6 +10,6 @@
 - (NSArray *)managedRepoList;
 - (NSArray<AUPMPackage *> *)packageListForRepo:(AUPMRepo *)repo;
 - (NSArray *)cleanUpDuplicatePackages:(NSArray *)packageList;
-// - (void)addSource:(NSURL *)sourceURL;
+- (void)addSource:(NSURL *)sourceURL completion:(void (^)(BOOL success))completion;
 - (void)deleteSource:(AUPMRepo *)delRepo;
 @end

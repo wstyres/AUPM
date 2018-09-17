@@ -1,3 +1,3 @@
 @interface AUPMTabBarController : UITabBarController
-- (void)performBackgroundRefresh;
+- (void)performBackgroundRefresh:(BOOL)requested;
 @end
