@@ -184,7 +184,7 @@ NSArray *packages_to_array(const char *path);
       output = [output stringByAppendingFormat:@"deb %@ ./\n", [repo repoURL]];
     }
   }
-  output = [output stringByAppendingFormat:@"deb %@/ ./\n", URL];
+  output = [output stringByAppendingFormat:@"deb %@ ./\n", URL];
 
   NSArray *searchPaths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
   NSString *documentPath = [searchPaths objectAtIndex:0];
@@ -209,10 +209,7 @@ NSArray *packages_to_array(const char *path);
 - (void)deleteSource:(AUPMRepo *)delRepo {
   NSString *output = @"";
   for (AUPMRepo *repo in _repos) {
-    if ([[delRepo repoBaseFileName] isEqual:[repo repoBaseFileName]]) {
-      [_repos removeObject:repo];
-    }
-    else {
+    if (![[delRepo repoBaseFileName] isEqual:[repo repoBaseFileName]]) {
       if ([repo defaultRepo]) {
         if ([[repo repoName] isEqual:@"Cydia/Telesphoreo"]) {
           output = [output stringByAppendingFormat:@"deb http://apt.saurik.com/ ios/%.2f main\n",kCFCoreFoundationVersionNumber];
@@ -245,14 +242,19 @@ NSArray *packages_to_array(const char *path);
     [updateListTask launch];
     [updateListTask waitUntilExit];
 
-    NSTask *deleteCacheTask = [[NSTask alloc] init];
-    [deleteCacheTask setLaunchPath:@"/Applications/AUPM.app/supersling"];
-    NSArray *arguments = [[NSArray alloc] initWithObjects: @"rm", @"-rf", [NSString stringWithFormat:@"/var/mobile/Library/Caches/xyz.willy.aupm/lists/%@*", [delRepo repoBaseFileName]], nil];
-    // apt-get update -o Dir::Etc::SourceList "/etc/apt/sources.list.d/aupm.list" -o Dir::State::Lists "/var/lib/aupm/lists"
-    [deleteCacheTask setArguments:arguments];
+    NSTask *deletePackageCache = [[NSTask alloc] init];
+    [deletePackageCache setLaunchPath:@"/Applications/AUPM.app/supersling"];
+    NSArray *arguments = [[NSArray alloc] initWithObjects: @"rm", @"-rf", [NSString stringWithFormat:@"/var/mobile/Library/Caches/xyz.willy.aupm/lists/%@_Packages", [delRepo repoBaseFileName]], nil];
+    [deletePackageCache setArguments:arguments];
 
-    [deleteCacheTask launch];
-    [deleteCacheTask waitUntilExit];
+    [deletePackageCache launch];
+
+    NSTask *deleteReleaseCache = [[NSTask alloc] init];
+    [deleteReleaseCache setLaunchPath:@"/Applications/AUPM.app/supersling"];
+    arguments = [[NSArray alloc] initWithObjects: @"rm", @"-rf", [NSString stringWithFormat:@"/var/mobile/Library/Caches/xyz.willy.aupm/lists/%@_Release", [delRepo repoBaseFileName]], nil];
+    [deleteReleaseCache setArguments:arguments];
+
+    [deleteReleaseCache launch];
   }
 
   AUPMDatabaseManager *databaseManager = ((AUPMAppDelegate *)[[UIApplication sharedApplication] delegate]).databaseManager;
