@@ -14,12 +14,7 @@
 
 	self.databaseManager = [[AUPMDatabaseManager alloc] init];
 
-	RLMRealmConfiguration *realmConfig = [[RLMRealm defaultRealm] configuration];
-	NSFileManager *fileManager = [NSFileManager defaultManager];
-	NSString *realmPath = realmConfig.fileURL.absoluteString;
-	NSLog(@"[AUPM] Realm Path: %@", realmPath);
-
-	if ([fileManager fileExistsAtPath:realmPath]) {
+	if ([[RLMRealm defaultRealm] isEmpty]) {
 		AUPMRefreshViewController *refreshViewController = [[AUPMRefreshViewController alloc] init];
 
 		self.window.rootViewController = refreshViewController;
