@@ -190,7 +190,15 @@
 - (void)addRepository:(NSURL *)sourceURL {
 	NSLog(@"[AUPM] Adding %@ to database", sourceURL);
 	AUPMRepoManager *repoManager = [[AUPMRepoManager alloc] init];
-	[repoManager addSource:sourceURL];
+	[repoManager addSource:sourceURL completion:^(BOOL success) {
+		if (success) {
+			AUPMRefreshViewController *refreshViewController = [[AUPMRefreshViewController alloc] init];
+			[self presentViewController:refreshViewController animated:true completion:nil];
+		}
+		else {
+			NSLog(@"[AUPM] Failed to add repo");
+		}
+	}];
 }
 
 @end

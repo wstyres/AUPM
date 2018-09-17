@@ -167,7 +167,7 @@ NSArray *packages_to_array(const char *path);
     return (NSArray *)[self cleanUpDuplicatePackages:packageListForRepo];
 }
 
-- (void)addSource:(NSURL *)sourceURL {
+- (void)addSource:(NSURL *)sourceURL completion:(void (^)(BOOL success))completion {
   NSString *URL = [sourceURL absoluteString];
   NSString *output = @"";
 
@@ -194,6 +194,7 @@ NSArray *packages_to_array(const char *path);
   [output writeToFile:filePath atomically:TRUE encoding:NSUTF8StringEncoding error:&error];
   if (error != NULL) {
     NSLog(@"[AUPM] Error while writing sources to file: %@", error);
+    completion(false);
   }
   else {
     NSTask *updateListTask = [[NSTask alloc] init];
@@ -203,6 +204,8 @@ NSArray *packages_to_array(const char *path);
 
     [updateListTask launch];
     [updateListTask waitUntilExit];
+
+    completion(true);
   }
 }
 
@@ -255,10 +258,10 @@ NSArray *packages_to_array(const char *path);
     [deleteReleaseCache setArguments:arguments];
 
     [deleteReleaseCache launch];
-  }
 
-  AUPMDatabaseManager *databaseManager = ((AUPMAppDelegate *)[[UIApplication sharedApplication] delegate]).databaseManager;
-  [databaseManager deleteRepo:delRepo];
+    AUPMDatabaseManager *databaseManager = ((AUPMAppDelegate *)[[UIApplication sharedApplication] delegate]).databaseManager;
+    [databaseManager deleteRepo:delRepo];
+  }
 }
 
 @end
