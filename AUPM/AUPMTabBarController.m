@@ -24,20 +24,40 @@
 
   self.viewControllers = [NSArray arrayWithObjects:reposNavController, packagesNavController, debugNavController, nil];
 
-  [self performBackgroundRefresh];
+  [self performBackgroundRefresh:false];
 }
 
-- (void)performBackgroundRefresh {
-  dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void){
-    UINavigationController *sourcesController = self.viewControllers[0];
-    [sourcesController tabBarItem].badgeValue = @"⏳";
-    AUPMDatabaseManager *databaseManager = ((AUPMAppDelegate *)[[UIApplication sharedApplication] delegate]).databaseManager;
-    [databaseManager updatePopulation:^(BOOL success) {
-      dispatch_async(dispatch_get_main_queue(), ^{
-        [sourcesController tabBarItem].badgeValue = nil;
-      });
-    }];
-  });
+- (void)performBackgroundRefresh:(BOOL)requested {
+  BOOL timePassed;
+
+  if (!requested) {
+    NSDate *currentDate = [NSDate date];
+    NSDate *lastUpdatedDate = (NSDate *)[[NSUserDefaults standardUserDefaults] objectForKey:@"lastUpdatedDate"];
+
+    if (lastUpdatedDate != nil) {
+      NSCalendar *gregorian = [[NSCalendar alloc] initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
+      NSUInteger unitFlags = NSCalendarUnitMinute;
+      NSDateComponents *components = [gregorian components:unitFlags fromDate:lastUpdatedDate toDate:currentDate options:0];
+
+      timePassed = ([components minute] >= 30); //might need to be less
+    }
+    else {
+      timePassed = true;
+    }
+  }
+
+  if (requested || timePassed) {
+    dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void){
+      UINavigationController *sourcesController = self.viewControllers[0];
+      [sourcesController tabBarItem].badgeValue = @"⏳";
+      AUPMDatabaseManager *databaseManager = ((AUPMAppDelegate *)[[UIApplication sharedApplication] delegate]).databaseManager;
+      [databaseManager updatePopulation:^(BOOL success) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+          [sourcesController tabBarItem].badgeValue = nil;
+        });
+      }];
+    });
+  }
 }
 
 @end

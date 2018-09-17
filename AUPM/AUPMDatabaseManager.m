@@ -59,6 +59,8 @@ bool packages_file_changed(FILE* f1, FILE* f2);
   }
 
   //dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
+  NSDate *newUpdateDate = [NSDate date];
+  [[NSUserDefaults standardUserDefaults] setObject:newUpdateDate forKey:@"lastUpdatedDate"];
 
   //Cache installed packages
   [self populateInstalledDatabase:^(BOOL success) {
@@ -118,6 +120,8 @@ bool packages_file_changed(FILE* f1, FILE* f2);
   }
 
   //dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
+  NSDate *newUpdateDate = [NSDate date];
+  [[NSUserDefaults standardUserDefaults] setObject:newUpdateDate forKey:@"lastUpdatedDate"];
 
   //Cache installed packages
   [self populateInstalledDatabase:^(BOOL success) {

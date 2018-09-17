@@ -53,7 +53,7 @@
 
 - (void)refreshPackages {
 	AUPMTabBarController *tabController = (AUPMTabBarController *)self.tabBarController;
-	[tabController performBackgroundRefresh];
+	[tabController performBackgroundRefresh:true];
 }
 
 #pragma mark - Table View Data Source
