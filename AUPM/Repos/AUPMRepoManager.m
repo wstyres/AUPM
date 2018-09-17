@@ -3,6 +3,7 @@
 #import "../Packages/AUPMPackage.h"
 #include "dpkgver.c"
 #import "../AUPMDatabaseManager.h"
+#import "../AUPMAppDelegate.h"
 
 @interface AUPMRepoManager ()
     @property (nonatomic, retain) NSMutableArray *repos;
@@ -201,46 +202,57 @@ NSArray *packages_to_array(const char *path);
 //     }
 // }
 //
-// - (void)deleteSource:(AUPMRepo *)delRepo {
-//     NSString *output = @"";
-//     for (AUPMRepo *repo in _repos) {
-//         if ([[delRepo repoBaseFileName] isEqual:[repo repoBaseFileName]]) {
-//             [_repos removeObject:repo];
-//         }
-//         else {
-//             if ([repo defaultRepo]) {
-//                 if ([[repo repoName] isEqual:@"Cydia/Telesphoreo"]) {
-//                     output = [output stringByAppendingFormat:@"deb http://apt.saurik.com/ ios/%.2f main\n",kCFCoreFoundationVersionNumber];
-//                 }
-//                 else {
-//                     output = [output stringByAppendingFormat:@"deb %@ %@ %@\n", [repo repoURL], [repo suite], [repo components]];
-//                 }
-//             }
-//             else {
-//                 output = [output stringByAppendingFormat:@"deb %@ ./\n", [repo repoURL]];
-//             }
-//         }
-//     }
-//
-//     NSError *error;
-//     [output writeToFile:@"/var/mobile/Library/Caches/com.xtm3x.aupm/newsources.list" atomically:TRUE encoding:NSUTF8StringEncoding error:&error];
-//     if (error != NULL) {
-//         HBLogError(@"Error while writing sources to file: %@", error);
-//     }
-//     else {
-//         NSTask *updateListTask = [[NSTask alloc] init];
-//         [updateListTask setLaunchPath:@"/Applications/AUPM.app/supersling"];
-//         NSArray *updateArgs = [[NSArray alloc] initWithObjects:@"cp", @"/var/mobile/Library/Caches/com.xtm3x.aupm/newsources.list", @"/etc/apt/sources.list.d/cydia.list", nil];
-//         [updateListTask setArguments:updateArgs];
-//
-//         [updateListTask launch];
-//         [updateListTask waitUntilExit];
-//     }
-//
-//     AUPMDatabaseManager *databaseManager = [[AUPMDatabaseManager alloc] init];
-// 	  sqlite3 *database = [databaseManager database];
-//     [databaseManager deleteRepo:delRepo fromDatabase:database];
-//     sqlite3_close(database);
-// }
+- (void)deleteSource:(AUPMRepo *)delRepo {
+  NSString *output = @"";
+  for (AUPMRepo *repo in _repos) {
+    if ([[delRepo repoBaseFileName] isEqual:[repo repoBaseFileName]]) {
+      [_repos removeObject:repo];
+    }
+    else {
+      if ([repo defaultRepo]) {
+        if ([[repo repoName] isEqual:@"Cydia/Telesphoreo"]) {
+          output = [output stringByAppendingFormat:@"deb http://apt.saurik.com/ ios/%.2f main\n",kCFCoreFoundationVersionNumber];
+        }
+        else {
+          output = [output stringByAppendingFormat:@"deb %@ %@ %@\n", [repo repoURL], [repo suite], [repo components]];
+        }
+      }
+      else {
+        output = [output stringByAppendingFormat:@"deb %@ ./\n", [repo repoURL]];
+      }
+    }
+  }
+
+  NSArray *searchPaths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+  NSString *documentPath = [searchPaths objectAtIndex:0];
+  NSString *filePath = [documentPath stringByAppendingString:@"aupm.list"];
+
+  NSError *error;
+  [output writeToFile:filePath atomically:TRUE encoding:NSUTF8StringEncoding error:&error];
+  if (error != NULL) {
+    NSLog(@"[AUPM] Error while writing sources to file: %@", error);
+  }
+  else {
+    NSTask *updateListTask = [[NSTask alloc] init];
+    [updateListTask setLaunchPath:@"/Applications/AUPM.app/supersling"];
+    NSArray *updateArgs = [[NSArray alloc] initWithObjects:@"cp", filePath, @"/var/lib/aupm/aupm.list", nil];
+    [updateListTask setArguments:updateArgs];
+
+    [updateListTask launch];
+    [updateListTask waitUntilExit];
+
+    NSTask *deleteCacheTask = [[NSTask alloc] init];
+    [deleteCacheTask setLaunchPath:@"/Applications/AUPM.app/supersling"];
+    NSArray *arguments = [[NSArray alloc] initWithObjects: @"rm", @"-rf", [NSString stringWithFormat:@"/var/mobile/Library/Caches/xyz.willy.aupm/lists/%@*", [delRepo repoBaseFileName]], nil];
+    // apt-get update -o Dir::Etc::SourceList "/etc/apt/sources.list.d/aupm.list" -o Dir::State::Lists "/var/lib/aupm/lists"
+    [deleteCacheTask setArguments:arguments];
+
+    [deleteCacheTask launch];
+    [deleteCacheTask waitUntilExit];
+  }
+
+  AUPMDatabaseManager *databaseManager = ((AUPMAppDelegate *)[[UIApplication sharedApplication] delegate]).databaseManager;
+  [databaseManager deleteRepo:delRepo];
+}
 
 @end

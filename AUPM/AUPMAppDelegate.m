@@ -3,6 +3,8 @@
 #import "Packages/AUPMPackageListViewController.h"
 #import "AUPMRefreshViewController.h"
 #import "AUPMDatabaseManager.h"
+#import "AUPMTabBarController.h"
+#import <Realm/Realm.h>
 
 @implementation AUPMAppDelegate
 
@@ -12,15 +14,20 @@
 
 	self.databaseManager = [[AUPMDatabaseManager alloc] init];
 
-	if ([[NSUserDefaults standardUserDefaults] boolForKey:@"firstSetupComplete"]) {
-		AUPMRefreshViewController *refreshViewController = [[AUPMRefreshViewController alloc] initWithAction:1];
+	RLMRealmConfiguration *realmConfig = [[RLMRealm defaultRealm] configuration];
+	NSFileManager *fileManager = [NSFileManager defaultManager];
+	NSString *realmPath = realmConfig.fileURL.absoluteString;
+	NSLog(@"[AUPM] Realm Path: %@", realmPath);
+
+	if ([fileManager fileExistsAtPath:realmPath]) {
+		AUPMRefreshViewController *refreshViewController = [[AUPMRefreshViewController alloc] init];
 
 		self.window.rootViewController = refreshViewController;
 	}
 	else {
-		AUPMRefreshViewController *refreshViewController = [[AUPMRefreshViewController alloc] init];
+		AUPMTabBarController *tabBarController = [[AUPMTabBarController alloc] init];
 
-		self.window.rootViewController = refreshViewController;
+		self.window.rootViewController = tabBarController;
 	}
 
 	[self.window makeKeyAndVisible];
