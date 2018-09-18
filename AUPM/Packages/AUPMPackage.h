@@ -13,5 +13,6 @@
 @property NSString *versionidentifier;
 @property BOOL installed;
 @property AUPMRepo *repo;
+@property NSDate *updated;
 @end
 RLM_ARRAY_TYPE(AUPMPackage)
