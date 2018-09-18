@@ -164,7 +164,11 @@ NSArray *packages_to_array(const char *path);
     NSTimeInterval executionTime = [methodFinish timeIntervalSinceDate:methodStart];
     NSLog(@"[AUPM] Time to parse %@ package files: %f seconds", [repo repoName], executionTime);
 
-    return (NSArray *)[self cleanUpDuplicatePackages:packageListForRepo];
+    NSArray *cleanedArray = (NSArray *)[self cleanUpDuplicatePackages:packageListForRepo];
+    NSSortDescriptor *sortByPackageName = [NSSortDescriptor sortDescriptorWithKey:@"packageName" ascending:YES];
+    NSArray *sortDescriptors = [NSArray arrayWithObject:sortByPackageName];
+
+    return [cleanedArray sortedArrayUsingDescriptors:sortDescriptors];
 }
 
 - (void)addSource:(NSURL *)sourceURL completion:(void (^)(BOOL success))completion {
