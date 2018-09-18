@@ -2,3 +2,4 @@
 .DS_Store
 .theos/
 obj
+.atom-build.yml

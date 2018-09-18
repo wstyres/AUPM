@@ -39,6 +39,7 @@ bool packages_file_changed(FILE* f1, FILE* f2);
       NSArray<AUPMPackage *> *packagesArray = [repoManager packageListForRepo:repo];
       for (AUPMPackage *package in packagesArray) {
         package.repo = repo;
+        package.updated = methodStart;
         [repo.packages addObject:package];
       }
       [realm beginWriteTransaction];
@@ -119,8 +120,16 @@ bool packages_file_changed(FILE* f1, FILE* f2);
     //});
   }
 
-  //dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
+  //Use this to give new packages new dates, this is pretty bad implementation but it works (probably)
+  RLMResults *dateless = [AUPMPackage objectsWhere:@"updated == NULL"];
   NSDate *newUpdateDate = [NSDate date];
+  for (AUPMPackage *package in dateless) {
+    [realm beginWriteTransaction];
+    package.updated = newUpdateDate;
+    [realm commitWriteTransaction];
+  }
+
+  //dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
   [[NSUserDefaults standardUserDefaults] setObject:newUpdateDate forKey:@"lastUpdatedDate"];
 
   //Cache installed packages

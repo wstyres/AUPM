@@ -76,7 +76,10 @@
 	}
 
 	cell.textLabel.text = [package packageName];
-	cell.detailTextLabel.text = [NSString stringWithFormat:@"%@ (%@)", [package packageIdentifier], [package version]];
+
+	NSString *dateString = [NSDateFormatter localizedStringFromDate:[package updated] dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterFullStyle];
+
+	cell.detailTextLabel.text = dateString;//[NSString stringWithFormat:@"%@ (%@)", [package packageIdentifier], [package version]];
 
 	CGSize itemSize = CGSizeMake(35, 35);
   UIGraphicsBeginImageContextWithOptions(itemSize, NO, UIScreen.mainScreen.scale);

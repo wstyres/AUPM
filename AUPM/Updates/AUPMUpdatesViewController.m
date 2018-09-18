@@ -4,63 +4,102 @@
 #import "../AUPMTabBarController.h"
 
 @interface AUPMUpdatesViewController ()
-@property (nonatomic, strong) RLMResults *objects;
+@property (nonatomic, strong) RLMResults<AUPMPackage *> *objects;
 @property (nonatomic, strong) RLMNotificationToken *notification;
+@property (nonatomic, strong) NSArray<NSArray <AUPMPackage *> *> *packages;
 @end
 
 @implementation AUPMUpdatesViewController
 
 - (void)viewDidLoad {
 	[super viewDidLoad];
-	self.objects = [[AUPMPackage allObjects] sortedResultsUsingKeyPath:@"updated" ascending:YES];
+	self.objects = [[AUPMPackage allObjects] sortedResultsUsingKeyPath:@"updated" ascending:false];
 	[self setupUI];
+	self.packages = [self sortPackages];
 
-	__weak AUPMUpdatesViewController *weakSelf = self;
-	self.notification = [self.objects addNotificationBlock:^(RLMResults *data, RLMCollectionChange *changes, NSError *error) {
-		if (error) {
-			NSLog(@"[AUPM] Failed to open Realm on background worker: %@", error);
-			return;
+	// __weak AUPMUpdatesViewController *weakSelf = self;
+	// self.notification = [self.objects addNotificationBlock:^(RLMResults *data, RLMCollectionChange *changes, NSError *error) {
+	// 	if (error) {
+	// 		NSLog(@"[AUPM] Failed to open Realm on background worker: %@", error);
+	// 		return;
+	// 	}
+	//
+	// 	UITableView *tv = weakSelf.tableView;
+	// 	if (!changes) {
+	// 		[tv reloadData];
+	// 		return;
+	// 	}
+	//
+	// 	[tv beginUpdates];
+	// 	[tv deleteRowsAtIndexPaths:[changes deletionsInSection:0] withRowAnimation:UITableViewRowAnimationAutomatic];
+	// 	[tv insertRowsAtIndexPaths:[changes insertionsInSection:0] withRowAnimation:UITableViewRowAnimationAutomatic];
+	// 	[tv reloadRowsAtIndexPaths:[changes modificationsInSection:0] withRowAnimation:UITableViewRowAnimationAutomatic];
+	// 	[tv endUpdates];
+	// }];
+}
+
+- (NSArray *)sortPackages { //This is super slow, probably going to do something with realm along the lines of AUPMDateKeeper in the future
+	NSLog(@"[AUPM] Trying to sort...");
+	NSDate *lastDate = self.objects.firstObject.updated;
+	NSMutableArray *lastGroup = [NSMutableArray<AUPMPackage *> new];
+	NSMutableArray *groups = [NSMutableArray<NSMutableArray<AUPMPackage *> *> new];
+
+	for (AUPMPackage *package in self.objects) {
+		NSDate *packageDate = package.updated;
+
+    NSCalendar *gregorian = [[NSCalendar alloc] initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
+    NSUInteger unitFlags = NSCalendarUnitMinute;
+    NSDateComponents *components = [gregorian components:unitFlags fromDate:packageDate toDate:lastDate options:0];
+
+		if ([components minute] > 5) {
+			lastDate = packageDate;
+			[groups addObject:lastGroup];
+			NSMutableArray *newGroup = [NSMutableArray new];
+			[newGroup addObject:package];
+			lastGroup = newGroup;
 		}
-
-		UITableView *tv = weakSelf.tableView;
-		if (!changes) {
-			[tv reloadData];
-			return;
+		else {
+			[lastGroup addObject:package];
 		}
+	}
+	[groups addObject:lastGroup];
 
-		[tv beginUpdates];
-		[tv deleteRowsAtIndexPaths:[changes deletionsInSection:0] withRowAnimation:UITableViewRowAnimationAutomatic];
-		[tv insertRowsAtIndexPaths:[changes insertionsInSection:0] withRowAnimation:UITableViewRowAnimationAutomatic];
-		[tv reloadRowsAtIndexPaths:[changes modificationsInSection:0] withRowAnimation:UITableViewRowAnimationAutomatic];
-		[tv endUpdates];
-	}];
+	return (NSArray *)groups;
 }
 
 - (void)setupUI {
 	self.title = @"Updates";
+
 	UIBarButtonItem *refreshItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(refreshPackages)];
 	self.navigationItem.rightBarButtonItem = refreshItem;
 }
 
 - (void)refreshPackages {
-	AUPMTabBarController *tabController = (AUPMTabBarController *)self.tabBarController;
-	[tabController performBackgroundRefresh:true];
+	// AUPMTabBarController *tabController = (AUPMTabBarController *)self.tabBarController;
+	// [tabController performBackgroundRefresh:true];
+	[self.tableView reloadData];
 }
 
 #pragma mark - Table View Data Source
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-	return 1;
+	return self.packages.count;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-	return _objects.count;
+	return self.packages[section].count;
+}
+
+- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
+	NSDate *date = self.packages[section].firstObject.updated;
+	NSString *dateString = [NSDateFormatter localizedStringFromDate:date dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterShortStyle];
+	return dateString;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
 	static NSString *identifier = @"UpdatesTableViewCell";
 	UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:identifier];
-	AUPMPackage *package = _objects[indexPath.row];
+	AUPMPackage *package = self.packages[indexPath.section][indexPath.row];
 
 	if (!cell) {
 		cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:identifier];
