@@ -79,6 +79,14 @@ bool packages_file_changed(FILE* f1, FILE* f2);
 - (void)updatePopulation:(void (^)(BOOL success))completion {
   HBLogInfo(@"Performing partial database population...");
 
+  NSTask *removeCachetask = [[NSTask alloc] init];
+  [removeCachetask setLaunchPath:@"/Applications/AUPM.app/supersling"];
+  NSArray *rmArgs = [[NSArray alloc] initWithObjects: @"rm", @"-rf", @"/var/mobile/Library/Caches/xyz.willy.aupm/lists", nil];
+  [removeCachetask setArguments:rmArgs];
+
+  [removeCachetask launch];
+  [removeCachetask waitUntilExit];
+
   NSTask *cpTask = [[NSTask alloc] init];
   [cpTask setLaunchPath:@"/Applications/AUPM.app/supersling"];
   NSArray *cpArgs = [[NSArray alloc] initWithObjects: @"cp", @"-fR", @"/var/lib/aupm/lists", @"/var/mobile/Library/Caches/xyz.willy.aupm/", nil];
