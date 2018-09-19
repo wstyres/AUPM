@@ -2,20 +2,29 @@
 #import "../Packages/AUPMPackage.h"
 #import "../Packages/AUPMPackageViewController.h"
 #import "../AUPMTabBarController.h"
+#import <Realm/Realm.h>
+#import "AUPMDateKeeper.h"
 
 @interface AUPMUpdatesViewController ()
-@property (nonatomic, strong) RLMResults<AUPMPackage *> *objects;
+@property (nonatomic, strong) NSArray<NSArray<AUPMPackage *> *> *objects;
+@property (nonatomic, strong) RLMResults<AUPMDateKeeper *> *sectionTitles;
 @property (nonatomic, strong) RLMNotificationToken *notification;
-@property (nonatomic, strong) NSArray<NSArray <AUPMPackage *> *> *packages;
 @end
 
 @implementation AUPMUpdatesViewController
 
 - (void)viewDidLoad {
 	[super viewDidLoad];
-	self.objects = [[AUPMPackage allObjects] sortedResultsUsingKeyPath:@"updated" ascending:false];
+	self.sectionTitles = [AUPMDateKeeper allObjects];
+
+	RLMResults<AUPMPackage *> *allPackages = [AUPMPackage allObjects];
+	NSMutableArray *sortedObjects = [NSMutableArray new];
+	for (AUPMDateKeeper *dateKeeper in _sectionTitles) {
+		[sortedObjects insertObject:[allPackages objectsWhere:@"dateKeeper == %@", dateKeeper] atIndex:0];
+	}
+	self.objects = sortedObjects;
+
 	[self setupUI];
-	self.packages = [self sortPackages];
 
 	// __weak AUPMUpdatesViewController *weakSelf = self;
 	// self.notification = [self.objects addNotificationBlock:^(RLMResults *data, RLMCollectionChange *changes, NSError *error) {
@@ -38,35 +47,6 @@
 	// }];
 }
 
-- (NSArray *)sortPackages { //This is super slow, probably going to do something with realm along the lines of AUPMDateKeeper in the future
-	NSLog(@"[AUPM] Trying to sort...");
-	NSDate *lastDate = self.objects.firstObject.updated;
-	NSMutableArray *lastGroup = [NSMutableArray<AUPMPackage *> new];
-	NSMutableArray *groups = [NSMutableArray<NSMutableArray<AUPMPackage *> *> new];
-
-	for (AUPMPackage *package in self.objects) {
-		NSDate *packageDate = package.updated;
-
-    NSCalendar *gregorian = [[NSCalendar alloc] initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
-    NSUInteger unitFlags = NSCalendarUnitMinute;
-    NSDateComponents *components = [gregorian components:unitFlags fromDate:packageDate toDate:lastDate options:0];
-
-		if ([components minute] > 5) {
-			lastDate = packageDate;
-			[groups addObject:lastGroup];
-			NSMutableArray *newGroup = [NSMutableArray new];
-			[newGroup addObject:package];
-			lastGroup = newGroup;
-		}
-		else {
-			[lastGroup addObject:package];
-		}
-	}
-	[groups addObject:lastGroup];
-
-	return (NSArray *)groups;
-}
-
 - (void)setupUI {
 	self.title = @"Updates";
 
@@ -83,23 +63,23 @@
 #pragma mark - Table View Data Source
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-	return self.packages.count;
+	return self.sectionTitles.count;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-	return self.packages[section].count;
+	return self.objects[section].count;
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
-	NSDate *date = self.packages[section].firstObject.updated;
+	NSDate *date = self.sectionTitles[section].date;
 	NSString *dateString = [NSDateFormatter localizedStringFromDate:date dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterShortStyle];
-	return dateString;
+	return [@"Updated at " stringByAppendingString:dateString];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
 	static NSString *identifier = @"UpdatesTableViewCell";
 	UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:identifier];
-	AUPMPackage *package = self.packages[indexPath.section][indexPath.row];
+	AUPMPackage *package = self.objects[indexPath.section][indexPath.row];
 
 	if (!cell) {
 		cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:identifier];
@@ -142,7 +122,7 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 	[tableView deselectRowAtIndexPath:indexPath animated:YES];
-	AUPMPackage *package = _objects[indexPath.row];
+	AUPMPackage *package = self.objects[indexPath.section][indexPath.row];
 	AUPMPackageViewController *packageVC = [[AUPMPackageViewController alloc] initWithPackage:package];
   [self.navigationController pushViewController:packageVC animated:YES];
 }

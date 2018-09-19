@@ -1,6 +1,7 @@
 #import <Realm/Realm.h>
 
 @class AUPMRepo;
+@class AUPMDateKeeper;
 @protocol AUPMRepo;
 
 @interface AUPMPackage : RLMObject
@@ -13,6 +14,6 @@
 @property NSString *versionidentifier;
 @property BOOL installed;
 @property AUPMRepo *repo;
-@property NSDate *updated;
+@property AUPMDateKeeper *dateKeeper;
 @end
 RLM_ARRAY_TYPE(AUPMPackage)

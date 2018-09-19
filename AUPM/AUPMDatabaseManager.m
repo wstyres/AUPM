@@ -4,6 +4,7 @@
 #import "Repos/AUPMRepo.h"
 #import "Packages/AUPMPackage.h"
 #import "Packages/AUPMPackageManager.h"
+#import "Updates/AUPMDateKeeper.h"
 
 @implementation AUPMDatabaseManager
 
@@ -33,13 +34,15 @@ bool packages_file_changed(FILE* f1, FILE* f2);
 
   AUPMRepoManager *repoManager = [[AUPMRepoManager alloc] init];
   NSArray *repoArray = [repoManager managedRepoList];
+  AUPMDateKeeper *dateKeeper = [[AUPMDateKeeper alloc] init];
+  dateKeeper.date = [NSDate date];
   for (AUPMRepo *repo in repoArray) {
     //dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^ {
       NSDate *methodStart = [NSDate date];
       NSArray<AUPMPackage *> *packagesArray = [repoManager packageListForRepo:repo];
       for (AUPMPackage *package in packagesArray) {
         package.repo = repo;
-        package.updated = methodStart;
+        package.dateKeeper = dateKeeper;
         [repo.packages addObject:package];
       }
       [realm beginWriteTransaction];
@@ -58,6 +61,10 @@ bool packages_file_changed(FILE* f1, FILE* f2);
       NSLog(@"[AUPM] Time to add %@ to database: %f seconds", [repo repoName], executionTime);
     //});
   }
+
+  [realm beginWriteTransaction];
+  [realm addObject:dateKeeper];
+  [realm commitWriteTransaction];
 
   //dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
   NSDate *newUpdateDate = [NSDate date];
@@ -109,7 +116,7 @@ bool packages_file_changed(FILE* f1, FILE* f2);
         [realm addOrUpdateObject:repo];
       }
       @catch (NSException *e) {
-        NSLog(@"[AUPM] Could not add object to realm: %@", e);
+        NSLog(@"[AUPM] Could not add %@ to realm: %@", [repo repoName], e);
       }
 
       [realm commitWriteTransaction];
@@ -120,12 +127,14 @@ bool packages_file_changed(FILE* f1, FILE* f2);
     //});
   }
 
-  //Use this to give new packages new dates, this is pretty bad implementation but it works (probably)
-  RLMResults *dateless = [AUPMPackage objectsWhere:@"updated == NULL"];
+  // //Use this to give new packages new dates, this is pretty bad implementation but it works (probably)
+  RLMResults *dateless = [AUPMPackage objectsWhere:@"dateKeeper == NULL"];
   NSDate *newUpdateDate = [NSDate date];
+  AUPMDateKeeper *dateKeeper = [[AUPMDateKeeper alloc] init];
+  dateKeeper.date = newUpdateDate;
   for (AUPMPackage *package in dateless) {
     [realm beginWriteTransaction];
-    package.updated = newUpdateDate;
+    package.dateKeeper = dateKeeper;
     [realm commitWriteTransaction];
   }
 
