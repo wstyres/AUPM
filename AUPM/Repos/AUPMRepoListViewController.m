@@ -100,6 +100,12 @@
 }
 
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
+	AUPMRepo *repo = _objects[indexPath.row];
+	if ([[repo repoName] isEqual:@"xTM3x Repo"])
+	{
+		return NO;
+	}
+
 	return YES;
 }
 
