@@ -41,7 +41,13 @@ NSArray *packages_to_array(const char *path);
     for (NSString *path in listOfFiles) {
         if (([path rangeOfString:@"Release"].location != NSNotFound) && ([path rangeOfString:@".gpg"].location == NSNotFound)) {
             NSString *fullPath = [NSString stringWithFormat:@"/var/lib/aupm/lists/%@", path];
-            NSString *content = [NSString stringWithContentsOfFile:fullPath encoding:NSUTF8StringEncoding error:NULL];
+            NSError *readError;
+            NSString *content = [NSString stringWithContentsOfFile:fullPath encoding:NSUTF8StringEncoding error:&readError];
+
+            if (readError != nil)
+            {
+              NSLog(@"[AUPM] Error while reading repo: %@", readError);
+            }
 
             NSString *trimmedString = [content stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
             NSArray *keyValuePairs = [trimmedString componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
