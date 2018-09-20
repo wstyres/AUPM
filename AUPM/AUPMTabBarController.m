@@ -1,5 +1,6 @@
 #import "AUPMTabBarController.h"
 #import "Repos/AUPMRepoListViewController.h"
+#import "Updates/AUPMUpdatesViewController.h"
 #import "Packages/AUPMPackageListViewController.h"
 #import "AUPMDebugViewController.h"
 #import "AUPMDatabaseManager.h"
@@ -14,6 +15,10 @@
   UITabBarItem *repoIcon = [[UITabBarItem alloc] initWithTitle:@"Sources" image:[UIImage imageNamed:@"sources.png"] selectedImage:[UIImage imageNamed:@"sources-filled.png"]];
   [reposNavController setTabBarItem:repoIcon];
 
+  UINavigationController *updatesNavController = [[UINavigationController alloc] initWithRootViewController:[[AUPMUpdatesViewController alloc] init]];
+  UITabBarItem *updatesIcon = [[UITabBarItem alloc] initWithTitle:@"Updates" image:[UIImage imageNamed:@"updates.png"] selectedImage:[UIImage imageNamed:@"updates-filled.png"]];
+  [updatesNavController setTabBarItem:updatesIcon];
+
   UINavigationController *packagesNavController = [[UINavigationController alloc] initWithRootViewController:[[AUPMPackageListViewController alloc] init]];
   UITabBarItem *packageIcon = [[UITabBarItem alloc] initWithTitle:@"Packages" image:[UIImage imageNamed:@"installed.png"] selectedImage:[UIImage imageNamed:@"installed-filled.png"]];
   [packagesNavController setTabBarItem:packageIcon];
@@ -22,7 +27,7 @@
   UITabBarItem *debugIcon = [[UITabBarItem alloc] initWithTitle:@"Nuke" image:[UIImage imageNamed:@"debug.png"] selectedImage:[UIImage imageNamed:@"debug-filled.png"]];
   [debugNavController setTabBarItem:debugIcon];
 
-  self.viewControllers = [NSArray arrayWithObjects:reposNavController, packagesNavController, debugNavController, nil];
+  self.viewControllers = [NSArray arrayWithObjects:reposNavController, updatesNavController, packagesNavController, debugNavController, nil];
 
   [self performBackgroundRefresh:false];
 }

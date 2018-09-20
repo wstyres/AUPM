@@ -100,6 +100,11 @@
 }
 
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
+	AUPMRepo *repo = _objects[indexPath.row];
+	if ([[repo repoName] isEqual:@"xTM3x Repo"]) {
+		return NO;
+	}
+
 	return YES;
 }
 
@@ -192,7 +197,7 @@
 	AUPMRepoManager *repoManager = [[AUPMRepoManager alloc] init];
 	[repoManager addSource:sourceURL completion:^(BOOL success) {
 		if (success) {
-			AUPMRefreshViewController *refreshViewController = [[AUPMRefreshViewController alloc] init];
+			AUPMRefreshViewController *refreshViewController = [[AUPMRefreshViewController alloc] initWithAction:1];
 			[self presentViewController:refreshViewController animated:true completion:nil];
 		}
 		else {

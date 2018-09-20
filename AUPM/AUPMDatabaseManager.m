@@ -4,6 +4,7 @@
 #import "Repos/AUPMRepo.h"
 #import "Packages/AUPMPackage.h"
 #import "Packages/AUPMPackageManager.h"
+#import "Updates/AUPMDateKeeper.h"
 
 @implementation AUPMDatabaseManager
 
@@ -33,30 +34,32 @@ bool packages_file_changed(FILE* f1, FILE* f2);
 
   AUPMRepoManager *repoManager = [[AUPMRepoManager alloc] init];
   NSArray *repoArray = [repoManager managedRepoList];
-  for (AUPMRepo *repo in repoArray) {
-    //dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^ {
-      NSDate *methodStart = [NSDate date];
-      NSArray<AUPMPackage *> *packagesArray = [repoManager packageListForRepo:repo];
-      for (AUPMPackage *package in packagesArray) {
-        package.repo = repo;
-        [repo.packages addObject:package];
-      }
-      [realm beginWriteTransaction];
+  AUPMDateKeeper *dateKeeper = [[AUPMDateKeeper alloc] init];
+  dateKeeper.date = [NSDate date];
+  [[RLMRealm defaultRealm] transactionWithBlock:^{
+    for (AUPMRepo *repo in repoArray) {
+      //dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^ {
+        NSDate *methodStart = [NSDate date];
+        NSArray<AUPMPackage *> *packagesArray = [repoManager packageListForRepo:repo];
+        for (AUPMPackage *package in packagesArray) {
+          package.repo = repo;
+          package.dateKeeper = dateKeeper;
+          [repo.packages addObject:package];
+        }
 
-      @try {
-        [realm addObject:repo];
-      }
-      @catch (NSException *e) {
-        NSLog(@"[AUPM] Could not add object to realm: %@", e);
-      }
+        @try {
+          [realm addObject:repo];
+        }
+        @catch (NSException *e) {
+          NSLog(@"[AUPM] Could not add object to realm: %@", e);
+        }
 
-      [realm commitWriteTransaction];
-
-      NSDate *methodFinish = [NSDate date];
-      NSTimeInterval executionTime = [methodFinish timeIntervalSinceDate:methodStart];
-      NSLog(@"[AUPM] Time to add %@ to database: %f seconds", [repo repoName], executionTime);
-    //});
-  }
+        NSDate *methodFinish = [NSDate date];
+        NSTimeInterval executionTime = [methodFinish timeIntervalSinceDate:methodStart];
+        NSLog(@"[AUPM] Time to add %@ to database: %f seconds", [repo repoName], executionTime);
+      //});
+    }
+  }];
 
   //dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
   NSDate *newUpdateDate = [NSDate date];
@@ -70,6 +73,14 @@ bool packages_file_changed(FILE* f1, FILE* f2);
 
 - (void)updatePopulation:(void (^)(BOOL success))completion {
   HBLogInfo(@"Performing partial database population...");
+
+  NSTask *removeCachetask = [[NSTask alloc] init];
+  [removeCachetask setLaunchPath:@"/Applications/AUPM.app/supersling"];
+  NSArray *rmArgs = [[NSArray alloc] initWithObjects: @"rm", @"-rf", @"/var/mobile/Library/Caches/xyz.willy.aupm/lists", nil];
+  [removeCachetask setArguments:rmArgs];
+
+  [removeCachetask launch];
+  [removeCachetask waitUntilExit];
 
   NSTask *cpTask = [[NSTask alloc] init];
   [cpTask setLaunchPath:@"/Applications/AUPM.app/supersling"];
@@ -108,7 +119,7 @@ bool packages_file_changed(FILE* f1, FILE* f2);
         [realm addOrUpdateObject:repo];
       }
       @catch (NSException *e) {
-        NSLog(@"[AUPM] Could not add object to realm: %@", e);
+        NSLog(@"[AUPM] Could not add %@ to realm: %@", [repo repoName], e);
       }
 
       [realm commitWriteTransaction];
@@ -119,8 +130,23 @@ bool packages_file_changed(FILE* f1, FILE* f2);
     //});
   }
 
-  //dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
+  NSLog(@"[AUPM] Adding times to new packages");
+  // //Use this to give new packages new dates, this is pretty bad implementation but it works (probably)
+  NSLog(@"[AUPM] Getting list of packages with no date");
+  RLMResults *dateless = [AUPMPackage objectsWhere:@"dateKeeper == NULL"];
+  NSLog(@"[AUPM] Adding dates to packages");
   NSDate *newUpdateDate = [NSDate date];
+  [[RLMRealm defaultRealm] transactionWithBlock:^{
+    AUPMDateKeeper *dateKeeper = [[AUPMDateKeeper alloc] init];
+    dateKeeper.date = newUpdateDate;
+    for (AUPMPackage *package in dateless) {
+      package.dateKeeper = dateKeeper;
+    }
+  }];
+  NSLog(@"[AUPM] Done");
+  NSLog(@"[AUPM] Populating installed database");
+
+  //dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
   [[NSUserDefaults standardUserDefaults] setObject:newUpdateDate forKey:@"lastUpdatedDate"];
 
   //Cache installed packages
@@ -178,12 +204,12 @@ bool packages_file_changed(FILE* f1, FILE* f2);
   //(name text, packageid text, version text, section text, desc text, url text)
   HBLogInfo(@"Started to parse installed packages");
 
-  for (AUPMPackage *package in packagesArray) {
-    RLMRealm *realm = [RLMRealm defaultRealm];
-    [realm beginWriteTransaction];
-    [realm addOrUpdateObject:package];
-    [realm commitWriteTransaction];
-  }
+  [[RLMRealm defaultRealm] transactionWithBlock:^{
+    for (AUPMPackage *package in packagesArray) {
+      RLMRealm *realm = [RLMRealm defaultRealm];
+      [realm addOrUpdateObject:package];
+    }
+  }];
 
   completion(true);
 }
@@ -196,6 +222,10 @@ bool packages_file_changed(FILE* f1, FILE* f2);
   [realm beginWriteTransaction];
   [realm deleteObject:delRepo];
   [realm commitWriteTransaction];
+
+  [self populateInstalledDatabase:^(BOOL success) {
+    NSLog(@"[AUPM] Deleted repo");
+  }];
 }
 
 @end
