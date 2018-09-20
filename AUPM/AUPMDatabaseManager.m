@@ -222,6 +222,10 @@ bool packages_file_changed(FILE* f1, FILE* f2);
   [realm beginWriteTransaction];
   [realm deleteObject:delRepo];
   [realm commitWriteTransaction];
+
+  [self populateInstalledDatabase:^(BOOL success) {
+    NSLog(@"[AUPM] Deleted repo");
+  }];
 }
 
 @end
