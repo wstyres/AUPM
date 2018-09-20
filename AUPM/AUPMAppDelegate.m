@@ -4,6 +4,7 @@
 #import "AUPMRefreshViewController.h"
 #import "AUPMDatabaseManager.h"
 #import "AUPMTabBarController.h"
+#import "NSTask.h"
 #import <Realm/Realm.h>
 
 @implementation AUPMAppDelegate
@@ -15,6 +16,15 @@
 	self.databaseManager = [[AUPMDatabaseManager alloc] init];
 
 	if ([[RLMRealm defaultRealm] isEmpty]) {
+
+		NSTask *cpTask = [[NSTask alloc] init];
+	  [cpTask setLaunchPath:@"/Applications/AUPM.app/supersling"];
+	  NSArray *cpArgs = [[NSArray alloc] initWithObjects: @"cp", @"-fR", @"/var/lib/aupm/default.list", @"/var/lib/aupm/aupm.list", nil];
+	  [cpTask setArguments:cpArgs];
+
+	  [cpTask launch];
+	  [cpTask waitUntilExit];
+
 		AUPMRefreshViewController *refreshViewController = [[AUPMRefreshViewController alloc] init];
 
 		self.window.rootViewController = refreshViewController;
