@@ -11,6 +11,10 @@
 - (void)loadView {
   [super loadView];
 
+  UINavigationController *debugNavController = [[UINavigationController alloc] initWithRootViewController:[[AUPMDebugViewController alloc] init]];
+  UITabBarItem *debugIcon = [[UITabBarItem alloc] initWithTitle:@"Beta" image:[UIImage imageNamed:@"beta.png"] selectedImage:[UIImage imageNamed:@"beta-filled.png"]];
+  [debugNavController setTabBarItem:debugIcon];
+
   UINavigationController *reposNavController = [[UINavigationController alloc] initWithRootViewController:[[AUPMRepoListViewController alloc] init]];
   UITabBarItem *repoIcon = [[UITabBarItem alloc] initWithTitle:@"Sources" image:[UIImage imageNamed:@"sources.png"] selectedImage:[UIImage imageNamed:@"sources-filled.png"]];
   [reposNavController setTabBarItem:repoIcon];
@@ -22,10 +26,6 @@
   UINavigationController *packagesNavController = [[UINavigationController alloc] initWithRootViewController:[[AUPMPackageListViewController alloc] init]];
   UITabBarItem *packageIcon = [[UITabBarItem alloc] initWithTitle:@"Packages" image:[UIImage imageNamed:@"installed.png"] selectedImage:[UIImage imageNamed:@"installed-filled.png"]];
   [packagesNavController setTabBarItem:packageIcon];
-
-  UINavigationController *debugNavController = [[UINavigationController alloc] initWithRootViewController:[[AUPMDebugViewController alloc] init]];
-  UITabBarItem *debugIcon = [[UITabBarItem alloc] initWithTitle:@"Nuke" image:[UIImage imageNamed:@"debug.png"] selectedImage:[UIImage imageNamed:@"debug-filled.png"]];
-  [debugNavController setTabBarItem:debugIcon];
 
   self.viewControllers = [NSArray arrayWithObjects:reposNavController, updatesNavController, packagesNavController, debugNavController, nil];
 
