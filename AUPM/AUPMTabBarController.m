@@ -53,7 +53,7 @@
 
   if (requested || timePassed) {
     dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void){
-      UINavigationController *sourcesController = self.viewControllers[0];
+      UINavigationController *sourcesController = self.viewControllers[1];
       [sourcesController tabBarItem].badgeValue = @"⏳";
       AUPMDatabaseManager *databaseManager = ((AUPMAppDelegate *)[[UIApplication sharedApplication] delegate]).databaseManager;
       [databaseManager updatePopulation:^(BOOL success) {
