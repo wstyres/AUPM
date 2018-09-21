@@ -1,5 +1,7 @@
 #import "AUPMDebugViewController.h"
 #import "AUPMRefreshViewController.h"
+#import <Realm/Realm.h>
+#define aupmVersion @"1.0~beta1"
 
 @implementation AUPMDebugViewController {
   WKWebView *_webView;
@@ -40,7 +42,7 @@
 		HBLogError(@"Error reading file: %@", error);
 	}
 
-	NSString *html = [NSString stringWithFormat:rawDepiction, @"1.0~beta1"];
+	NSString *html = [NSString stringWithFormat:rawDepiction, aupmVersion];
 
 	return html;
 }
@@ -52,13 +54,17 @@
 }
 
 - (void)sendBugReport {
-  if ([MFMailComposeViewController canSendMail])
-  {
+  if ([MFMailComposeViewController canSendMail]) {
+    NSString *iosVersion = [NSString stringWithFormat:@"%@ running iOS %@", [[UIDevice currentDevice] model], [[UIDevice currentDevice] systemVersion]];
+    RLMRealmConfiguration *config = [[RLMRealm defaultRealm] configuration];
+    NSString *databaseLocation = [[config fileURL] absoluteString];
+    NSString *message = [NSString stringWithFormat:@"iOS Version: %@\nAUPM Version: %@\nAUPM Database Location: %@\n\nPlease describe the bug you are experiencing or feature you are requesting below: \n\n", iosVersion, aupmVersion, databaseLocation];
+
     MFMailComposeViewController *mail = [[MFMailComposeViewController alloc] init];
     mail.mailComposeDelegate = self;
-    [mail setSubject:@"AUPM Beta"];
-    [mail setMessageBody:@"" isHTML:NO];
-    [mail setToRecipients:@[@"wilson@styres.me"]];
+    [mail setSubject:@"AUPM Beta Bug Report"];
+    [mail setMessageBody:message isHTML:NO];
+    [mail setToRecipients:@[@"xtm3xyt@gmail.com"]];
 
     [self presentViewController:mail animated:YES completion:NULL];
   }
