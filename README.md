@@ -6,12 +6,13 @@ A Useless Package Manager for iOS.
 
 - [ ] Source Management
   - [x] List sources
-  - [ ] Ability to add/remove a source and have it show up in Cydia
-  - [ ] List packages from each source and search through the repo
-- [ ] Package Management
+  - [x] Ability to add/remove a source
+  - [x] List packages from each source
+   - [ ] Search through repo
+- [x] Package Management
   - [x] List installed packages
   - [x] Ability to install packages from a repository
-  - [ ] Ability to remove packages installed on the device
+  - [x] Ability to remove packages installed on the device
   - [ ] Ability to reinstall packages that are installed from a repository
   - [ ] Ability to downgrade a package from a repository if the repository provides a previous version
   - [x] View a packages depiction if one is available
@@ -19,6 +20,7 @@ A Useless Package Manager for iOS.
 - [ ] Search
   - [ ] Search through database for packages
 - [ ] Updates
+  - [x] Display updated packages in order by date
   - [ ] Display packages that have updates
 - [ ] Support for most modern iOS versions
 
