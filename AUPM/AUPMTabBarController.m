@@ -27,7 +27,7 @@
   UITabBarItem *packageIcon = [[UITabBarItem alloc] initWithTitle:@"Packages" image:[UIImage imageNamed:@"installed.png"] selectedImage:[UIImage imageNamed:@"installed-filled.png"]];
   [packagesNavController setTabBarItem:packageIcon];
 
-  self.viewControllers = [NSArray arrayWithObjects:reposNavController, updatesNavController, packagesNavController, debugNavController, nil];
+  self.viewControllers = [NSArray arrayWithObjects:debugNavController, reposNavController, updatesNavController, packagesNavController, nil];
 
   [self performBackgroundRefresh:false];
 }
