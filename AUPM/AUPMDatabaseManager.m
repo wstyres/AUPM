@@ -146,6 +146,13 @@ bool packages_file_changed(FILE* f1, FILE* f2);
   NSLog(@"[AUPM] Done");
   NSLog(@"[AUPM] Populating installed database");
 
+  NSTask *deletePackageCache = [[NSTask alloc] init];
+  [deletePackageCache setLaunchPath:@"/Applications/AUPM.app/supersling"];
+  NSArray *packageArgs = [[NSArray alloc] initWithObjects: @"rm", @"-rf", @"/var/mobile/Library/Caches/xyz.willy.aupm/lists", nil];
+  [deletePackageCache setArguments:packageArgs];
+
+  [deletePackageCache launch];
+
   //dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
   [[NSUserDefaults standardUserDefaults] setObject:newUpdateDate forKey:@"lastUpdatedDate"];
 
@@ -217,14 +224,25 @@ bool packages_file_changed(FILE* f1, FILE* f2);
 - (void)deleteRepo:(AUPMRepo *)repo {
   RLMRealm *realm = [RLMRealm defaultRealm];
 
+  RLMResults<AUPMPackage *> *packagesToDelete = [AUPMPackage objectsWhere:@"repo == %@", repo];
+
   AUPMRepo *delRepo = [[AUPMRepo objectsWhere:@"repoBaseFileName == %@", [repo repoBaseFileName]] firstObject];
 
   [realm beginWriteTransaction];
+  [realm deleteObjects:packagesToDelete];
   [realm deleteObject:delRepo];
   [realm commitWriteTransaction];
 
   [self populateInstalledDatabase:^(BOOL success) {
     NSLog(@"[AUPM] Deleted repo");
+    //quietly update so the old files get deleted
+    NSTask *task = [[NSTask alloc] init];
+    [task setLaunchPath:@"/Applications/AUPM.app/supersling"];
+    NSArray *arguments = [[NSArray alloc] initWithObjects: @"apt-get", @"update", @"-o", @"Dir::Etc::SourceList=/var/lib/aupm/aupm.list", @"-o", @"Dir::State::Lists=/var/lib/aupm/lists", @"-o", @"Dir::Etc::SourceParts=/var/lib/aupm/lists/partial/false", nil];
+    // apt-get update -o Dir::Etc::SourceList "/etc/apt/sources.list.d/aupm.list" -o Dir::State::Lists "/var/lib/aupm/lists"
+    [task setArguments:arguments];
+
+    [task launch];
   }];
 }
 

@@ -255,20 +255,6 @@ NSArray *packages_to_array(const char *path);
     [updateListTask launch];
     [updateListTask waitUntilExit];
 
-    NSTask *deletePackageCache = [[NSTask alloc] init];
-    [deletePackageCache setLaunchPath:@"/Applications/AUPM.app/supersling"];
-    NSArray *arguments = [[NSArray alloc] initWithObjects: @"rm", @"-rf", [NSString stringWithFormat:@"/var/mobile/Library/Caches/xyz.willy.aupm/lists/%@_Packages", [delRepo repoBaseFileName]], nil];
-    [deletePackageCache setArguments:arguments];
-
-    [deletePackageCache launch];
-
-    NSTask *deleteReleaseCache = [[NSTask alloc] init];
-    [deleteReleaseCache setLaunchPath:@"/Applications/AUPM.app/supersling"];
-    arguments = [[NSArray alloc] initWithObjects: @"rm", @"-rf", [NSString stringWithFormat:@"/var/mobile/Library/Caches/xyz.willy.aupm/lists/%@_Release", [delRepo repoBaseFileName]], nil];
-    [deleteReleaseCache setArguments:arguments];
-
-    [deleteReleaseCache launch];
-
     AUPMDatabaseManager *databaseManager = ((AUPMAppDelegate *)[[UIApplication sharedApplication] delegate]).databaseManager;
     [databaseManager deleteRepo:delRepo];
   }

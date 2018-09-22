@@ -20,7 +20,16 @@
 	RLMResults<AUPMPackage *> *allPackages = [AUPMPackage allObjects];
 	NSMutableArray *sortedObjects = [NSMutableArray new];
 	for (AUPMDateKeeper *dateKeeper in _sectionTitles) {
-		[sortedObjects insertObject:[allPackages objectsWhere:@"dateKeeper == %@", dateKeeper] atIndex:0];
+		RLMResults *results = [allPackages objectsWhere:@"dateKeeper == %@", dateKeeper];
+		if (results.count != 0) {
+			[sortedObjects insertObject:results atIndex:0];
+		}
+		else {
+			RLMRealm *realm = [RLMRealm defaultRealm];
+			[realm beginWriteTransaction];
+			[realm deleteObject:dateKeeper];
+			[realm commitWriteTransaction];
+		}
 	}
 	self.objects = sortedObjects;
 
@@ -53,7 +62,16 @@
 	RLMResults<AUPMPackage *> *allPackages = [AUPMPackage allObjects];
 	NSMutableArray *sortedObjects = [NSMutableArray new];
 	for (AUPMDateKeeper *dateKeeper in _sectionTitles) {
-		[sortedObjects insertObject:[allPackages objectsWhere:@"dateKeeper == %@", dateKeeper] atIndex:0];
+		RLMResults *results = [allPackages objectsWhere:@"dateKeeper == %@", dateKeeper];
+		if (results.count != 0) {
+			[sortedObjects insertObject:results atIndex:0];
+		}
+		else {
+			RLMRealm *realm = [RLMRealm defaultRealm];
+			[realm beginWriteTransaction];
+			[realm deleteObject:dateKeeper];
+			[realm commitWriteTransaction];
+		}
 	}
 	self.objects = sortedObjects;
 
