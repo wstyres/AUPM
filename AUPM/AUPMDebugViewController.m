@@ -64,7 +64,7 @@
     mail.mailComposeDelegate = self;
     [mail setSubject:@"AUPM Beta Bug Report"];
     [mail setMessageBody:message isHTML:NO];
-    [mail setToRecipients:@[@"xtm3xyt@gmail.com"]];
+    [mail setToRecipients:@[@"wilson@styres.me"]];
 
     [self presentViewController:mail animated:YES completion:NULL];
   }
