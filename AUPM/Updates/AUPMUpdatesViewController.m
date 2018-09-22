@@ -47,6 +47,25 @@
 	// }];
 }
 
+- (void)refreshTable {
+	self.sectionTitles = [AUPMDateKeeper allObjects];
+
+	RLMResults<AUPMPackage *> *allPackages = [AUPMPackage allObjects];
+	NSMutableArray *sortedObjects = [NSMutableArray new];
+	for (AUPMDateKeeper *dateKeeper in _sectionTitles) {
+		[sortedObjects insertObject:[allPackages objectsWhere:@"dateKeeper == %@", dateKeeper] atIndex:0];
+	}
+	self.objects = sortedObjects;
+
+	[self.tableView reloadData];
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+	[super viewWillAppear:animated];
+
+	[self refreshTable];
+}
+
 - (void)setupUI {
 	self.title = @"Updates";
 
