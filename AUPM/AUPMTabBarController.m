@@ -2,6 +2,7 @@
 #import "Repos/AUPMRepoListViewController.h"
 #import "Updates/AUPMUpdatesViewController.h"
 #import "Packages/AUPMPackageListViewController.h"
+#import "Search/AUPMSearchViewController.h"
 #import "AUPMDebugViewController.h"
 #import "AUPMDatabaseManager.h"
 #import "AUPMAppDelegate.h"
@@ -27,7 +28,11 @@
   UITabBarItem *packageIcon = [[UITabBarItem alloc] initWithTitle:@"Packages" image:[UIImage imageNamed:@"installed.png"] selectedImage:[UIImage imageNamed:@"installed-filled.png"]];
   [packagesNavController setTabBarItem:packageIcon];
 
-  self.viewControllers = [NSArray arrayWithObjects:debugNavController, reposNavController, updatesNavController, packagesNavController, nil];
+  UINavigationController *searchNavController = [[UINavigationController alloc] initWithRootViewController:[[AUPMSearchViewController alloc] init]];
+  UITabBarItem *searchIcon = [[UITabBarItem alloc] initWithTitle:@"Search" image:[UIImage imageNamed:@"search.png"] selectedImage:[UIImage imageNamed:@"search-filled.png"]];
+  [searchNavController setTabBarItem:searchIcon];
+
+  self.viewControllers = [NSArray arrayWithObjects:debugNavController, reposNavController, updatesNavController, packagesNavController, searchNavController, nil];
 
   [self performBackgroundRefresh:false];
 }
