@@ -12,6 +12,7 @@
 - (void)applicationDidFinishLaunching:(UIApplication *)application {
 	self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
 	self.window.backgroundColor = [UIColor whiteColor]; //Fixes a weird visual issue after pushing a vc
+	self.window.tintColor = [UIColor colorWithRed:0.18 green:0.80 blue:0.44 alpha:1.0];
 
 	self.databaseManager = [[AUPMDatabaseManager alloc] init];
 
