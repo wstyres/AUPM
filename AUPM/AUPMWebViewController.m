@@ -33,6 +33,7 @@
   configuration.userContentController = controller;
 
   _webView = [[WKWebView alloc] initWithFrame:self.view.frame configuration:configuration];
+  _webView.navigationDelegate = self;
   if (_url == NULL) {
     [_webView loadHTMLString:[self generateHomepage] baseURL:nil];
   }
@@ -41,8 +42,6 @@
   }
 
   [self.view addSubview:_webView];
-
-  self.title = @"Beta";
 }
 
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id <UIViewControllerTransitionCoordinator>)coordinator {
@@ -65,6 +64,10 @@
       AUPMWebViewController *webViewController = [[AUPMWebViewController alloc] initWithURL:[NSURL URLWithString:@"https://xtm3x.github.io/aupm/"]];
       [[self navigationController] pushViewController:webViewController animated:true];
     }
+}
+
+- (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation {
+  [self.navigationItem setTitle:[webView title]];
 }
 
 - (NSString *)generateHomepage {
