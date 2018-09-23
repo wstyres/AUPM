@@ -21,6 +21,7 @@
 
     NSPipe *pipe = [[NSPipe alloc] init];
     [_task setStandardOutput:pipe];
+    [_task setStandardError:pipe];
 
     NSFileHandle *output = [pipe fileHandleForReading];
     [output waitForDataInBackgroundAndNotify];
