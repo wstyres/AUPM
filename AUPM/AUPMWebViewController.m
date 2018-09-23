@@ -1,7 +1,7 @@
 #import "AUPMWebViewController.h"
 #import "AUPMRefreshViewController.h"
 #import <Realm/Realm.h>
-#define aupmVersion @"1.0~beta1"
+#define aupmVersion @"1.0~beta2"
 
 @implementation AUPMWebViewController {
   WKWebView *_webView;
