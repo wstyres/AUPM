@@ -13,7 +13,11 @@
 - (void)viewDidLoad {
   [super viewDidLoad];
 
-  self.searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(0, 64, 320, 40)];
+  CGRect screenRect = [[UIScreen mainScreen] bounds];
+  CGFloat windowWidth = screenRect.size.width;
+  CGFloat safeHeight = [UIApplication sharedApplication].statusBarFrame.size.height + self.navigationController.navigationBar.frame.size.height;
+
+  self.searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(0, safeHeight, windowWidth, 40)];
   self.searchBar.placeholder = @"Search Packages";
   self.searchBar.delegate = self;
   [self.view addSubview:self.searchBar];
