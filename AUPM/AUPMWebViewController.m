@@ -1,10 +1,25 @@
-#import "AUPMDebugViewController.h"
+#import "AUPMWebViewController.h"
 #import "AUPMRefreshViewController.h"
 #import <Realm/Realm.h>
 #define aupmVersion @"1.0~beta1"
 
-@implementation AUPMDebugViewController {
+@implementation AUPMWebViewController {
   WKWebView *_webView;
+  NSURL *_url;
+}
+
+- (id)init {
+    self = [super init];
+
+    return self;
+}
+
+- (id)initWithURL:(NSURL *)url {
+  self = [super init];
+  if (self) {
+      _url = url;
+  }
+  return self;
 }
 
 - (void)loadView {
@@ -18,11 +33,16 @@
   configuration.userContentController = controller;
 
   _webView = [[WKWebView alloc] initWithFrame:self.view.frame configuration:configuration];
-  [_webView loadHTMLString:[self generateHomepage] baseURL:nil];
+  if (_url == NULL) {
+    [_webView loadHTMLString:[self generateHomepage] baseURL:nil];
+  }
+  else {
+    [_webView loadRequest:[[NSURLRequest alloc] initWithURL:_url]];
+  }
 
   [self.view addSubview:_webView];
 
-  self.title = @"AUPM Beta";
+  self.title = @"Beta";
 }
 
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id <UIViewControllerTransitionCoordinator>)coordinator {
@@ -40,6 +60,10 @@
     }
     else if ([action isEqualToString:@"sendBug"]) {
       [self sendBugReport];
+    }
+    else if ([action isEqualToString:@"changelog"]) {
+      AUPMWebViewController *webViewController = [[AUPMWebViewController alloc] initWithURL:[NSURL URLWithString:@"https://xtm3x.github.io/aupm/"]];
+      [[self navigationController] pushViewController:webViewController animated:true];
     }
 }
 

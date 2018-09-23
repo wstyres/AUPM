@@ -3,7 +3,7 @@
 #import "Updates/AUPMUpdatesViewController.h"
 #import "Packages/AUPMPackageListViewController.h"
 #import "Search/AUPMSearchViewController.h"
-#import "AUPMDebugViewController.h"
+#import "AUPMWebViewController.h"
 #import "AUPMDatabaseManager.h"
 #import "AUPMAppDelegate.h"
 
@@ -12,7 +12,7 @@
 - (void)loadView {
   [super loadView];
 
-  UINavigationController *debugNavController = [[UINavigationController alloc] initWithRootViewController:[[AUPMDebugViewController alloc] init]];
+  UINavigationController *debugNavController = [[UINavigationController alloc] initWithRootViewController:[[AUPMWebViewController alloc] init]];
   UITabBarItem *debugIcon = [[UITabBarItem alloc] initWithTitle:@"Beta" image:[UIImage imageNamed:@"beta.png"] selectedImage:[UIImage imageNamed:@"beta-filled.png"]];
   [debugNavController setTabBarItem:debugIcon];
 
