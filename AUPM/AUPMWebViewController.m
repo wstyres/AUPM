@@ -1,7 +1,6 @@
 #import "AUPMWebViewController.h"
 #import "AUPMRefreshViewController.h"
 #import <Realm/Realm.h>
-#define aupmVersion @"1.0~beta2"
 
 @implementation AUPMWebViewController {
   WKWebView *_webView;
@@ -77,7 +76,7 @@
 		HBLogError(@"Error reading file: %@", error);
 	}
 
-	NSString *html = [NSString stringWithFormat:rawDepiction, aupmVersion];
+	NSString *html = [NSString stringWithFormat:rawDepiction, PACKAGE_VERSION];
 
 	return html;
 }
@@ -93,7 +92,7 @@
     NSString *iosVersion = [NSString stringWithFormat:@"%@ running iOS %@", [[UIDevice currentDevice] model], [[UIDevice currentDevice] systemVersion]];
     RLMRealmConfiguration *config = [[RLMRealm defaultRealm] configuration];
     NSString *databaseLocation = [[config fileURL] absoluteString];
-    NSString *message = [NSString stringWithFormat:@"iOS Version: %@\nAUPM Version: %@\nAUPM Database Location: %@\n\nPlease describe the bug you are experiencing or feature you are requesting below: \n\n", iosVersion, aupmVersion, databaseLocation];
+    NSString *message = [NSString stringWithFormat:@"iOS Version: %@\nAUPM Version: %@\nAUPM Database Location: %@\n\nPlease describe the bug you are experiencing or feature you are requesting below: \n\n", iosVersion, PACKAGE_VERSION, databaseLocation];
 
     MFMailComposeViewController *mail = [[MFMailComposeViewController alloc] init];
     mail.mailComposeDelegate = self;

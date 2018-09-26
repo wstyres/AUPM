@@ -10,9 +10,20 @@
 @implementation AUPMAppDelegate
 
 - (void)applicationDidFinishLaunching:(UIApplication *)application {
+	NSLog(@"[AUPM] AUPM Version %@", PACKAGE_VERSION);
 	self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
 	self.window.backgroundColor = [UIColor whiteColor]; //Fixes a weird visual issue after pushing a vc
 	self.window.tintColor = [UIColor colorWithRed:0.00 green:0.66 blue:1.00 alpha:1.0];
+
+	RLMRealmConfiguration *config = [RLMRealmConfiguration defaultConfiguration];
+	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+	NSString *documentsDirectory = paths[0];
+	NSString *dataPath = [documentsDirectory stringByAppendingPathComponent:@"/AUPMDatabase"];
+	if (![[NSFileManager defaultManager] fileExistsAtPath:dataPath])
+    [[NSFileManager defaultManager] createDirectoryAtPath:dataPath withIntermediateDirectories:NO attributes:nil error:nil];
+	config.fileURL = [NSURL URLWithString:[dataPath stringByAppendingPathComponent:@"/aupm.realm"]];
+	config.deleteRealmIfMigrationNeeded = YES;
+	[RLMRealmConfiguration setDefaultConfiguration:config];
 
 	self.databaseManager = [[AUPMDatabaseManager alloc] init];
 

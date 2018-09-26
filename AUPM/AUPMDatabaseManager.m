@@ -30,38 +30,32 @@ bool packages_file_changed(FILE* f1, FILE* f2);
   [task launch];
   [task waitUntilExit];
 
-  //dispatch_group_t group = dispatch_group_create();
-
   AUPMRepoManager *repoManager = [[AUPMRepoManager alloc] init];
   NSArray *repoArray = [repoManager managedRepoList];
   AUPMDateKeeper *dateKeeper = [[AUPMDateKeeper alloc] init];
   dateKeeper.date = [NSDate date];
   [[RLMRealm defaultRealm] transactionWithBlock:^{
     for (AUPMRepo *repo in repoArray) {
-      //dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^ {
-        NSDate *methodStart = [NSDate date];
-        NSArray<AUPMPackage *> *packagesArray = [repoManager packageListForRepo:repo];
-        for (AUPMPackage *package in packagesArray) {
-          package.repo = repo;
-          package.dateKeeper = dateKeeper;
-          [repo.packages addObject:package];
-        }
+      NSDate *methodStart = [NSDate date];
+      NSArray<AUPMPackage *> *packagesArray = [repoManager packageListForRepo:repo];
+      [realm addObject:repo];
+      for (AUPMPackage *package in packagesArray) {
+        package.dateKeeper = dateKeeper;
+      }
 
-        @try {
-          [realm addObject:repo];
-        }
-        @catch (NSException *e) {
-          NSLog(@"[AUPM] Could not add object to realm: %@", e);
-        }
+      @try {
+        [realm addObjects:packagesArray];
+      }
+      @catch (NSException *e) {
+        NSLog(@"[AUPM] Could not add object to realm: %@", e);
+      }
 
-        NSDate *methodFinish = [NSDate date];
-        NSTimeInterval executionTime = [methodFinish timeIntervalSinceDate:methodStart];
-        NSLog(@"[AUPM] Time to add %@ to database: %f seconds", [repo repoName], executionTime);
-      //});
+      NSDate *methodFinish = [NSDate date];
+      NSTimeInterval executionTime = [methodFinish timeIntervalSinceDate:methodStart];
+      NSLog(@"[AUPM] Time to add %@ to database: %f seconds", [repo repoName], executionTime);
     }
   }];
 
-  //dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
   NSDate *newUpdateDate = [NSDate date];
   [[NSUserDefaults standardUserDefaults] setObject:newUpdateDate forKey:@"lastUpdatedDate"];
 
@@ -74,13 +68,13 @@ bool packages_file_changed(FILE* f1, FILE* f2);
 - (void)updatePopulation:(void (^)(BOOL success))completion {
   HBLogInfo(@"Performing partial database population...");
 
-  NSTask *removeCachetask = [[NSTask alloc] init];
-  [removeCachetask setLaunchPath:@"/Applications/AUPM.app/supersling"];
+  NSTask *removeCacheTask = [[NSTask alloc] init];
+  [removeCacheTask setLaunchPath:@"/Applications/AUPM.app/supersling"];
   NSArray *rmArgs = [[NSArray alloc] initWithObjects: @"rm", @"-rf", @"/var/mobile/Library/Caches/xyz.willy.aupm/lists", nil];
-  [removeCachetask setArguments:rmArgs];
+  [removeCacheTask setArguments:rmArgs];
 
-  [removeCachetask launch];
-  [removeCachetask waitUntilExit];
+  [removeCacheTask launch];
+  [removeCacheTask waitUntilExit];
 
   NSTask *cpTask = [[NSTask alloc] init];
   [cpTask setLaunchPath:@"/Applications/AUPM.app/supersling"];
@@ -90,44 +84,38 @@ bool packages_file_changed(FILE* f1, FILE* f2);
   [cpTask launch];
   [cpTask waitUntilExit];
 
-  //Update APT
   NSTask *refreshTask = [[NSTask alloc] init];
   [refreshTask setLaunchPath:@"/Applications/AUPM.app/supersling"];
   NSArray *arguments = [[NSArray alloc] initWithObjects: @"apt-get", @"update", @"-o", @"Dir::Etc::SourceList=/var/lib/aupm/aupm.list", @"-o", @"Dir::State::Lists=/var/lib/aupm/lists", @"-o", @"Dir::Etc::SourceParts=/var/lib/aupm/lists/partial/false", nil];
-  // apt-get update -o Dir::Etc::SourceList "/etc/apt/sources.list.d/aupm.list" -o Dir::State::Lists "/var/lib/aupm/lists"
   [refreshTask setArguments:arguments];
 
   [refreshTask launch];
   [refreshTask waitUntilExit];
 
-  //dispatch_group_t group = dispatch_group_create();
   RLMRealm *realm = [RLMRealm defaultRealm];
 
   AUPMRepoManager *repoManager = [[AUPMRepoManager alloc] init];
   NSArray *bill = [self billOfReposToUpdate];
   for (AUPMRepo *repo in bill) {
-    //dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^ {
-      NSDate *methodStart = [NSDate date];
-      NSArray<AUPMPackage *> *packagesArray = [repoManager packageListForRepo:repo];
-      for (AUPMPackage *package in packagesArray) {
-        package.repo = repo;
-        [repo.packages addObject:package];
-      }
-      [realm beginWriteTransaction];
+    NSDate *methodStart = [NSDate date];
+    NSArray<AUPMPackage *> *packagesArray = [repoManager packageListForRepo:repo];
+    [realm transactionWithBlock:^{
+      [realm addOrUpdateObject:repo];
+    }];
 
-      @try {
-        [realm addOrUpdateObject:repo];
-      }
-      @catch (NSException *e) {
-        NSLog(@"[AUPM] Could not add %@ to realm: %@", [repo repoName], e);
-      }
+    [realm beginWriteTransaction];
+    @try {
+      [realm addOrUpdateObjects:packagesArray];
+    }
+    @catch (NSException *e) {
+      NSLog(@"[AUPM] Could not add object to realm: %@", e);
+    }
 
-      [realm commitWriteTransaction];
+    [realm commitWriteTransaction];
 
-      NSDate *methodFinish = [NSDate date];
-      NSTimeInterval executionTime = [methodFinish timeIntervalSinceDate:methodStart];
-      NSLog(@"[AUPM] Time to add %@ to database: %f seconds", [repo repoName], executionTime);
-    //});
+    NSDate *methodFinish = [NSDate date];
+    NSTimeInterval executionTime = [methodFinish timeIntervalSinceDate:methodStart];
+    NSLog(@"[AUPM] Time to add %@ to database: %f seconds", [repo repoName], executionTime);
   }
 
   NSLog(@"[AUPM] Adding times to new packages");
