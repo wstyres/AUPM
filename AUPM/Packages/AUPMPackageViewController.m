@@ -71,7 +71,7 @@
 - (void)installPackage {
 	NSTask *task = [[NSTask alloc] init];
 	[task setLaunchPath:@"/Applications/AUPM.app/supersling"];
-	NSArray *arguments = [[NSArray alloc] initWithObjects: @"apt-get", @"install", [_package packageIdentifier], @"-y", @"--force-yes", nil];
+	NSArray *arguments = [[NSArray alloc] initWithObjects: @"apt-get", @"install", [NSString stringWithFormat:@"%@=%@", [_package packageIdentifier], [_package version]], @"-y", @"--force-yes", nil];
 	[task setArguments:arguments];
 
 	RLMRealm *realm = [RLMRealm defaultRealm];
