@@ -7,7 +7,7 @@
 #import "../AUPMAppDelegate.h"
 
 @implementation AUPMPackageListViewController {
-	RLMArray<AUPMPackage *> *_objects;
+	RLMResults<AUPMPackage *> *_objects;
 	AUPMRepo *_repo;
 }
 
@@ -23,12 +23,12 @@
 	[super loadView];
 
 	if (_repo != NULL) {
-		_objects = _repo.packages;
+		_objects = [_repo packages];
 
 		self.title = [_repo repoName];
 	}
 	else {
-		_objects = (RLMArray *)[[AUPMPackage objectsWhere:@"installed = true"] sortedResultsUsingDescriptors:@[
+		_objects = [[AUPMPackage objectsWhere:@"installed = true"] sortedResultsUsingDescriptors:@[
 	    [RLMSortDescriptor sortDescriptorWithKeyPath:@"packageName" ascending:YES]
 	  ]];
 
