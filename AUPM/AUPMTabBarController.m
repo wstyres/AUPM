@@ -19,10 +19,10 @@
   UINavigationController *reposNavController = [[UINavigationController alloc] initWithRootViewController:[[AUPMRepoListViewController alloc] init]];
   UITabBarItem *repoIcon = [[UITabBarItem alloc] initWithTitle:@"Sources" image:[UIImage imageNamed:@"sources.png"] selectedImage:[UIImage imageNamed:@"sources-filled.png"]];
   [reposNavController setTabBarItem:repoIcon];
-
-  UINavigationController *updatesNavController = [[UINavigationController alloc] initWithRootViewController:[[AUPMUpdatesViewController alloc] init]];
-  UITabBarItem *updatesIcon = [[UITabBarItem alloc] initWithTitle:@"Updates" image:[UIImage imageNamed:@"updates.png"] selectedImage:[UIImage imageNamed:@"updates-filled.png"]];
-  [updatesNavController setTabBarItem:updatesIcon];
+  //
+  // UINavigationController *updatesNavController = [[UINavigationController alloc] initWithRootViewController:[[AUPMUpdatesViewController alloc] init]];
+  // UITabBarItem *updatesIcon = [[UITabBarItem alloc] initWithTitle:@"Updates" image:[UIImage imageNamed:@"updates.png"] selectedImage:[UIImage imageNamed:@"updates-filled.png"]];
+  // [updatesNavController setTabBarItem:updatesIcon];
 
   UINavigationController *packagesNavController = [[UINavigationController alloc] initWithRootViewController:[[AUPMPackageListViewController alloc] init]];
   UITabBarItem *packageIcon = [[UITabBarItem alloc] initWithTitle:@"Packages" image:[UIImage imageNamed:@"installed.png"] selectedImage:[UIImage imageNamed:@"installed-filled.png"]];
@@ -32,7 +32,7 @@
   UITabBarItem *searchIcon = [[UITabBarItem alloc] initWithTitle:@"Search" image:[UIImage imageNamed:@"search.png"] selectedImage:[UIImage imageNamed:@"search-filled.png"]];
   [searchNavController setTabBarItem:searchIcon];
 
-  self.viewControllers = [NSArray arrayWithObjects:debugNavController, reposNavController, updatesNavController, packagesNavController, searchNavController, nil];
+  self.viewControllers = [NSArray arrayWithObjects:debugNavController, reposNavController, packagesNavController, searchNavController, nil];
 
   [self performBackgroundRefresh:false];
 }

@@ -23,7 +23,9 @@
 	[super loadView];
 
 	if (_repo != NULL) {
-		_objects = [_repo packages];
+		_objects = [[_repo packages] sortedResultsUsingDescriptors:@[
+	    [RLMSortDescriptor sortDescriptorWithKeyPath:@"packageName" ascending:YES]
+	  ]];
 
 		self.title = [_repo repoName];
 	}

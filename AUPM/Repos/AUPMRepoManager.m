@@ -162,7 +162,7 @@ NSArray *packages_to_array(const char *path);
         urlString = [urlString substringToIndex:[urlString length] - 3]; //idk why this is here
         package.depictionURL = urlString;
 
-        if ([dict[@"Package"] rangeOfString:@"gsc"].location == NSNotFound && [dict[@"Package"] rangeOfString:@"cy+"].location == NSNotFound) {
+        if ([dict[@"Package"] rangeOfString:@"gsc"].location == NSNotFound && [dict[@"Package"] rangeOfString:@"saffron-jailbreak"].location == NSNotFound && [dict[@"Package"] rangeOfString:@"cy+"].location == NSNotFound) {
             [packageListForRepo addObject:package];
         }
     }

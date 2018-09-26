@@ -31,7 +31,7 @@ NSArray *packages_to_array(const char *path);
         package.depictionURL = urlString;
         package.installed = true;
 
-        if ([dict[@"Status"] rangeOfString:@"deinstall"].location == NSNotFound && [dict[@"Status"] rangeOfString:@"not-installed"].location == NSNotFound && [dict[@"Package"] rangeOfString:@"gsc"].location == NSNotFound && [dict[@"Package"] rangeOfString:@"cy+"].location == NSNotFound) {
+        if ([dict[@"Status"] rangeOfString:@"deinstall"].location == NSNotFound && [dict[@"Status"] rangeOfString:@"not-installed"].location == NSNotFound && [dict[@"Package"] rangeOfString:@"saffron-jailbreak"].location == NSNotFound && [dict[@"Package"] rangeOfString:@"gsc"].location == NSNotFound && [dict[@"Package"] rangeOfString:@"cy+"].location == NSNotFound) {
             [installedPackageList addObject:package];
         }
     }
