@@ -11,4 +11,5 @@
 - (void)firstLoadPopulation:(void (^)(BOOL success))completion;
 - (void)updatePopulation:(void (^)(BOOL success))completion;
 - (void)deleteRepo:(AUPMRepo *)repo;
+- (NSArray<AUPMPackage*> *)packagesThatNeedUpdates;
 @end

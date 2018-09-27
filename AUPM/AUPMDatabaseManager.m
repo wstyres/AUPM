@@ -5,6 +5,7 @@
 #import "Packages/AUPMPackage.h"
 #import "Packages/AUPMPackageManager.h"
 #import "Updates/AUPMDateKeeper.h"
+#include "Repos/dpkgver.c"
 
 @implementation AUPMDatabaseManager
 
@@ -209,6 +210,28 @@ bool packages_file_changed(FILE* f1, FILE* f2);
   }];
 
   completion(true);
+}
+
+- (NSArray<AUPMPackage*> *)packagesThatNeedUpdates {
+  NSMutableArray *updates = [NSMutableArray new];
+  RLMResults<AUPMPackage *> *installedPackages = [AUPMPackage objectsWhere:@"installed = true"];
+
+  for (AUPMPackage *package in installedPackages) {
+    RLMResults<AUPMPackage *> *otherVersions = [AUPMPackage objectsWhere:@"packageIdentifier == %@", [package packageIdentifier]];
+    if ([otherVersions count] != 1) {
+      for (AUPMPackage *otherPackage in otherVersions) {
+        if (otherPackage != package) {
+          int result = verrevcmp([[package version] UTF8String], [[otherPackage version] UTF8String]);
+
+          if (result < 0) {
+              [updates addObject:otherPackage];
+          }
+        }
+      }
+    }
+  }
+
+  return (NSArray *)updates;
 }
 
 - (void)deleteRepo:(AUPMRepo *)repo {

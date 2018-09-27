@@ -7,6 +7,7 @@
 #import "../AUPMAppDelegate.h"
 
 @implementation AUPMPackageListViewController {
+	NSArray *_updateObjects;
 	RLMResults<AUPMPackage *> *_objects;
 	AUPMRepo *_repo;
 }
@@ -30,6 +31,8 @@
 		self.title = [_repo repoName];
 	}
 	else {
+		AUPMDatabaseManager *databaseManager = ((AUPMAppDelegate *)[[UIApplication sharedApplication] delegate]).databaseManager;
+		_updateObjects = [databaseManager packagesThatNeedUpdates];
 		_objects = [[AUPMPackage objectsWhere:@"installed = true"] sortedResultsUsingDescriptors:@[
 	    [RLMSortDescriptor sortDescriptorWithKeyPath:@"packageName" ascending:YES]
 	  ]];
@@ -41,17 +44,51 @@
 #pragma mark - Table View Data Source
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+	if ([_updateObjects count] > 0) {
+		return 2;
+	}
 	return 1;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-	return _objects.count;
+	if ([self numberOfSectionsInTableView:tableView] == 2) {
+		if (section == 0) {
+			return [_updateObjects count];
+		}
+		else {
+			return [_objects count];
+		}
+	}
+	else {
+		return [_objects count];
+	}
+}
+
+- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
+	if ([self numberOfSectionsInTableView:tableView] == 2) {
+		if (section == 0) {
+			return @"Updates";
+		}
+	}
+	return @"Installed Packages";
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
 	static NSString *identifier = @"PackageTableViewCell";
 	UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:identifier];
-	AUPMPackage *package = _objects[indexPath.row];
+	AUPMPackage *package;
+
+	if ([self numberOfSectionsInTableView:tableView] == 2) {
+		if (indexPath.section == 0) {
+			package = _updateObjects[indexPath.row];
+		}
+		else {
+			package = _objects[indexPath.row];
+		}
+	}
+	else {
+		package = _objects[indexPath.row];
+	}
 
 	if (!cell) {
 		cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:identifier];

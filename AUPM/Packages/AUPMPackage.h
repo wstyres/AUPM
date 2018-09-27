@@ -15,5 +15,6 @@
 @property BOOL installed;
 @property AUPMRepo *repo;
 @property AUPMDateKeeper *dateKeeper;
+- (BOOL)isInstalled;
 @end
 RLM_ARRAY_TYPE(AUPMPackage)

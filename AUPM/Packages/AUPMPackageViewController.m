@@ -45,6 +45,14 @@
 	self.title = [_package packageName];
 }
 
+- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id <UIViewControllerTransitionCoordinator>)coordinator {
+    [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
+
+    [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context) {
+        _webView.frame = self.view.frame;
+    } completion:nil];
+}
+
 - (NSString *)generateDepiction {
 	NSError *error;
 	NSString *rawDepiction = [NSString stringWithContentsOfFile:@"/Applications/AUPM.app/package_depiction.html" encoding:NSUTF8StringEncoding error:&error];
@@ -58,7 +66,7 @@
 }
 
 - (void)configureNavButton {
-	if ([_package installed]) {
+	if ([_package isInstalled]) {
 		UIBarButtonItem *removeButton = [[UIBarButtonItem alloc] initWithTitle:@"Remove" style:UIBarButtonItemStylePlain target:self action:@selector(removePackage)];
 		self.navigationItem.rightBarButtonItem = removeButton;
 	}

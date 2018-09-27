@@ -63,8 +63,6 @@
       AUPMDatabaseManager *databaseManager = ((AUPMAppDelegate *)[[UIApplication sharedApplication] delegate]).databaseManager;
       [databaseManager updatePopulation:^(BOOL success) {
         dispatch_async(dispatch_get_main_queue(), ^{
-          UINavigationController *updatesController = self.viewControllers[2];
-          [(AUPMUpdatesViewController *)updatesController.topViewController refreshTable];
           [sourcesController tabBarItem].badgeValue = nil;
         });
       }];
