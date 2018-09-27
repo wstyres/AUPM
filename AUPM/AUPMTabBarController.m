@@ -63,11 +63,26 @@
       AUPMDatabaseManager *databaseManager = ((AUPMAppDelegate *)[[UIApplication sharedApplication] delegate]).databaseManager;
       [databaseManager updatePopulation:^(BOOL success) {
         dispatch_async(dispatch_get_main_queue(), ^{
+          _updateObjects = [databaseManager packagesThatNeedUpdates];
+          if (_updateObjects.count > 0) {
+            [self.viewControllers[2] tabBarItem].badgeValue = [NSString stringWithFormat:@"%lu", (unsigned long)_updateObjects.count];
+          }
           [sourcesController tabBarItem].badgeValue = nil;
         });
       }];
     });
   }
+  else {
+    AUPMDatabaseManager *databaseManager = ((AUPMAppDelegate *)[[UIApplication sharedApplication] delegate]).databaseManager;
+    _updateObjects = [databaseManager packagesThatNeedUpdates];
+    if (_updateObjects.count > 0) {
+      [self.viewControllers[2] tabBarItem].badgeValue = [NSString stringWithFormat:@"%lu", (unsigned long)_updateObjects.count];
+    }
+  }
+}
+
+- (NSArray *)updateObjects {
+  return _updateObjects;
 }
 
 @end

@@ -5,6 +5,7 @@
 #import "../AUPMDatabaseManager.h"
 #import "../Repos/AUPMRepo.h"
 #import "../AUPMAppDelegate.h"
+#import "../AUPMTabBarController.h"
 
 @implementation AUPMPackageListViewController {
 	NSArray *_updateObjects;
@@ -31,8 +32,7 @@
 		self.title = [_repo repoName];
 	}
 	else {
-		AUPMDatabaseManager *databaseManager = ((AUPMAppDelegate *)[[UIApplication sharedApplication] delegate]).databaseManager;
-		_updateObjects = [databaseManager packagesThatNeedUpdates];
+		_updateObjects = [((AUPMTabBarController *)self.tabBarController) updateObjects];
 		_objects = [[AUPMPackage objectsWhere:@"installed = true"] sortedResultsUsingDescriptors:@[
 	    [RLMSortDescriptor sortDescriptorWithKeyPath:@"packageName" ascending:YES]
 	  ]];
