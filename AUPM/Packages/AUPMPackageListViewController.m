@@ -11,7 +11,7 @@
 
 @implementation AUPMPackageListViewController {
 	NSArray *_updateObjects;
-	BOOL *_hasUpdates;
+	BOOL _hasUpdates;
 	RLMResults<AUPMPackage *> *_objects;
 	AUPMRepo *_repo;
 }
@@ -35,16 +35,7 @@
 		self.title = [_repo repoName];
 	}
 	else {
-		_updateObjects = [((AUPMTabBarController *)self.tabBarController) updateObjects];
-
-		if (_updateObjects.count > 0) {
-			UIBarButtonItem *upgradeItem = [[UIBarButtonItem alloc] initWithTitle:@"Upgrade All" style:UIBarButtonItemStyleDone target:self action:@selector(upgradePackages)];
-			self.navigationItem.rightBarButtonItem = upgradeItem;
-		}
-
-		_objects = [[AUPMPackage objectsWhere:@"installed = true"] sortedResultsUsingDescriptors:@[
-	    [RLMSortDescriptor sortDescriptorWithKeyPath:@"packageName" ascending:YES]
-	  ]];
+		[self refreshTable];
 
 		self.title = @"Packages";
 	}
@@ -70,7 +61,7 @@
 - (void)upgradePackages {
 	NSTask *task = [[NSTask alloc] init];
 	[task setLaunchPath:@"/Applications/AUPM.app/supersling"];
-	NSArray *arguments = [[NSArray alloc] initWithObjects: @"apt-get", @"upgrade", @"-y", @"--force-yes", nil];
+	NSArray *arguments = [[NSArray alloc] initWithObjects: @"apt-get", @"upgrade", @"-o", @"Dir::Etc::SourceList=/var/lib/aupm/aupm.list", @"-o", @"Dir::State::Lists=/var/lib/aupm/lists", @"-o", @"Dir::Etc::SourceParts=/var/lib/aupm/lists/partial/false", @"-y", @"--force-yes", nil];
 	[task setArguments:arguments];
 
 	AUPMConsoleViewController *console = [[AUPMConsoleViewController alloc] initWithTask:task];
