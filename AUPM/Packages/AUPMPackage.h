@@ -11,7 +11,7 @@
 @property NSString *section;
 @property NSString *packageDescription;
 @property NSString *depictionURL;
-@property NSString *versionidentifier;
+@property NSString *repoVersion;
 @property BOOL installed;
 @property AUPMRepo *repo;
 @property AUPMDateKeeper *dateKeeper;

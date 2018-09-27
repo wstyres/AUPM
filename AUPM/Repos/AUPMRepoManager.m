@@ -155,7 +155,7 @@ NSArray *packages_to_array(const char *path);
         package.version = [dict[@"Version"] substringToIndex:[dict[@"Version"] length] - 1];
         package.section = [dict[@"Section"] substringToIndex:[dict[@"Section"] length] - 1];
         package.packageDescription = [dict[@"Description"] substringToIndex:[dict[@"Description"] length] - 1];
-        package.versionidentifier = [NSString stringWithFormat:@"%@~%@", dict[@"Version"], dict[@"Package"]];
+        package.repoVersion = [NSString stringWithFormat:@"%@~%@", [repo repoBaseFileName], dict[@"Package"]];
         package.repo = repo;
 
         NSString *urlString = [dict[@"Depiction"] stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];

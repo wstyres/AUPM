@@ -2,6 +2,6 @@
 
 @implementation AUPMPackage
 + (NSString *)primaryKey {
-    return @"versionidentifier";
+    return @"repoVersion";
 }
 @end

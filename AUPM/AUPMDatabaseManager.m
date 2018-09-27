@@ -196,8 +196,6 @@ bool packages_file_changed(FILE* f1, FILE* f2);
   AUPMPackageManager *packageManager = [[AUPMPackageManager alloc] init];
   NSArray *packagesArray = [packageManager installedPackageList];
 
-
-
   //(name text, packageid text, version text, section text, desc text, url text)
   HBLogInfo(@"Started to parse installed packages");
 
