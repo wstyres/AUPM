@@ -11,6 +11,7 @@
 
 @implementation AUPMPackageListViewController {
 	NSArray *_updateObjects;
+	BOOL *_hasUpdates;
 	RLMResults<AUPMPackage *> *_objects;
 	AUPMRepo *_repo;
 }
@@ -49,6 +50,23 @@
 	}
 }
 
+- (void)refreshTable {
+	_updateObjects = [((AUPMTabBarController *)self.tabBarController) updateObjects];
+
+	if (_updateObjects.count > 0) {
+		_hasUpdates = true;
+
+		UIBarButtonItem *upgradeItem = [[UIBarButtonItem alloc] initWithTitle:@"Upgrade All" style:UIBarButtonItemStyleDone target:self action:@selector(upgradePackages)];
+		self.navigationItem.rightBarButtonItem = upgradeItem;
+	}
+
+	_objects = [[AUPMPackage objectsWhere:@"installed = true"] sortedResultsUsingDescriptors:@[
+		[RLMSortDescriptor sortDescriptorWithKeyPath:@"packageName" ascending:YES]
+	]];
+
+	[self.tableView reloadData];
+}
+
 - (void)upgradePackages {
 	NSTask *task = [[NSTask alloc] init];
 	[task setLaunchPath:@"/Applications/AUPM.app/supersling"];
@@ -63,20 +81,15 @@
 #pragma mark - Table View Data Source
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-	if ([_updateObjects count] > 0) {
+	if (_hasUpdates) {
 		return 2;
 	}
 	return 1;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-	if ([self numberOfSectionsInTableView:tableView] == 2) {
-		if (section == 0) {
-			return [_updateObjects count];
-		}
-		else {
-			return [_objects count];
-		}
+	if (_hasUpdates && section == 0) {
+		return [_updateObjects count];
 	}
 	else {
 		return [_objects count];
@@ -84,10 +97,8 @@
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
-	if ([self numberOfSectionsInTableView:tableView] == 2) {
-		if (section == 0) {
-			return @"Updates";
-		}
+	if (_hasUpdates && section == 0) {
+		return @"Updates";
 	}
 	return @"Installed Packages";
 }
@@ -97,13 +108,8 @@
 	UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:identifier];
 	AUPMPackage *package;
 
-	if ([self numberOfSectionsInTableView:tableView] == 2) {
-		if (indexPath.section == 0) {
-			package = _updateObjects[indexPath.row];
-		}
-		else {
-			package = _objects[indexPath.row];
-		}
+	if (_hasUpdates && indexPath.section == 0) {
+		package = _updateObjects[indexPath.row];
 	}
 	else {
 		package = _objects[indexPath.row];
