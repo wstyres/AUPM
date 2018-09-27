@@ -6,6 +6,8 @@
 #import "../Repos/AUPMRepo.h"
 #import "../AUPMAppDelegate.h"
 #import "../AUPMTabBarController.h"
+#import "../NSTask.h"
+#import "../AUPMConsoleViewController.h"
 
 @implementation AUPMPackageListViewController {
 	NSArray *_updateObjects;
@@ -33,12 +35,29 @@
 	}
 	else {
 		_updateObjects = [((AUPMTabBarController *)self.tabBarController) updateObjects];
+
+		if (_updateObjects.count > 0) {
+			UIBarButtonItem *upgradeItem = [[UIBarButtonItem alloc] initWithTitle:@"Upgrade All" style:UIBarButtonItemStyleDone target:self action:@selector(upgradePackages)];
+			self.navigationItem.rightBarButtonItem = upgradeItem;
+		}
+
 		_objects = [[AUPMPackage objectsWhere:@"installed = true"] sortedResultsUsingDescriptors:@[
 	    [RLMSortDescriptor sortDescriptorWithKeyPath:@"packageName" ascending:YES]
 	  ]];
 
 		self.title = @"Packages";
 	}
+}
+
+- (void)upgradePackages {
+	NSTask *task = [[NSTask alloc] init];
+	[task setLaunchPath:@"/Applications/AUPM.app/supersling"];
+	NSArray *arguments = [[NSArray alloc] initWithObjects: @"apt-get", @"upgrade", @"-y", @"--force-yes", nil];
+	[task setArguments:arguments];
+
+	AUPMConsoleViewController *console = [[AUPMConsoleViewController alloc] initWithTask:task];
+	UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:console];
+	[self presentViewController:navController animated:true completion:nil];
 }
 
 #pragma mark - Table View Data Source

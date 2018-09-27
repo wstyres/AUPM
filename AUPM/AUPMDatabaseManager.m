@@ -231,8 +231,34 @@ bool packages_file_changed(FILE* f1, FILE* f2);
     }
   }
 
-  return (NSArray *)updates;
+  return [self cleanUpDuplicatePackages:updates];
 }
+
+- (NSArray *)cleanUpDuplicatePackages:(NSArray *)packageList {
+    NSMutableDictionary *packageVersionDict = [[NSMutableDictionary alloc] init];
+    NSMutableArray *cleanedPackageList = [packageList mutableCopy];
+
+    for (AUPMPackage *package in packageList) {
+        if (packageVersionDict[[package packageIdentifier]] == NULL) {
+            packageVersionDict[[package packageIdentifier]] = package;
+        }
+
+        NSString *arrayVersion = [(AUPMPackage *)packageVersionDict[[package packageIdentifier]] version];
+        NSString *packageVersion = [package version];
+        int result = verrevcmp([packageVersion UTF8String], [arrayVersion UTF8String]);
+
+        if (result > 0) {
+            [cleanedPackageList removeObject:packageVersionDict[[package packageIdentifier]]];
+            packageVersionDict[[package packageIdentifier]] = package;
+        }
+        else if (result < 0) {
+            [cleanedPackageList removeObject:package];
+        }
+    }
+
+    return (NSArray *)cleanedPackageList;
+}
+
 
 - (void)deleteRepo:(AUPMRepo *)repo {
   RLMRealm *realm = [RLMRealm defaultRealm];
