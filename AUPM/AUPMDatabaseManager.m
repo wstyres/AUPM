@@ -158,6 +158,7 @@ bool packages_file_changed(FILE* f1, FILE* f2);
         if (hasUpdates) {
           _updateObjects = updates;
           _numberOfPackagesThatNeedUpdates = updates.count;
+          NSLog(@"[AUPM] I have %d updates! %@", _numberOfPackagesThatNeedUpdates, _updateObjects);
         }
         _hasPackagesThatNeedUpdates = hasUpdates;
         completion(true);
@@ -312,6 +313,7 @@ bool packages_file_changed(FILE* f1, FILE* f2);
 }
 
 - (NSArray *)updateObjects {
+  NSLog(@"[AUPM] Requested updates %@", _updateObjects);
   return _updateObjects;
 }
 

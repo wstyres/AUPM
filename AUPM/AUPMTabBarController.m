@@ -83,8 +83,13 @@
   UINavigationController *packageNavController = self.viewControllers[2];
   AUPMPackageListViewController *packageVC = packageNavController.viewControllers[0];
   AUPMDatabaseManager *databaseManager = ((AUPMAppDelegate *)[[UIApplication sharedApplication] delegate]).databaseManager;
+  NSLog(@"[AUPM] Updating package table view with %d updates", [databaseManager numberOfPackagesThatNeedUpdates]);
   if ([databaseManager hasPackagesThatNeedUpdates]) {
     [packageNavController tabBarItem].badgeValue = [NSString stringWithFormat:@"%lu", (unsigned long)[databaseManager numberOfPackagesThatNeedUpdates]];
+    [packageVC refreshTable];
+  }
+  else {
+    [packageNavController tabBarItem].badgeValue = nil;
     [packageVC refreshTable];
   }
 }

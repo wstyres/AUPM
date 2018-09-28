@@ -2,6 +2,7 @@
 #import "NSTask.h"
 #import "AUPMAppDelegate.h"
 #import "AUPMDatabaseManager.h"
+#import "AUPMTabBarController.h"
 
 @implementation AUPMConsoleViewController {
     NSTask *_task;
@@ -43,6 +44,9 @@
 - (void)dismissConsole {
   AUPMDatabaseManager *databaseManager = ((AUPMAppDelegate *)[[UIApplication sharedApplication] delegate]).databaseManager;
   [databaseManager updateEssentials:^(BOOL success) {
+    AUPMTabBarController *tabController = (AUPMTabBarController *)((AUPMAppDelegate *)[[UIApplication sharedApplication] delegate]).window.rootViewController;
+    [tabController updatePackageTableView];
+
     [self dismissViewControllerAnimated:true completion:nil];
   }];
 }

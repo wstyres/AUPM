@@ -14,14 +14,12 @@
 	BOOL _hasUpdates;
 	RLMResults<AUPMPackage *> *_objects;
 	AUPMRepo *_repo;
-	AUPMDatabaseManager *_databaseManager;
 }
 
 - (id)initWithRepo:(AUPMRepo *)repo {
 	self = [super init];
     if (self) {
         _repo = repo;
-				_databaseManager = ((AUPMAppDelegate *)[[UIApplication sharedApplication] delegate]).databaseManager;
     }
     return self;
 }
@@ -44,8 +42,12 @@
 }
 
 - (void)refreshTable {
-	_hasUpdates = [_databaseManager hasPackagesThatNeedUpdates];
-	_updateObjects = [_databaseManager updateObjects];
+	AUPMDatabaseManager *databaseManager = ((AUPMAppDelegate *)[[UIApplication sharedApplication] delegate]).databaseManager;
+	NSLog(@"[AUPM] Refreshing package table");
+	_hasUpdates = [databaseManager hasPackagesThatNeedUpdates];
+	_updateObjects = [databaseManager updateObjects];
+
+	NSLog(@"[AUPM] Got my %d updates %@", [databaseManager numberOfPackagesThatNeedUpdates], _updateObjects);
 
 	if (_updateObjects.count > 0) {
 		UIBarButtonItem *upgradeItem = [[UIBarButtonItem alloc] initWithTitle:@"Upgrade All" style:UIBarButtonItemStyleDone target:self action:@selector(upgradePackages)];
@@ -92,7 +94,12 @@
 	if (_hasUpdates && section == 0) {
 		return @"Updates";
 	}
-	return @"Installed Packages";
+	else if (section == 1) {
+		return @"Installed Packages";
+	}
+	else {
+		return nil;
+	}
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
