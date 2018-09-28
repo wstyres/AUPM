@@ -13,11 +13,11 @@
   [super loadView];
 
   UINavigationController *debugNavController = [[UINavigationController alloc] initWithRootViewController:[[AUPMWebViewController alloc] init]];
-  UITabBarItem *debugIcon = [[UITabBarItem alloc] initWithTitle:@"Beta" image:[UIImage imageNamed:@"beta.png"] selectedImage:[UIImage imageNamed:@"beta-filled.png"]];
+  UITabBarItem *debugIcon = [[UITabBarItem alloc] initWithTitle:@"Beta" image:[UIImage imageNamed:@"beta.png"] selectedImage:[UIImage imageNamed:@"beta.png"]];
   [debugNavController setTabBarItem:debugIcon];
 
   UINavigationController *reposNavController = [[UINavigationController alloc] initWithRootViewController:[[AUPMRepoListViewController alloc] init]];
-  UITabBarItem *repoIcon = [[UITabBarItem alloc] initWithTitle:@"Sources" image:[UIImage imageNamed:@"sources.png"] selectedImage:[UIImage imageNamed:@"sources-filled.png"]];
+  UITabBarItem *repoIcon = [[UITabBarItem alloc] initWithTitle:@"Sources" image:[UIImage imageNamed:@"sources.png"] selectedImage:[UIImage imageNamed:@"sources.png"]];
   [reposNavController setTabBarItem:repoIcon];
   //
   // UINavigationController *updatesNavController = [[UINavigationController alloc] initWithRootViewController:[[AUPMUpdatesViewController alloc] init]];
@@ -25,11 +25,11 @@
   // [updatesNavController setTabBarItem:updatesIcon];
 
   UINavigationController *packagesNavController = [[UINavigationController alloc] initWithRootViewController:[[AUPMPackageListViewController alloc] init]];
-  UITabBarItem *packageIcon = [[UITabBarItem alloc] initWithTitle:@"Packages" image:[UIImage imageNamed:@"installed.png"] selectedImage:[UIImage imageNamed:@"installed-filled.png"]];
+  UITabBarItem *packageIcon = [[UITabBarItem alloc] initWithTitle:@"Packages" image:[UIImage imageNamed:@"packages.png"] selectedImage:[UIImage imageNamed:@"packages.png"]];
   [packagesNavController setTabBarItem:packageIcon];
 
   UINavigationController *searchNavController = [[UINavigationController alloc] initWithRootViewController:[[AUPMSearchViewController alloc] init]];
-  UITabBarItem *searchIcon = [[UITabBarItem alloc] initWithTitle:@"Search" image:[UIImage imageNamed:@"search.png"] selectedImage:[UIImage imageNamed:@"search-filled.png"]];
+  UITabBarItem *searchIcon = [[UITabBarItem alloc] initWithTitle:@"Search" image:[UIImage imageNamed:@"search.png"] selectedImage:[UIImage imageNamed:@"search.png"]];
   [searchNavController setTabBarItem:searchIcon];
 
   self.viewControllers = [NSArray arrayWithObjects:debugNavController, reposNavController, packagesNavController, searchNavController, nil];
