@@ -52,15 +52,22 @@
 }
 
 - (void)userContentController:(WKUserContentController *)userContentController didReceiveScriptMessage:(WKScriptMessage *)message {
-    NSString *action = message.body;
-    if ([action isEqualToString:@"nuke"]) {
-      [self nukeDatabase];
+    NSArray *contents = [message.body componentsSeparatedByString:@"~"];
+    NSString *destination = (NSString *)contents[0];
+    NSString *action = contents[1];
+
+    NSLog(@"[AUPM] Web message %@", contents);
+
+    if ([destination isEqual:@"local"]) {
+      if ([action isEqual:@"nuke"]) {
+        [self nukeDatabase];
+      }
+      else if ([action isEqual:@"sendBug"]) {
+        [self sendBugReport];
+      }
     }
-    else if ([action isEqualToString:@"sendBug"]) {
-      [self sendBugReport];
-    }
-    else if ([action isEqualToString:@"changelog"]) {
-      AUPMWebViewController *webViewController = [[AUPMWebViewController alloc] initWithURL:[NSURL URLWithString:@"https://xtm3x.github.io/aupm/"]];
+    else if ([destination isEqual:@"web"]) {
+      AUPMWebViewController *webViewController = [[AUPMWebViewController alloc] initWithURL:[NSURL URLWithString:action]];
       [[self navigationController] pushViewController:webViewController animated:true];
     }
 }
