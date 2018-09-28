@@ -1,6 +1,3 @@
-@interface AUPMTabBarController : UITabBarController {
-  NSArray *_updateObjects;
-}
+@interface AUPMTabBarController : UITabBarController
 - (void)performBackgroundRefresh:(BOOL)requested;
-- (NSArray *)updateObjects;
 @end

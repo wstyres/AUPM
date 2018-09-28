@@ -60,8 +60,7 @@ bool packages_file_changed(FILE* f1, FILE* f2);
   NSDate *newUpdateDate = [NSDate date];
   [[NSUserDefaults standardUserDefaults] setObject:newUpdateDate forKey:@"lastUpdatedDate"];
 
-  //Cache installed packages
-  [self populateInstalledDatabase:^(BOOL success) {
+  [self updateEssentials:^(BOOL success) {
     completion(true);
   }];
 }
@@ -145,10 +144,71 @@ bool packages_file_changed(FILE* f1, FILE* f2);
   //dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
   [[NSUserDefaults standardUserDefaults] setObject:newUpdateDate forKey:@"lastUpdatedDate"];
 
-  //Cache installed packages
-  [self populateInstalledDatabase:^(BOOL success) {
+  [self updateEssentials:^(BOOL success) {
     completion(true);
   }];
+}
+
+//Update installed packages and packages that need updates. This needs to be done several times so creating this as a convienence method
+- (void)updateEssentials:(void (^)(BOOL success))completion {
+  //Repopulate the installed packages, because these change
+  [self populateInstalledDatabase:^(BOOL installedSuccess) {
+    if (installedSuccess) {
+      [self getPackagesThatNeedUpdates:^(NSArray *updates, BOOL hasUpdates) {
+        if (hasUpdates) {
+          _updateObjects = updates;
+          _numberOfPackagesThatNeedUpdates = updates.count;
+        }
+        _hasPackagesThatNeedUpdates = hasUpdates;
+        completion(true);
+      }];
+    }
+  }];
+}
+
+//Update packages that are currently installed on the system.
+- (void)populateInstalledDatabase:(void (^)(BOOL success))completion {
+  AUPMPackageManager *packageManager = [[AUPMPackageManager alloc] init];
+  NSArray *packagesArray = [packageManager installedPackageList];
+
+  RLMRealm *realm = [RLMRealm defaultRealm];
+  [realm transactionWithBlock:^{
+    [realm deleteObjects:[AUPMPackage objectsWhere:@"installed == TRUE"]];
+    for (AUPMPackage *package in packagesArray) {
+      RLMRealm *realm = [RLMRealm defaultRealm];
+      [realm addOrUpdateObject:package];
+    }
+  }];
+
+  completion(true);
+}
+
+- (void)getPackagesThatNeedUpdates:(void (^)(NSArray *updates, BOOL hasUpdates))completion {
+  NSMutableArray *updates = [NSMutableArray new];
+  RLMResults<AUPMPackage *> *installedPackages = [AUPMPackage objectsWhere:@"installed = true"];
+
+  for (AUPMPackage *package in installedPackages) {
+    RLMResults<AUPMPackage *> *otherVersions = [AUPMPackage objectsWhere:@"packageIdentifier == %@", [package packageIdentifier]];
+    if ([otherVersions count] != 1) {
+      for (AUPMPackage *otherPackage in otherVersions) {
+        if (otherPackage != package) {
+          int result = verrevcmp([[package version] UTF8String], [[otherPackage version] UTF8String]);
+
+          if (result < 0) {
+              [updates addObject:otherPackage];
+          }
+        }
+      }
+    }
+  }
+
+  NSArray *updateObjects = [self cleanUpDuplicatePackages:updates];
+  if (updateObjects.count > 0) {
+    completion(updateObjects, true);
+  }
+  else {
+    completion(NULL, false);
+  }
 }
 
 - (NSArray *)billOfReposToUpdate {
@@ -193,47 +253,6 @@ bool packages_file_changed(FILE* f1, FILE* f2);
   return (NSArray *)bill;
 }
 
-- (void)populateInstalledDatabase:(void (^)(BOOL success))completion {
-  AUPMPackageManager *packageManager = [[AUPMPackageManager alloc] init];
-  NSArray *packagesArray = [packageManager installedPackageList];
-
-  //(name text, packageid text, version text, section text, desc text, url text)
-  HBLogInfo(@"Started to parse installed packages");
-
-  RLMRealm *realm = [RLMRealm defaultRealm];
-  [realm transactionWithBlock:^{
-    [realm deleteObjects:[AUPMPackage objectsWhere:@"installed == TRUE"]];
-    for (AUPMPackage *package in packagesArray) {
-      RLMRealm *realm = [RLMRealm defaultRealm];
-      [realm addOrUpdateObject:package];
-    }
-  }];
-
-  completion(true);
-}
-
-- (NSArray<AUPMPackage*> *)packagesThatNeedUpdates {
-  NSMutableArray *updates = [NSMutableArray new];
-  RLMResults<AUPMPackage *> *installedPackages = [AUPMPackage objectsWhere:@"installed = true"];
-
-  for (AUPMPackage *package in installedPackages) {
-    RLMResults<AUPMPackage *> *otherVersions = [AUPMPackage objectsWhere:@"packageIdentifier == %@", [package packageIdentifier]];
-    if ([otherVersions count] != 1) {
-      for (AUPMPackage *otherPackage in otherVersions) {
-        if (otherPackage != package) {
-          int result = verrevcmp([[package version] UTF8String], [[otherPackage version] UTF8String]);
-
-          if (result < 0) {
-              [updates addObject:otherPackage];
-          }
-        }
-      }
-    }
-  }
-
-  return [self cleanUpDuplicatePackages:updates];
-}
-
 - (NSArray *)cleanUpDuplicatePackages:(NSArray *)packageList {
     NSMutableDictionary *packageVersionDict = [[NSMutableDictionary alloc] init];
     NSMutableArray *cleanedPackageList = [packageList mutableCopy];
@@ -259,7 +278,6 @@ bool packages_file_changed(FILE* f1, FILE* f2);
     return (NSArray *)cleanedPackageList;
 }
 
-
 - (void)deleteRepo:(AUPMRepo *)repo {
   RLMRealm *realm = [RLMRealm defaultRealm];
 
@@ -283,6 +301,18 @@ bool packages_file_changed(FILE* f1, FILE* f2);
 
     [task launch];
   }];
+}
+
+- (BOOL)hasPackagesThatNeedUpdates {
+  return _hasPackagesThatNeedUpdates;
+}
+
+- (int)numberOfPackagesThatNeedUpdates {
+  return _numberOfPackagesThatNeedUpdates;
+}
+
+- (NSArray *)updateObjects {
+  return _updateObjects;
 }
 
 @end

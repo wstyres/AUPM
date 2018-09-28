@@ -5,11 +5,16 @@
 @class AUPMRepo;
 @class AUPMPackage;
 
-@interface AUPMDatabaseManager : NSObject
-@property (nonatomic) long long lastInsertedRowID;
-
+@interface AUPMDatabaseManager : NSObject {
+  BOOL _hasPackagesThatNeedUpdates;
+  int _numberOfPackagesThatNeedUpdates;
+  NSArray *_updateObjects;
+}
 - (void)firstLoadPopulation:(void (^)(BOOL success))completion;
 - (void)updatePopulation:(void (^)(BOOL success))completion;
+- (void)updateEssentials:(void (^)(BOOL success))completion;
 - (void)deleteRepo:(AUPMRepo *)repo;
-- (NSArray<AUPMPackage*> *)packagesThatNeedUpdates;
+- (BOOL)hasPackagesThatNeedUpdates;
+- (int)numberOfPackagesThatNeedUpdates;
+- (NSArray *)updateObjects;
 @end

@@ -14,12 +14,14 @@
 	BOOL _hasUpdates;
 	RLMResults<AUPMPackage *> *_objects;
 	AUPMRepo *_repo;
+	AUPMDatabaseManager *_databaseManager;
 }
 
 - (id)initWithRepo:(AUPMRepo *)repo {
 	self = [super init];
     if (self) {
         _repo = repo;
+				_databaseManager = ((AUPMAppDelegate *)[[UIApplication sharedApplication] delegate]).databaseManager;
     }
     return self;
 }
@@ -42,11 +44,10 @@
 }
 
 - (void)refreshTable {
-	_updateObjects = [((AUPMTabBarController *)self.tabBarController) updateObjects];
+	_hasUpdates = [_databaseManager hasPackagesThatNeedUpdates];
+	_updateObjects = [_databaseManager updateObjects];
 
 	if (_updateObjects.count > 0) {
-		_hasUpdates = true;
-
 		UIBarButtonItem *upgradeItem = [[UIBarButtonItem alloc] initWithTitle:@"Upgrade All" style:UIBarButtonItemStyleDone target:self action:@selector(upgradePackages)];
 		self.navigationItem.rightBarButtonItem = upgradeItem;
 	}

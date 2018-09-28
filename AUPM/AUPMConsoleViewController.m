@@ -1,5 +1,7 @@
 #import "AUPMConsoleViewController.h"
 #import "NSTask.h"
+#import "AUPMAppDelegate.h"
+#import "AUPMDatabaseManager.h"
 
 @implementation AUPMConsoleViewController {
     NSTask *_task;
@@ -39,7 +41,10 @@
 }
 
 - (void)dismissConsole {
+  AUPMDatabaseManager *databaseManager = ((AUPMAppDelegate *)[[UIApplication sharedApplication] delegate]).databaseManager;
+  [databaseManager updateEssentials:^(BOOL success) {
     [self dismissViewControllerAnimated:true completion:nil];
+  }];
 }
 
 - (void)receivedData:(NSNotification *)notif {
