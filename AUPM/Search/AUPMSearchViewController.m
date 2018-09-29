@@ -15,7 +15,13 @@
 
   CGRect screenRect = [[UIScreen mainScreen] bounds];
   CGFloat windowWidth = screenRect.size.width;
-  CGFloat safeHeight = [UIApplication sharedApplication].statusBarFrame.size.height + self.navigationController.navigationBar.frame.size.height;
+  CGFloat safeHeight;
+
+  if (@available(iOS 11.0, *)) {
+    safeHeight = [[UIApplication sharedApplication] keyWindow].safeAreaInsets.top;
+  } else {
+    safeHeight = [UIApplication sharedApplication].statusBarFrame.size.height + self.navigationController.navigationBar.frame.size.height;
+  }
 
   self.searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(0, safeHeight, windowWidth, 40)];
   self.searchBar.placeholder = @"Search Packages";
