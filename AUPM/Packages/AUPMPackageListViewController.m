@@ -49,9 +49,12 @@
 
 	NSLog(@"[AUPM] Got my %d updates %@", [databaseManager numberOfPackagesThatNeedUpdates], _updateObjects);
 
-	if (_updateObjects.count > 0) {
+	if (_hasUpdates) {
 		UIBarButtonItem *upgradeItem = [[UIBarButtonItem alloc] initWithTitle:@"Upgrade All" style:UIBarButtonItemStyleDone target:self action:@selector(upgradePackages)];
 		self.navigationItem.rightBarButtonItem = upgradeItem;
+	}
+	else {
+		self.navigationItem.rightBarButtonItems = nil;
 	}
 
 	_objects = [[AUPMPackage objectsWhere:@"installed = true"] sortedResultsUsingDescriptors:@[
