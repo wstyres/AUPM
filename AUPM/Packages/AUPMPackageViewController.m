@@ -79,7 +79,7 @@
 - (void)installPackage {
 	NSTask *task = [[NSTask alloc] init];
 	[task setLaunchPath:@"/Applications/AUPM.app/supersling"];
-	NSArray *arguments = [[NSArray alloc] initWithObjects: @"apt-get", @"install", [NSString stringWithFormat:@"%@=%@", [_package packageIdentifier], [_package version]], @"-y", @"--force-yes", nil];
+	NSArray *arguments = [[NSArray alloc] initWithObjects: @"apt-get", @"install", [NSString stringWithFormat:@"%@=%@", [_package packageIdentifier], [_package version]], @"-o", @"Dir::Etc::SourceList=/var/lib/aupm/aupm.list", @"-o", @"Dir::State::Lists=/var/lib/aupm/lists", @"-o", @"Dir::Etc::SourceParts=/var/lib/aupm/lists/partial/false", @"-y", @"--force-yes", nil];
 	[task setArguments:arguments];
 
 	RLMRealm *realm = [RLMRealm defaultRealm];
@@ -95,7 +95,7 @@
 - (void)removePackage {
 	NSTask *task = [[NSTask alloc] init];
 	[task setLaunchPath:@"/Applications/AUPM.app/supersling"];
-	NSArray *arguments = [[NSArray alloc] initWithObjects: @"apt-get", @"remove", [_package packageIdentifier], @"-y", @"--force-yes", nil];
+	NSArray *arguments = [[NSArray alloc] initWithObjects: @"apt-get", @"remove", [_package packageIdentifier], @"-o", @"Dir::Etc::SourceList=/var/lib/aupm/aupm.list", @"-o", @"Dir::State::Lists=/var/lib/aupm/lists", @"-o", @"Dir::Etc::SourceParts=/var/lib/aupm/lists/partial/false", @"-y", @"--force-yes", nil];
 	[task setArguments:arguments];
 
 	RLMRealm *realm = [RLMRealm defaultRealm];
