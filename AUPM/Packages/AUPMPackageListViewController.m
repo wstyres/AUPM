@@ -158,9 +158,17 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 	[tableView deselectRowAtIndexPath:indexPath animated:YES];
-	AUPMPackage *package = _objects[indexPath.row];
-	AUPMPackageViewController *packageVC = [[AUPMPackageViewController alloc] initWithPackage:package];
-    [self.navigationController pushViewController:packageVC animated:YES];
+	AUPMPackage *package;
+	if (_hasUpdates && indexPath.section == 0) {
+		package = _updateObjects[indexPath.row];
+		AUPMPackageViewController *packageVC = [[AUPMPackageViewController alloc] initWithPackage:package];
+	  [self.navigationController pushViewController:packageVC animated:YES];
+	}
+	else {
+		package = _objects[indexPath.row];
+		AUPMPackageViewController *packageVC = [[AUPMPackageViewController alloc] initWithPackage:package];
+	  [self.navigationController pushViewController:packageVC animated:YES];
+	}
 }
 
 @end
