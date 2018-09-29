@@ -185,31 +185,33 @@ bool packages_file_changed(FILE* f1, FILE* f2);
 }
 
 - (void)getPackagesThatNeedUpdates:(void (^)(NSArray *updates, BOOL hasUpdates))completion {
-  NSMutableArray *updates = [NSMutableArray new];
-  RLMResults<AUPMPackage *> *installedPackages = [AUPMPackage objectsWhere:@"installed = true"];
+  dispatch_async(dispatch_get_main_queue(), ^{
+    NSMutableArray *updates = [NSMutableArray new];
+    RLMResults<AUPMPackage *> *installedPackages = [AUPMPackage objectsWhere:@"installed = true"];
 
-  for (AUPMPackage *package in installedPackages) {
-    RLMResults<AUPMPackage *> *otherVersions = [AUPMPackage objectsWhere:@"packageIdentifier == %@", [package packageIdentifier]];
-    if ([otherVersions count] != 1) {
-      for (AUPMPackage *otherPackage in otherVersions) {
-        if (otherPackage != package) {
-          int result = verrevcmp([[package version] UTF8String], [[otherPackage version] UTF8String]);
+    for (AUPMPackage *package in installedPackages) {
+      RLMResults<AUPMPackage *> *otherVersions = [AUPMPackage objectsWhere:@"packageIdentifier == %@", [package packageIdentifier]];
+      if ([otherVersions count] != 1) {
+        for (AUPMPackage *otherPackage in otherVersions) {
+          if (otherPackage != package) {
+            int result = verrevcmp([[package version] UTF8String], [[otherPackage version] UTF8String]);
 
-          if (result < 0) {
-              [updates addObject:otherPackage];
+            if (result < 0) {
+                [updates addObject:otherPackage];
+            }
           }
         }
       }
     }
-  }
 
-  NSArray *updateObjects = [self cleanUpDuplicatePackages:updates];
-  if (updateObjects.count > 0) {
-    completion(updateObjects, true);
-  }
-  else {
-    completion(NULL, false);
-  }
+    NSArray *updateObjects = [self cleanUpDuplicatePackages:updates];
+    if (updateObjects.count > 0) {
+      completion(updateObjects, true);
+    }
+    else {
+      completion(NULL, false);
+    }
+  });
 }
 
 - (NSArray *)billOfReposToUpdate {
@@ -313,7 +315,6 @@ bool packages_file_changed(FILE* f1, FILE* f2);
 }
 
 - (NSArray *)updateObjects {
-  NSLog(@"[AUPM] Requested updates %@", _updateObjects);
   return _updateObjects;
 }
 
