@@ -66,6 +66,9 @@
 }
 
 - (void)configureNavButton {
+	if ([_package isInvalidated]) {
+    NSLog(@"[AUPM] Object Invalidated!");
+  }
 	if ([_package isInstalled]) {
 		UIBarButtonItem *removeButton = [[UIBarButtonItem alloc] initWithTitle:@"Remove" style:UIBarButtonItemStylePlain target:self action:@selector(removePackage)];
 		self.navigationItem.rightBarButtonItem = removeButton;
@@ -82,11 +85,6 @@
 	NSArray *arguments = [[NSArray alloc] initWithObjects: @"apt-get", @"install", [NSString stringWithFormat:@"%@=%@", [_package packageIdentifier], [_package version]], @"-o", @"Dir::Etc::SourceList=/var/lib/aupm/aupm.list", @"-o", @"Dir::State::Lists=/var/lib/aupm/lists", @"-o", @"Dir::Etc::SourceParts=/var/lib/aupm/lists/partial/false", @"-y", @"--force-yes", nil];
 	[task setArguments:arguments];
 
-	RLMRealm *realm = [RLMRealm defaultRealm];
-	[realm beginWriteTransaction];
-	_package.installed = true; //This should be updated based on the completion of the task
-	[realm commitWriteTransaction];
-
 	AUPMConsoleViewController *console = [[AUPMConsoleViewController alloc] initWithTask:task];
 	UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:console];
 	[self presentViewController:navController animated:true completion:nil];
@@ -97,11 +95,6 @@
 	[task setLaunchPath:@"/Applications/AUPM.app/supersling"];
 	NSArray *arguments = [[NSArray alloc] initWithObjects: @"apt-get", @"remove", [_package packageIdentifier], @"-o", @"Dir::Etc::SourceList=/var/lib/aupm/aupm.list", @"-o", @"Dir::State::Lists=/var/lib/aupm/lists", @"-o", @"Dir::Etc::SourceParts=/var/lib/aupm/lists/partial/false", @"-y", @"--force-yes", nil];
 	[task setArguments:arguments];
-
-	RLMRealm *realm = [RLMRealm defaultRealm];
-	[realm beginWriteTransaction];
-	_package.installed = false; //This should be updated based on the completion of the task
-	[realm commitWriteTransaction];
 
 	AUPMConsoleViewController *console = [[AUPMConsoleViewController alloc] initWithTask:task];
 	UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:console];
