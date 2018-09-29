@@ -40,14 +40,11 @@
   self.searchBar.frame = frame;
 }
 
-- (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText {
-  self.results = [[AUPMPackage allObjects] objectsWhere:@"packageName CONTAINS[cd] %@", searchText];
+- (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar {
+  [searchBar resignFirstResponder];
+  [searchBar setShowsCancelButton:NO animated:YES];
+  self.results = [[AUPMPackage allObjects] objectsWhere:@"packageName CONTAINS[cd] %@", searchBar.text];
   [self.tableView reloadData];
-}
-
-- (void) searchBarSearchButtonClicked:(UISearchBar*) theSearchBar {
-  [theSearchBar resignFirstResponder];
-  [theSearchBar setShowsCancelButton:NO animated:YES];
 }
 
 - (void)searchBarTextDidBeginEditing:(UISearchBar *)searchBar {
