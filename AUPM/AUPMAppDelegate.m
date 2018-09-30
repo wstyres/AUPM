@@ -19,24 +19,26 @@
 	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
 	NSString *documentsDirectory = paths[0];
 	NSString *dataPath = [documentsDirectory stringByAppendingPathComponent:@"/AUPMDatabase"];
-	if (![[NSFileManager defaultManager] fileExistsAtPath:dataPath])
-    [[NSFileManager defaultManager] createDirectoryAtPath:dataPath withIntermediateDirectories:NO attributes:nil error:nil];
+	if (![[NSFileManager defaultManager] fileExistsAtPath:dataPath]) {
+		[[NSFileManager defaultManager] createDirectoryAtPath:dataPath withIntermediateDirectories:NO attributes:nil error:nil];
+	}
 	config.fileURL = [NSURL URLWithString:[dataPath stringByAppendingPathComponent:@"/aupm.realm"]];
 	config.deleteRealmIfMigrationNeeded = YES;
 	[RLMRealmConfiguration setDefaultConfiguration:config];
 
 	self.databaseManager = [[AUPMDatabaseManager alloc] init];
 
-	if ([[RLMRealm defaultRealm] isEmpty]) {
-
+	if (![[NSFileManager defaultManager] fileExistsAtPath:@"/var/lib/aupm/aupm.list"]) {
 		NSTask *cpTask = [[NSTask alloc] init];
-	  [cpTask setLaunchPath:@"/Applications/AUPM.app/supersling"];
-	  NSArray *cpArgs = [[NSArray alloc] initWithObjects: @"cp", @"-fR", @"/var/lib/aupm/default.list", @"/var/lib/aupm/aupm.list", nil];
-	  [cpTask setArguments:cpArgs];
+		[cpTask setLaunchPath:@"/Applications/AUPM.app/supersling"];
+		NSArray *cpArgs = [[NSArray alloc] initWithObjects: @"cp", @"-fR", @"/var/lib/aupm/default.list", @"/var/lib/aupm/aupm.list", nil];
+		[cpTask setArguments:cpArgs];
 
-	  [cpTask launch];
-	  [cpTask waitUntilExit];
+		[cpTask launch];
+		[cpTask waitUntilExit];
+	}
 
+	if ([[RLMRealm defaultRealm] isEmpty]) {
 		AUPMRefreshViewController *refreshViewController = [[AUPMRefreshViewController alloc] init];
 
 		self.window.rootViewController = refreshViewController;
