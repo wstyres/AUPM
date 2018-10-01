@@ -19,8 +19,13 @@
 	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
 	NSString *documentsDirectory = paths[0];
 	NSString *dataPath = [documentsDirectory stringByAppendingPathComponent:@"/AUPMDatabase"];
+
+	NSError *error;
 	if (![[NSFileManager defaultManager] fileExistsAtPath:dataPath]) {
-		[[NSFileManager defaultManager] createDirectoryAtPath:dataPath withIntermediateDirectories:NO attributes:nil error:nil];
+		[[NSFileManager defaultManager] createDirectoryAtPath:dataPath withIntermediateDirectories:NO attributes:nil error:&error];
+		if (error != nil) {
+			NSLog(@"[AUPM] Error while creating directory in documents directory: %@", error.localizedDescription);
+		}
 	}
 	config.fileURL = [NSURL URLWithString:[dataPath stringByAppendingPathComponent:@"/aupm.realm"]];
 	config.deleteRealmIfMigrationNeeded = YES;
@@ -38,7 +43,13 @@
 		[cpTask waitUntilExit];
 	}
 
-	if ([[RLMRealm defaultRealm] isEmpty]) {
+	NSError *configError;
+	RLMRealm *realm = [RLMRealm realmWithConfiguration:config error:&configError];
+
+	if (configError != nil) {
+		NSLog(@"[AUPM] Error when opening database: %@", configError.localizedDescription);
+	}
+	if ([realm isEmpty]) {
 		AUPMRefreshViewController *refreshViewController = [[AUPMRefreshViewController alloc] init];
 
 		self.window.rootViewController = refreshViewController;
