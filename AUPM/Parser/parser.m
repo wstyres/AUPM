@@ -34,10 +34,12 @@ NSArray *packages_to_array(const char *path)
                 int colonIndex = (int)(colon - info);
 
                 const UInt8 *bytes = (const UInt8 *)info;
-                CFStringRef key = CFStringCreateWithBytes(kCFAllocatorDefault, bytes, colonIndex, kCFStringEncodingMacRoman, true);
+                CFStringRef key = CFStringCreateWithBytes(kCFAllocatorDefault, bytes, colonIndex, kCFStringEncodingUTF8, true);
                 bytes += colonIndex + 2;
-                CFStringRef value = CFStringCreateWithBytes(kCFAllocatorDefault, bytes, len - (colonIndex + 1), kCFStringEncodingMacRoman, true);
-                CFDictionaryAddValue(package, key, value);
+                CFStringRef value = CFStringCreateWithBytes(kCFAllocatorDefault, bytes, len - (colonIndex + 1), kCFStringEncodingUTF8, true);
+                if (key != NULL && value != NULL) {            
+                  CFDictionaryAddValue(package, key, value);
+                }
             }
         }
         else {

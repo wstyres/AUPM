@@ -41,6 +41,7 @@
 	if (configError != nil) {
 		NSLog(@"[AUPM] Error when opening database: %@", configError.localizedDescription);
 	}
+
 	if ([realm isEmpty]) {
 		AUPMRefreshViewController *refreshViewController = [[AUPMRefreshViewController alloc] init];
 
