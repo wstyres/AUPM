@@ -18,16 +18,8 @@
 	RLMRealmConfiguration *config = [RLMRealmConfiguration defaultConfiguration];
 	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
 	NSString *documentsDirectory = paths[0];
-	NSString *dataPath = [documentsDirectory stringByAppendingPathComponent:@"/AUPMDatabase"];
 
-	NSError *error;
-	if (![[NSFileManager defaultManager] fileExistsAtPath:dataPath]) {
-		[[NSFileManager defaultManager] createDirectoryAtPath:dataPath withIntermediateDirectories:NO attributes:nil error:&error];
-		if (error != nil) {
-			NSLog(@"[AUPM] Error while creating directory in documents directory: %@", error.localizedDescription);
-		}
-	}
-	config.fileURL = [NSURL URLWithString:[dataPath stringByAppendingPathComponent:@"/aupm.realm"]];
+	config.fileURL = [NSURL URLWithString:[documentsDirectory stringByAppendingPathComponent:@"/aupm.realm"]];
 	config.deleteRealmIfMigrationNeeded = YES;
 	[RLMRealmConfiguration setDefaultConfiguration:config];
 
