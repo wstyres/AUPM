@@ -4,7 +4,6 @@
 #import "../Packages/AUPMPackageViewController.h"
 
 @interface AUPMSearchViewController ()
-@property (nonatomic, strong) UISearchBar *searchBar;
 @property (nonatomic, strong) RLMResults<AUPMPackage *> *results;
 @end
 
@@ -13,36 +12,20 @@
 - (void)viewDidLoad {
   [super viewDidLoad];
 
-  CGRect screenRect = [[UIScreen mainScreen] bounds];
-  CGFloat windowWidth = screenRect.size.width;
-  CGFloat safeHeight;
-
-  if (@available(iOS 11.0, *)) {
-    safeHeight = [[UIApplication sharedApplication] keyWindow].safeAreaInsets.top;
-  } else {
-    safeHeight = [UIApplication sharedApplication].statusBarFrame.size.height + self.navigationController.navigationBar.frame.size.height;
-  }
-
-  self.searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(0, safeHeight, windowWidth, 40)];
-  self.searchBar.placeholder = @"Search Packages";
-  self.searchBar.delegate = self;
-  [self.view addSubview:self.searchBar];
-
-  self.tableView.contentInset = UIEdgeInsetsMake(self.searchBar.frame.size.height, 0, 0, 0);
-  self.tableView.scrollIndicatorInsets = UIEdgeInsetsMake(self.searchBar.frame.size.height, 0, 0, 0);
+  self.searchController = [[UISearchController alloc] initWithSearchResultsController:nil];
+  self.searchController.dimsBackgroundDuringPresentation = NO;
+  self.searchController.searchBar.delegate = self;
+  self.tableView.tableHeaderView = self.searchController.searchBar;
+  self.definesPresentationContext = YES;
+  [self.searchController.searchBar sizeToFit];
 
   self.title = @"Search";
 }
 
-- (void)scrollViewDidScroll:(UIScrollView *)scrollView {
-  CGRect frame = self.searchBar.frame;
-  frame.origin.y = scrollView.contentOffset.y + 64;
-  self.searchBar.frame = frame;
-}
+#pragma mark - UISearchBarDelegate
 
 - (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar {
   [searchBar resignFirstResponder];
-  [searchBar setShowsCancelButton:NO animated:YES];
   self.results = [[AUPMPackage allObjects] objectsWhere:@"packageName CONTAINS[cd] %@", searchBar.text];
   [self.tableView reloadData];
 }
