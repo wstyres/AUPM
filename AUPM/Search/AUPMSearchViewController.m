@@ -74,7 +74,7 @@
 	}
 
 	cell.textLabel.text = [package packageName];
-	cell.detailTextLabel.text = [NSString stringWithFormat:@"%@ (%@)", [package packageIdentifier], [package version]];
+	cell.detailTextLabel.text = [NSString stringWithFormat:@"from %@ (%@)", [[package repo] repoName], [package version]];
 
 	CGSize itemSize = CGSizeMake(35, 35);
   UIGraphicsBeginImageContextWithOptions(itemSize, NO, UIScreen.mainScreen.scale);
