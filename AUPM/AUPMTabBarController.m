@@ -1,6 +1,5 @@
 #import "AUPMTabBarController.h"
 #import "Repos/AUPMRepoListViewController.h"
-#import "Updates/AUPMUpdatesViewController.h"
 #import "Packages/AUPMPackageListViewController.h"
 #import "Search/AUPMSearchViewController.h"
 #import "AUPMWebViewController.h"
@@ -19,11 +18,7 @@
   UINavigationController *reposNavController = [[UINavigationController alloc] initWithRootViewController:[[AUPMRepoListViewController alloc] init]];
   UITabBarItem *repoIcon = [[UITabBarItem alloc] initWithTitle:@"Sources" image:[UIImage imageNamed:@"sources.png"] selectedImage:[UIImage imageNamed:@"sources.png"]];
   [reposNavController setTabBarItem:repoIcon];
-  //
-  // UINavigationController *updatesNavController = [[UINavigationController alloc] initWithRootViewController:[[AUPMUpdatesViewController alloc] init]];
-  // UITabBarItem *updatesIcon = [[UITabBarItem alloc] initWithTitle:@"Updates" image:[UIImage imageNamed:@"updates.png"] selectedImage:[UIImage imageNamed:@"updates-filled.png"]];
-  // [updatesNavController setTabBarItem:updatesIcon];
-
+  
   UINavigationController *packagesNavController = [[UINavigationController alloc] initWithRootViewController:[[AUPMPackageListViewController alloc] init]];
   UITabBarItem *packageIcon = [[UITabBarItem alloc] initWithTitle:@"Packages" image:[UIImage imageNamed:@"packages.png"] selectedImage:[UIImage imageNamed:@"packages.png"]];
   [packagesNavController setTabBarItem:packageIcon];

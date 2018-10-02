@@ -4,7 +4,6 @@
 #import "Repos/AUPMRepo.h"
 #import "Packages/AUPMPackage.h"
 #import "Packages/AUPMPackageManager.h"
-#import "Updates/AUPMDateKeeper.h"
 #include "Repos/dpkgver.c"
 
 @implementation AUPMDatabaseManager
@@ -33,16 +32,11 @@ bool packages_file_changed(FILE* f1, FILE* f2);
 
   AUPMRepoManager *repoManager = [[AUPMRepoManager alloc] init];
   NSArray *repoArray = [repoManager managedRepoList];
-  AUPMDateKeeper *dateKeeper = [[AUPMDateKeeper alloc] init];
-  dateKeeper.date = [NSDate date];
   [[RLMRealm defaultRealm] transactionWithBlock:^{
     for (AUPMRepo *repo in repoArray) {
       NSDate *methodStart = [NSDate date];
       NSArray<AUPMPackage *> *packagesArray = [repoManager packageListForRepo:repo];
       [realm addObject:repo];
-      for (AUPMPackage *package in packagesArray) {
-        package.dateKeeper = dateKeeper;
-      }
 
       @try {
         [realm addObjects:packagesArray];
@@ -118,20 +112,6 @@ bool packages_file_changed(FILE* f1, FILE* f2);
     NSLog(@"[AUPM] Time to add %@ to database: %f seconds", [repo repoName], executionTime);
   }
 
-  NSLog(@"[AUPM] Adding times to new packages");
-  // //Use this to give new packages new dates, this is pretty bad implementation but it works (probably)
-  NSLog(@"[AUPM] Getting list of packages with no date");
-  RLMResults *dateless = [AUPMPackage objectsWhere:@"dateKeeper == NULL"];
-  NSLog(@"[AUPM] Adding dates to packages");
-  NSDate *newUpdateDate = [NSDate date];
-  [[RLMRealm defaultRealm] transactionWithBlock:^{
-    AUPMDateKeeper *dateKeeper = [[AUPMDateKeeper alloc] init];
-    dateKeeper.date = newUpdateDate;
-    for (AUPMPackage *package in dateless) {
-      package.dateKeeper = dateKeeper;
-    }
-  }];
-  NSLog(@"[AUPM] Done");
   NSLog(@"[AUPM] Populating installed database");
 
   NSTask *deletePackageCache = [[NSTask alloc] init];
@@ -141,7 +121,7 @@ bool packages_file_changed(FILE* f1, FILE* f2);
 
   [deletePackageCache launch];
 
-  //dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
+  NSDate *newUpdateDate = [NSDate date];
   [[NSUserDefaults standardUserDefaults] setObject:newUpdateDate forKey:@"lastUpdatedDate"];
 
   [self updateEssentials:^(BOOL success) {
