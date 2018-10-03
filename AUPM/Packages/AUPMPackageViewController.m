@@ -68,14 +68,17 @@
 - (void)configureNavButton {
 	if ([_package isInvalidated]) {
     NSLog(@"[AUPM] Object Invalidated!");
+		[[self navigationController] popViewControllerAnimated:true];
   }
-	if ([_package isInstalled]) {
-		UIBarButtonItem *removeButton = [[UIBarButtonItem alloc] initWithTitle:@"Remove" style:UIBarButtonItemStylePlain target:self action:@selector(removePackage)];
-		self.navigationItem.rightBarButtonItem = removeButton;
-	}
 	else {
-		UIBarButtonItem *installButton = [[UIBarButtonItem alloc] initWithTitle:@"Install" style:UIBarButtonItemStylePlain target:self action:@selector(installPackage)];
-		self.navigationItem.rightBarButtonItem = installButton;
+		if ([_package isInstalled]) {
+			UIBarButtonItem *removeButton = [[UIBarButtonItem alloc] initWithTitle:@"Remove" style:UIBarButtonItemStylePlain target:self action:@selector(removePackage)];
+			self.navigationItem.rightBarButtonItem = removeButton;
+		}
+		else {
+			UIBarButtonItem *installButton = [[UIBarButtonItem alloc] initWithTitle:@"Install" style:UIBarButtonItemStylePlain target:self action:@selector(installPackage)];
+			self.navigationItem.rightBarButtonItem = installButton;
+		}
 	}
 }
 
