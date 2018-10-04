@@ -4,6 +4,7 @@
 #import "AUPMDatabaseManager.h"
 #import "AUPMTabBarController.h"
 #import "Packages/AUPMPackage.h"
+#import "Packages/AUPMPackageManager.h"
 
 @implementation AUPMConsoleViewController {
     NSArray *_packages;
@@ -96,7 +97,7 @@
     [output waitForDataInBackgroundAndNotify];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receivedData:) name:NSFileHandleDataAvailableNotification object:output];
 
-    UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithTitle:@"Done" style:UIBarButtonItemStyleDone target:self action:@selector(dismissConsole)];
+    UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithTitle:@"Done" style:UIBarButtonItemStyleDone target:self action:@selector(postInstallActions)];
     UINavigationItem *navItem = self.navigationItem;
     task.terminationHandler = ^(NSTask *task){
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -107,16 +108,87 @@
     [task launch];
 }
 
-// - (void)postInstallActions {
-//   AUPMPackageManager *packageManager = [[AUPMPackageManager alloc] init];
-//
-//   UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"My Alert" message:@"This is an alert." preferredStyle:UIAlertControllerStyleAlert];
-//
-//   UIAlertAction* defaultAction = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {}];
-//
-//   [alert addAction:defaultAction];
-//   [self presentViewController:alert animated:YES completion:nil];
-// }
+- (void)postInstallActions {
+  if (_action == 0 || _action == 2) {
+    AUPMPackageManager *packageManager = [[AUPMPackageManager alloc] init];
+
+    if ([_packages count] == 1) {
+      if ([packageManager packageHasApp:[_packages firstObject]]) {
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"Application Detected"
+                           message:@"It looks like this package contains an application that appears on your home screen. Would you like to run uicache? If not, the application won't show up until a reboot."
+                           preferredStyle:UIAlertControllerStyleAlert];
+
+        UIAlertAction* okAction = [UIAlertAction actionWithTitle:@"Yep!" style:UIAlertActionStyleDefault
+                                        handler:^(UIAlertAction * action) {
+                                          [alert dismissViewControllerAnimated:true completion:nil];
+
+                                          UIAlertController* waitAlert = [UIAlertController alertControllerWithTitle:@"Awesome!"
+                                                             message:@"This might take a second, hang on!"
+                                                             preferredStyle:UIAlertControllerStyleAlert];
+
+                                          [self presentViewController:waitAlert animated:YES completion:nil];
+
+                                          NSTask *uiCacheTask = [[NSTask alloc] init];
+                                          [uiCacheTask setLaunchPath:@"/usr/bin/uicache"];
+
+                                          [uiCacheTask launch];
+                                          [uiCacheTask waitUntilExit];
+
+                                          [waitAlert dismissViewControllerAnimated:true completion:nil];
+                                          [self dismissConsole];
+                                        }];
+
+        UIAlertAction* noWayAction = [UIAlertAction actionWithTitle:@"No way!" style:UIAlertActionStyleDefault
+                                        handler:^(UIAlertAction * action) {
+                                          [alert dismissViewControllerAnimated:true completion:nil];
+                                          [self dismissConsole];
+                                        }];
+
+        [alert addAction:okAction];
+        [alert addAction:noWayAction];
+        [self presentViewController:alert animated:YES completion:nil];
+      }
+      else if ([packageManager packageHasTweak:[_packages firstObject]]) {
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"Tweak Detected"
+                           message:@"It looks like this package contains an tweak. Would you like to respring? If not, the tweak may not work until you respring."
+                           preferredStyle:UIAlertControllerStyleAlert];
+
+        UIAlertAction* okAction = [UIAlertAction actionWithTitle:@"Yep!" style:UIAlertActionStyleDefault
+                                        handler:^(UIAlertAction * action) {
+                                          // [alert dismissViewControllerAnimated:true completion:nil];
+
+                                          UIAlertController* waitAlert = [UIAlertController alertControllerWithTitle:@"Awesome!"
+                                                             message:@"This might take a second, hang on!"
+                                                             preferredStyle:UIAlertControllerStyleAlert];
+
+                                          [self presentViewController:waitAlert animated:YES completion:nil];
+
+                                          NSTask *respringTask = [[NSTask alloc] init];
+                                          [respringTask setLaunchPath:@"/usr/bin/killall"];
+                                          NSArray *args = [[NSArray alloc] initWithObjects: @"-9", @"backboardd", nil];
+                                          [respringTask setArguments:args];
+
+                                          [respringTask launch];
+
+                                          [waitAlert dismissViewControllerAnimated:true completion:nil];
+                                        }];
+
+        UIAlertAction* noWayAction = [UIAlertAction actionWithTitle:@"No way!" style:UIAlertActionStyleDefault
+                                        handler:^(UIAlertAction * action) {
+                                          [alert dismissViewControllerAnimated:true completion:nil];
+                                          [self dismissConsole];
+                                        }];
+
+        [alert addAction:okAction];
+        [alert addAction:noWayAction];
+        [self presentViewController:alert animated:YES completion:nil];
+      }
+    }
+  }
+  else {
+    [self dismissConsole];
+  }
+}
 
 - (void)dismissConsole {
   AUPMDatabaseManager *databaseManager = ((AUPMAppDelegate *)[[UIApplication sharedApplication] delegate]).databaseManager;
