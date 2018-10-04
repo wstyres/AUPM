@@ -1,5 +1,7 @@
 @class NSTask;
 
 @interface AUPMConsoleViewController : UIViewController
-- (id)initWithTask:(NSTask *)task;
+- (id)initAndInstall:(NSArray *)packages;
+- (id)initAndRemove:(NSArray *)packages;
+- (id)initAndUpgrade;
 @end

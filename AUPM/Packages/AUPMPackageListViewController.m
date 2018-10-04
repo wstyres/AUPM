@@ -65,12 +65,7 @@
 }
 
 - (void)upgradePackages {
-	NSTask *task = [[NSTask alloc] init];
-	[task setLaunchPath:@"/Applications/AUPM.app/supersling"];
-	NSArray *arguments = [[NSArray alloc] initWithObjects: @"apt-get", @"upgrade", @"-o", @"Dir::Etc::SourceList=/var/lib/aupm/aupm.list", @"-o", @"Dir::State::Lists=/var/lib/aupm/lists", @"-o", @"Dir::Etc::SourceParts=/var/lib/aupm/lists/partial/false", @"-y", @"--force-yes", nil];
-	[task setArguments:arguments];
-
-	AUPMConsoleViewController *console = [[AUPMConsoleViewController alloc] initWithTask:task];
+	AUPMConsoleViewController *console = [[AUPMConsoleViewController alloc] initAndUpgrade];
 	UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:console];
 	[self presentViewController:navController animated:true completion:nil];
 }

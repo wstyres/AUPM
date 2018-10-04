@@ -83,23 +83,13 @@
 }
 
 - (void)installPackage {
-	NSTask *task = [[NSTask alloc] init];
-	[task setLaunchPath:@"/Applications/AUPM.app/supersling"];
-	NSArray *arguments = [[NSArray alloc] initWithObjects: @"apt-get", @"install", [NSString stringWithFormat:@"%@=%@", [_package packageIdentifier], [_package version]], @"-o", @"Dir::Etc::SourceList=/var/lib/aupm/aupm.list", @"-o", @"Dir::State::Lists=/var/lib/aupm/lists", @"-o", @"Dir::Etc::SourceParts=/var/lib/aupm/lists/partial/false", @"-y", @"--force-yes", nil];
-	[task setArguments:arguments];
-
-	AUPMConsoleViewController *console = [[AUPMConsoleViewController alloc] initWithTask:task];
+	AUPMConsoleViewController *console = [[AUPMConsoleViewController alloc] initAndInstall:@[_package]];
 	UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:console];
 	[self presentViewController:navController animated:true completion:nil];
 }
 
 - (void)removePackage {
-	NSTask *task = [[NSTask alloc] init];
-	[task setLaunchPath:@"/Applications/AUPM.app/supersling"];
-	NSArray *arguments = [[NSArray alloc] initWithObjects: @"apt-get", @"remove", [_package packageIdentifier], @"-o", @"Dir::Etc::SourceList=/var/lib/aupm/aupm.list", @"-o", @"Dir::State::Lists=/var/lib/aupm/lists", @"-o", @"Dir::Etc::SourceParts=/var/lib/aupm/lists/partial/false", @"-y", @"--force-yes", nil];
-	[task setArguments:arguments];
-
-	AUPMConsoleViewController *console = [[AUPMConsoleViewController alloc] initWithTask:task];
+	AUPMConsoleViewController *console = [[AUPMConsoleViewController alloc] initAndRemove:@[_package]];
 	UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:console];
 	[self presentViewController:navController animated:true completion:nil];
 }
