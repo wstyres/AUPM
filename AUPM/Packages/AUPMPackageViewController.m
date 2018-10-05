@@ -3,6 +3,7 @@
 #import "../AUPMConsoleViewController.h"
 #import "../AUPMQueue.h"
 #import "../AUPMQueueAction.h"
+#import "AUPMQueueViewController.h"
 
 @implementation AUPMPackageViewController {
 	BOOL _isFinishedLoading;
@@ -87,8 +88,8 @@
 	AUPMQueue *queue = [AUPMQueue sharedInstance];
 	[queue addPackage:_package toQueueWithAction:AUPMQueueActionInstall];
 
-	AUPMConsoleViewController *console = [[AUPMConsoleViewController alloc] init];
-	UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:console];
+	AUPMQueueViewController *queueVC = [[AUPMQueueViewController alloc] init];
+	UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:queueVC];
 	[self presentViewController:navController animated:true completion:nil];
 }
 
@@ -96,8 +97,8 @@
 	AUPMQueue *queue = [AUPMQueue sharedInstance];
 	[queue addPackage:_package toQueueWithAction:AUPMQueueActionRemove];
 
-	AUPMConsoleViewController *console = [[AUPMConsoleViewController alloc] init];
-	UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:console];
+	AUPMQueueViewController *queueVC = [[AUPMQueueViewController alloc] init];
+	UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:queueVC];
 	[self presentViewController:navController animated:true completion:nil];
 }
 

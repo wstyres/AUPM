@@ -10,6 +10,7 @@
 #import "../AUPMConsoleViewController.h"
 #import "../AUPMQueueAction.h"
 #import "../AUPMQueue.h"
+#import "AUPMQueueViewController.h"
 
 @implementation AUPMPackageListViewController {
 	NSArray *_updateObjects;
@@ -52,7 +53,7 @@
 	NSLog(@"[AUPM] Got my %d updates %@", [databaseManager numberOfPackagesThatNeedUpdates], _updateObjects);
 
 	if (_hasUpdates) {
-		UIBarButtonItem *upgradeItem = [[UIBarButtonItem alloc] initWithTitle:@"Upgrade All" style:UIBarButtonItemStyleDone target:self action:@selector(upgradePackages)];
+		UIBarButtonItem *upgradeItem = [[UIBarButtonItem alloc] initWithTitle:@"Upgrade All" style:UIBarButtonItemStyleDone target:self action:@selector(upgradeAllPackages)];
 		self.navigationItem.rightBarButtonItem = upgradeItem;
 	}
 	else {
@@ -71,8 +72,8 @@
 
 	[queue addPackages:_updateObjects toQueueWithAction:AUPMQueueActionUpgrade];
 
-	AUPMConsoleViewController *console = [[AUPMConsoleViewController alloc] init];
-	UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:console];
+	AUPMQueueViewController *queueVC = [[AUPMQueueViewController alloc] init];
+	UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:queueVC];
 	[self presentViewController:navController animated:true completion:nil];
 }
 
