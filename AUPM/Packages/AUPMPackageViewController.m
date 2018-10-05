@@ -1,7 +1,8 @@
 #import "AUPMPackageViewController.h"
 #import "AUPMPackage.h"
 #import "../AUPMConsoleViewController.h"
-#import <objc/runtime.h>
+#import "../AUPMQueue.h"
+#import "../AUPMQueueAction.h"
 
 @implementation AUPMPackageViewController {
 	BOOL _isFinishedLoading;
@@ -83,13 +84,19 @@
 }
 
 - (void)installPackage {
-	AUPMConsoleViewController *console = [[AUPMConsoleViewController alloc] initAndInstall:@[_package]];
+	AUPMQueue *queue = [AUPMQueue sharedInstance];
+	[queue addPackage:_package toQueueWithAction:AUPMQueueActionInstall];
+
+	AUPMConsoleViewController *console = [[AUPMConsoleViewController alloc] init];
 	UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:console];
 	[self presentViewController:navController animated:true completion:nil];
 }
 
 - (void)removePackage {
-	AUPMConsoleViewController *console = [[AUPMConsoleViewController alloc] initAndRemove:@[_package]];
+	AUPMQueue *queue = [AUPMQueue sharedInstance];
+	[queue addPackage:_package toQueueWithAction:AUPMQueueActionRemove];
+
+	AUPMConsoleViewController *console = [[AUPMConsoleViewController alloc] init];
 	UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:console];
 	[self presentViewController:navController animated:true completion:nil];
 }

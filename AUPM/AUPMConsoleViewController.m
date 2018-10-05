@@ -5,189 +5,143 @@
 #import "AUPMTabBarController.h"
 #import "Packages/AUPMPackage.h"
 #import "Packages/AUPMPackageManager.h"
+#import "AUPMQueue.h"
 
 @implementation AUPMConsoleViewController {
-    NSArray *_packages;
-    int _action;
-    UITextView *_consoleOutputView;
+  UITextView *_consoleOutputView;
+  AUPMQueue *_queue;
 }
 
-- (id)initAndInstall:(NSArray *)packages {
+- (id)init {
   self = [super init];
 
   if (self) {
-      _packages = packages;
-      _action = 0;
-  }
-
-  return self;
-}
-
-- (id)initAndRemove:(NSArray *)packages {
-  self = [super init];
-
-  if (self) {
-      _packages = packages;
-      _action = 1;
-  }
-
-  return self;
-}
-
-- (id)initAndUpgrade {
-  self = [super init];
-
-  if (self) {
-      _action = 2;
+    _queue = [AUPMQueue sharedInstance];
   }
 
   return self;
 }
 
 - (void)loadView {
-    [super loadView];
-    CGFloat height = [[UIApplication sharedApplication] statusBarFrame].size.height + self.navigationController.navigationBar.frame.size.height;
-	  _consoleOutputView = [[UITextView alloc] initWithFrame:CGRectMake(0,0, self.view.frame.size.width, self.view.frame.size.height - height)];
-    _consoleOutputView.editable = false;
-    [self.view addSubview:_consoleOutputView];
+  [super loadView];
+  CGFloat height = [[UIApplication sharedApplication] statusBarFrame].size.height + self.navigationController.navigationBar.frame.size.height;
+  _consoleOutputView = [[UITextView alloc] initWithFrame:CGRectMake(0,0, self.view.frame.size.width, self.view.frame.size.height - height)];
+  _consoleOutputView.editable = false;
+  [self.view addSubview:_consoleOutputView];
+}
 
-    NSMutableArray *command = [[NSMutableArray alloc] initWithObjects:@"apt-get", @"-o", @"Dir::Etc::SourceList=/var/lib/aupm/aupm.list", @"-o", @"Dir::State::Lists=/var/lib/aupm/lists", @"-o", @"Dir::Etc::SourceParts=/var/lib/aupm/lists/partial/false", @"-y", @"--force-yes", nil];
+- (void)viewDidAppear:(BOOL)animated {
+  [super viewDidAppear:animated];
+
+  [self performActions:[_queue tasksForQueue]];
+}
+
+- (void)performActions:(NSArray *)actions {
+
+  for (NSArray *command in actions) {
     NSTask *task = [[NSTask alloc] init];
-    switch (_action) {
-      case 0: {
-        [command insertObject:@"install" atIndex:1];
-        for (AUPMPackage *package in _packages) {
-          [command insertObject:[NSString stringWithFormat:@"%@=%@", [package packageIdentifier], [package version]] atIndex:2];
-        }
-
-      	[task setLaunchPath:@"/Applications/AUPM.app/supersling"];
-      	[task setArguments:command];
-        break;
-      }
-      case 1: {
-        [command insertObject:@"remove" atIndex:1];
-        for (AUPMPackage *package in _packages) {
-          [command insertObject:[package packageIdentifier] atIndex:2];
-        }
-
-        [task setLaunchPath:@"/Applications/AUPM.app/supersling"];
-        [task setArguments:command];
-        break;
-      }
-      case 2: {
-        [command insertObject:@"upgrade" atIndex:1];
-
-        [task setLaunchPath:@"/Applications/AUPM.app/supersling"];
-        [task setArguments:command];
-        break;
-      }
-      default: {
-        [self dismissConsole];
-        break;
-      }
-    }
-
-    NSLog(@"[AUPM] Command: %@", command);
+    [task setLaunchPath:@"/Applications/AUPM.app/supersling"];
+    [task setArguments:command];
 
     NSPipe *pipe = [[NSPipe alloc] init];
-    [task setStandardOutput:pipe];
-    [task setStandardError:pipe];
-
     NSFileHandle *output = [pipe fileHandleForReading];
     [output waitForDataInBackgroundAndNotify];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receivedData:) name:NSFileHandleDataAvailableNotification object:output];
 
-    UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithTitle:@"Done" style:UIBarButtonItemStyleDone target:self action:@selector(postInstallActions)];
-    UINavigationItem *navItem = self.navigationItem;
-    task.terminationHandler = ^(NSTask *task){
-        dispatch_async(dispatch_get_main_queue(), ^{
-            navItem.rightBarButtonItem = doneButton;
-        });
-    };
+    [task setStandardOutput:pipe];
+    [task setStandardError:pipe];
 
     [task launch];
+    [task waitUntilExit];
+  }
+
+  UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithTitle:@"Done" style:UIBarButtonItemStyleDone target:self action:@selector(postInstallActions)];
+  UINavigationItem *navItem = self.navigationItem;
+  navItem.rightBarButtonItem = doneButton;
 }
 
 - (void)postInstallActions {
-  if (_action == 0 || _action == 2) {
-    AUPMPackageManager *packageManager = [[AUPMPackageManager alloc] init];
+  // if (_action == 0 || _action == 2) {
+  //   AUPMPackageManager *packageManager = [[AUPMPackageManager alloc] init];
+  //
+  //   if ([_packages count] == 1) {
+  //     if ([packageManager packageHasApp:[_packages firstObject]]) {
+  //       UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"Application Detected"
+  //       message:@"It looks like this package contains an application that appears on your home screen. Would you like to run uicache? If not, the application won't show up until a reboot."
+  //       preferredStyle:UIAlertControllerStyleAlert];
+  //
+  //       UIAlertAction* okAction = [UIAlertAction actionWithTitle:@"Yep!" style:UIAlertActionStyleDefault
+  //       handler:^(UIAlertAction * action) {
+  //         [alert dismissViewControllerAnimated:true completion:nil];
+  //
+  //         UIAlertController* waitAlert = [UIAlertController alertControllerWithTitle:@"Awesome!"
+  //         message:@"This might take a second, hang on!"
+  //         preferredStyle:UIAlertControllerStyleAlert];
+  //
+  //         [self presentViewController:waitAlert animated:YES completion:nil];
+  //
+  //         NSTask *uiCacheTask = [[NSTask alloc] init];
+  //         [uiCacheTask setLaunchPath:@"/usr/bin/uicache"];
+  //
+  //         [uiCacheTask launch];
+  //         [uiCacheTask waitUntilExit];
+  //
+  //         [waitAlert dismissViewControllerAnimated:true completion:nil];
+  //         [self dismissConsole];
+  //       }];
+  //
+  //       UIAlertAction* noWayAction = [UIAlertAction actionWithTitle:@"No way!" style:UIAlertActionStyleDefault
+  //       handler:^(UIAlertAction * action) {
+  //         [alert dismissViewControllerAnimated:true completion:nil];
+  //         [self dismissConsole];
+  //       }];
+  //
+  //       [alert addAction:okAction];
+  //       [alert addAction:noWayAction];
+  //       [self presentViewController:alert animated:YES completion:nil];
+  //     }
+  //     else if ([packageManager packageHasTweak:[_packages firstObject]]) {
+  //       UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"Tweak Detected"
+  //       message:@"It looks like this package contains an tweak. Would you like to respring? If not, the tweak may not work until you respring."
+  //       preferredStyle:UIAlertControllerStyleAlert];
+  //
+  //       UIAlertAction* okAction = [UIAlertAction actionWithTitle:@"Yep!" style:UIAlertActionStyleDefault
+  //       handler:^(UIAlertAction * action) {
+  //         // [alert dismissViewControllerAnimated:true completion:nil];
+  //
+  //         UIAlertController* waitAlert = [UIAlertController alertControllerWithTitle:@"Awesome!"
+  //         message:@"This might take a second, hang on!"
+  //         preferredStyle:UIAlertControllerStyleAlert];
+  //
+  //         [self presentViewController:waitAlert animated:YES completion:nil];
+  //
+  //         NSTask *respringTask = [[NSTask alloc] init];
+  //         [respringTask setLaunchPath:@"/usr/bin/killall"];
+  //         NSArray *args = [[NSArray alloc] initWithObjects: @"-9", @"backboardd", nil];
+  //         [respringTask setArguments:args];
+  //
+  //         [respringTask launch];
+  //
+  //         [waitAlert dismissViewControllerAnimated:true completion:nil];
+  //       }];
+  //
+  //       UIAlertAction* noWayAction = [UIAlertAction actionWithTitle:@"No way!" style:UIAlertActionStyleDefault
+  //       handler:^(UIAlertAction * action) {
+  //         [alert dismissViewControllerAnimated:true completion:nil];
+  //         [self dismissConsole];
+  //       }];
+  //
+  //       [alert addAction:okAction];
+  //       [alert addAction:noWayAction];
+  //       [self presentViewController:alert animated:YES completion:nil];
+  //     }
+  //   }
+  // }
+  // else {
+  //   [self dismissConsole];
+  // }
 
-    if ([_packages count] == 1) {
-      if ([packageManager packageHasApp:[_packages firstObject]]) {
-        UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"Application Detected"
-                           message:@"It looks like this package contains an application that appears on your home screen. Would you like to run uicache? If not, the application won't show up until a reboot."
-                           preferredStyle:UIAlertControllerStyleAlert];
-
-        UIAlertAction* okAction = [UIAlertAction actionWithTitle:@"Yep!" style:UIAlertActionStyleDefault
-                                        handler:^(UIAlertAction * action) {
-                                          [alert dismissViewControllerAnimated:true completion:nil];
-
-                                          UIAlertController* waitAlert = [UIAlertController alertControllerWithTitle:@"Awesome!"
-                                                             message:@"This might take a second, hang on!"
-                                                             preferredStyle:UIAlertControllerStyleAlert];
-
-                                          [self presentViewController:waitAlert animated:YES completion:nil];
-
-                                          NSTask *uiCacheTask = [[NSTask alloc] init];
-                                          [uiCacheTask setLaunchPath:@"/usr/bin/uicache"];
-
-                                          [uiCacheTask launch];
-                                          [uiCacheTask waitUntilExit];
-
-                                          [waitAlert dismissViewControllerAnimated:true completion:nil];
-                                          [self dismissConsole];
-                                        }];
-
-        UIAlertAction* noWayAction = [UIAlertAction actionWithTitle:@"No way!" style:UIAlertActionStyleDefault
-                                        handler:^(UIAlertAction * action) {
-                                          [alert dismissViewControllerAnimated:true completion:nil];
-                                          [self dismissConsole];
-                                        }];
-
-        [alert addAction:okAction];
-        [alert addAction:noWayAction];
-        [self presentViewController:alert animated:YES completion:nil];
-      }
-      else if ([packageManager packageHasTweak:[_packages firstObject]]) {
-        UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"Tweak Detected"
-                           message:@"It looks like this package contains an tweak. Would you like to respring? If not, the tweak may not work until you respring."
-                           preferredStyle:UIAlertControllerStyleAlert];
-
-        UIAlertAction* okAction = [UIAlertAction actionWithTitle:@"Yep!" style:UIAlertActionStyleDefault
-                                        handler:^(UIAlertAction * action) {
-                                          // [alert dismissViewControllerAnimated:true completion:nil];
-
-                                          UIAlertController* waitAlert = [UIAlertController alertControllerWithTitle:@"Awesome!"
-                                                             message:@"This might take a second, hang on!"
-                                                             preferredStyle:UIAlertControllerStyleAlert];
-
-                                          [self presentViewController:waitAlert animated:YES completion:nil];
-
-                                          NSTask *respringTask = [[NSTask alloc] init];
-                                          [respringTask setLaunchPath:@"/usr/bin/killall"];
-                                          NSArray *args = [[NSArray alloc] initWithObjects: @"-9", @"backboardd", nil];
-                                          [respringTask setArguments:args];
-
-                                          [respringTask launch];
-
-                                          [waitAlert dismissViewControllerAnimated:true completion:nil];
-                                        }];
-
-        UIAlertAction* noWayAction = [UIAlertAction actionWithTitle:@"No way!" style:UIAlertActionStyleDefault
-                                        handler:^(UIAlertAction * action) {
-                                          [alert dismissViewControllerAnimated:true completion:nil];
-                                          [self dismissConsole];
-                                        }];
-
-        [alert addAction:okAction];
-        [alert addAction:noWayAction];
-        [self presentViewController:alert animated:YES completion:nil];
-      }
-    }
-  }
-  else {
-    [self dismissConsole];
-  }
+  [self dismissConsole];
 }
 
 - (void)dismissConsole {
@@ -201,19 +155,19 @@
 }
 
 - (void)receivedData:(NSNotification *)notif {
-    NSFileHandle *fh = [notif object];
-    NSData *data = [fh availableData];
+  NSFileHandle *fh = [notif object];
+  NSData *data = [fh availableData];
 
-    if (data.length > 0) {
-        [fh waitForDataInBackgroundAndNotify];
-        NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-        [_consoleOutputView.textStorage appendAttributedString:[[NSAttributedString alloc] initWithString:str]];
+  if (data.length > 0) {
+    [fh waitForDataInBackgroundAndNotify];
+    NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+    [_consoleOutputView.textStorage appendAttributedString:[[NSAttributedString alloc] initWithString:str]];
 
-        if (_consoleOutputView.text.length > 0 ) {
-            NSRange bottom = NSMakeRange(_consoleOutputView.text.length -1, 1);
-            [_consoleOutputView scrollRangeToVisible:bottom];
-        }
+    if (_consoleOutputView.text.length > 0 ) {
+      NSRange bottom = NSMakeRange(_consoleOutputView.text.length -1, 1);
+      [_consoleOutputView scrollRangeToVisible:bottom];
     }
+  }
 }
 
 @end

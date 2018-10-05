@@ -6,7 +6,6 @@
 #import "AUPMTabBarController.h"
 #import "NSTask.h"
 #import <Realm/Realm.h>
-#import "AUPMQueue.h"
 
 @implementation AUPMAppDelegate
 
@@ -23,7 +22,6 @@
 	[RLMRealmConfiguration setDefaultConfiguration:config];
 
 	self.databaseManager = [[AUPMDatabaseManager alloc] init];
-	self.queue = [AUPMQueue sharedInstance];
 
 	if (![[NSFileManager defaultManager] fileExistsAtPath:@"/var/lib/aupm/aupm.list"]) {
 		NSTask *cpTask = [[NSTask alloc] init];

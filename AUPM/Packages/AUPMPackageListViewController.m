@@ -8,6 +8,8 @@
 #import "../AUPMTabBarController.h"
 #import "../NSTask.h"
 #import "../AUPMConsoleViewController.h"
+#import "../AUPMQueueAction.h"
+#import "../AUPMQueue.h"
 
 @implementation AUPMPackageListViewController {
 	NSArray *_updateObjects;
@@ -64,8 +66,12 @@
 	[self.tableView reloadData];
 }
 
-- (void)upgradePackages {
-	AUPMConsoleViewController *console = [[AUPMConsoleViewController alloc] initAndUpgrade];
+- (void)upgradeAllPackages {
+	AUPMQueue *queue = [AUPMQueue sharedInstance];
+
+	[queue addPackages:_updateObjects toQueueWithAction:AUPMQueueActionUpgrade];
+
+	AUPMConsoleViewController *console = [[AUPMConsoleViewController alloc] init];
 	UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:console];
 	[self presentViewController:navController animated:true completion:nil];
 }
