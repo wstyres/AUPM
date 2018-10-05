@@ -24,6 +24,8 @@
 
 - (void)loadView {
   [super loadView];
+  [self.navigationItem setHidesBackButton:YES animated:YES];
+
   _consoleOutputView = [[UITextView alloc] initWithFrame:CGRectMake(0,0, self.view.frame.size.width, self.view.frame.size.height)];
   _consoleOutputView.editable = false;
   [self.view addSubview:_consoleOutputView];
