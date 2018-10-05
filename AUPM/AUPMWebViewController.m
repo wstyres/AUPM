@@ -97,7 +97,7 @@
 - (void)sendBugReport {
   if ([MFMailComposeViewController canSendMail]) {
     NSString *iosVersion = [NSString stringWithFormat:@"%@ running iOS %@", [[UIDevice currentDevice] model], [[UIDevice currentDevice] systemVersion]];
-    RLMRealmConfiguration *config = [[RLMRealm defaultRealm] configuration];
+    RLMRealmConfiguration *config = [RLMRealmConfiguration defaultConfiguration];
     NSString *databaseLocation = [[config fileURL] absoluteString];
     NSString *message = [NSString stringWithFormat:@"iOS Version: %@\nAUPM Version: %@\nAUPM Database Location: %@\n\nPlease describe the bug you are experiencing or feature you are requesting below: \n\n", iosVersion, PACKAGE_VERSION, databaseLocation];
 

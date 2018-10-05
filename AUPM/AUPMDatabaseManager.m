@@ -10,14 +10,26 @@
 
 bool packages_file_changed(FILE* f1, FILE* f2);
 
+- (RLMRealm *)realm {
+  RLMRealmConfiguration *config = [RLMRealmConfiguration defaultConfiguration];
+  NSError *configError;
+	RLMRealm *realm = [RLMRealm realmWithConfiguration:config error:&configError];
+
+	if (configError != nil) {
+		NSLog(@"[AUPM] Error when opening database: %@", configError.localizedDescription);
+	}
+
+  return realm;
+}
+
 //Runs apt-get update and cahces all information from apt into a database
 - (void)firstLoadPopulation:(void (^)(BOOL success))completion {
   NSLog(@"[AUPM] Performing full database population...");
 
   //Delete all information in the realm if it exists.
-  RLMRealm *realm = [RLMRealm defaultRealm];
-  [realm transactionWithBlock:^{
-    [realm deleteAllObjects];
+
+  [[self realm] transactionWithBlock:^{
+    [[self realm] deleteAllObjects];
   }];
 
   //Update APT
@@ -32,14 +44,14 @@ bool packages_file_changed(FILE* f1, FILE* f2);
 
   AUPMRepoManager *repoManager = [[AUPMRepoManager alloc] init];
   NSArray *repoArray = [repoManager managedRepoList];
-  [[RLMRealm defaultRealm] transactionWithBlock:^{
+  [[self realm] transactionWithBlock:^{
     for (AUPMRepo *repo in repoArray) {
       NSDate *methodStart = [NSDate date];
       NSArray<AUPMPackage *> *packagesArray = [repoManager packageListForRepo:repo];
-      [realm addObject:repo];
+      [[self realm] addObject:repo];
 
       @try {
-        [realm addObjects:packagesArray];
+        [[self realm] addObjects:packagesArray];
       }
       @catch (NSException *e) {
         NSLog(@"[AUPM] Could not add object to realm: %@", e);
@@ -86,26 +98,24 @@ bool packages_file_changed(FILE* f1, FILE* f2);
   [refreshTask launch];
   [refreshTask waitUntilExit];
 
-  RLMRealm *realm = [RLMRealm defaultRealm];
-
   AUPMRepoManager *repoManager = [[AUPMRepoManager alloc] init];
   NSArray *bill = [self billOfReposToUpdate];
   for (AUPMRepo *repo in bill) {
     NSDate *methodStart = [NSDate date];
     NSArray<AUPMPackage *> *packagesArray = [repoManager packageListForRepo:repo];
-    [realm transactionWithBlock:^{
-      [realm addOrUpdateObject:repo];
+    [[self realm] transactionWithBlock:^{
+      [[self realm] addOrUpdateObject:repo];
     }];
 
-    [realm beginWriteTransaction];
+    [[self realm] beginWriteTransaction];
     @try {
-      [realm addOrUpdateObjects:packagesArray];
+      [[self realm] addOrUpdateObjects:packagesArray];
     }
     @catch (NSException *e) {
       NSLog(@"[AUPM] Could not add object to realm: %@", e);
     }
 
-    [realm commitWriteTransaction];
+    [[self realm] commitWriteTransaction];
 
     NSDate *methodFinish = [NSDate date];
     NSTimeInterval executionTime = [methodFinish timeIntervalSinceDate:methodStart];
@@ -152,12 +162,10 @@ bool packages_file_changed(FILE* f1, FILE* f2);
   AUPMPackageManager *packageManager = [[AUPMPackageManager alloc] init];
   NSArray *packagesArray = [packageManager installedPackageList];
 
-  RLMRealm *realm = [RLMRealm defaultRealm];
-  [realm transactionWithBlock:^{
-    [realm deleteObjects:[AUPMPackage objectsWhere:@"installed == TRUE"]];
+  [[self realm] transactionWithBlock:^{
+    [[self realm] deleteObjects:[AUPMPackage objectsWhere:@"installed == TRUE"]];
     for (AUPMPackage *package in packagesArray) {
-      RLMRealm *realm = [RLMRealm defaultRealm];
-      [realm addOrUpdateObject:package];
+      [[self realm] addOrUpdateObject:package];
     }
   }];
 
@@ -262,12 +270,11 @@ bool packages_file_changed(FILE* f1, FILE* f2);
 }
 
 - (void)deleteRepo:(AUPMRepo *)repo {
-  RLMRealm *realm = [RLMRealm defaultRealm];
-
   RLMResults<AUPMPackage *> *packagesToDelete = [AUPMPackage objectsWhere:@"repo == %@", repo];
 
   AUPMRepo *delRepo = [[AUPMRepo objectsWhere:@"repoBaseFileName == %@", [repo repoBaseFileName]] firstObject];
 
+  RLMRealm *realm = [self realm];
   [realm beginWriteTransaction];
   [realm deleteObjects:packagesToDelete];
   [realm deleteObject:delRepo];
