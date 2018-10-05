@@ -29,26 +29,34 @@
   switch (action) {
     case AUPMQueueActionInstall: {
       NSMutableArray *installArray = [_managedQueue[@"Install"] mutableCopy];
-      [installArray addObject:[NSString stringWithFormat:@"%@=%@", [package packageIdentifier], [package version]]];
-      [_managedQueue setObject:installArray forKey:@"Install"];
+      if (![installArray containsObject:[NSString stringWithFormat:@"%@=%@", [package packageIdentifier], [package version]]]) {
+        [installArray addObject:[NSString stringWithFormat:@"%@=%@", [package packageIdentifier], [package version]]];
+        [_managedQueue setObject:installArray forKey:@"Install"];
+      }
       break;
     }
     case AUPMQueueActionRemove: {
       NSMutableArray *removeArray = [_managedQueue[@"Remove"] mutableCopy];
-      [removeArray addObject:[package packageIdentifier]];
-      [_managedQueue setObject:removeArray forKey:@"Remove"];
+      if (![removeArray containsObject:[package packageIdentifier]]) {
+        [removeArray addObject:[package packageIdentifier]];
+        [_managedQueue setObject:removeArray forKey:@"Remove"];
+      }
       break;
     }
     case AUPMQueueActionReinstall: {
       NSMutableArray *reinstallArray = [_managedQueue[@"Reinstall"] mutableCopy];
-      [reinstallArray addObject:[package packageIdentifier]];
-      [_managedQueue setObject:reinstallArray forKey:@"Reinstall"];
+      if (![reinstallArray containsObject:[package packageIdentifier]]) {
+        [reinstallArray addObject:[package packageIdentifier]];
+        [_managedQueue setObject:reinstallArray forKey:@"Reinstall"];
+      }
       break;
     }
     case AUPMQueueActionUpgrade: {
       NSMutableArray *upgradeArray = [_managedQueue[@"Upgrade"] mutableCopy];
-      [upgradeArray addObject:[package packageIdentifier]];
-      [_managedQueue setObject:upgradeArray forKey:@"Upgrade"];
+      if (![upgradeArray containsObject:[package packageIdentifier]]) {
+        [upgradeArray addObject:[package packageIdentifier]];
+        [_managedQueue setObject:upgradeArray forKey:@"Upgrade"];
+      }
       break;
     }
   }
@@ -59,26 +67,34 @@
     switch (action) {
       case AUPMQueueActionInstall: {
         NSMutableArray *installArray = [_managedQueue[@"Install"] mutableCopy];
-        [installArray addObject:[NSString stringWithFormat:@"%@=%@", [package packageIdentifier], [package version]]];
-        [_managedQueue setObject:installArray forKey:@"Install"];
+        if (![installArray containsObject:[NSString stringWithFormat:@"%@=%@", [package packageIdentifier], [package version]]]) {
+          [installArray addObject:[NSString stringWithFormat:@"%@=%@", [package packageIdentifier], [package version]]];
+          [_managedQueue setObject:installArray forKey:@"Install"];
+        }
         break;
       }
       case AUPMQueueActionRemove: {
         NSMutableArray *removeArray = [_managedQueue[@"Remove"] mutableCopy];
-        [removeArray addObject:[package packageIdentifier]];
-        [_managedQueue setObject:removeArray forKey:@"Remove"];
+        if (![removeArray containsObject:[package packageIdentifier]]) {
+          [removeArray addObject:[package packageIdentifier]];
+          [_managedQueue setObject:removeArray forKey:@"Remove"];
+        }
         break;
       }
       case AUPMQueueActionReinstall: {
         NSMutableArray *reinstallArray = [_managedQueue[@"Reinstall"] mutableCopy];
-        [reinstallArray addObject:[package packageIdentifier]];
-        [_managedQueue setObject:reinstallArray forKey:@"Reinstall"];
+        if (![reinstallArray containsObject:[package packageIdentifier]]) {
+          [reinstallArray addObject:[package packageIdentifier]];
+          [_managedQueue setObject:reinstallArray forKey:@"Reinstall"];
+        }
         break;
       }
       case AUPMQueueActionUpgrade: {
         NSMutableArray *upgradeArray = [_managedQueue[@"Upgrade"] mutableCopy];
-        [upgradeArray addObject:[package packageIdentifier]];
-        [_managedQueue setObject:upgradeArray forKey:@"Upgrade"];
+        if (![upgradeArray containsObject:[package packageIdentifier]]) {
+          [upgradeArray addObject:[package packageIdentifier]];
+          [_managedQueue setObject:upgradeArray forKey:@"Upgrade"];
+        }
         break;
       }
     }
