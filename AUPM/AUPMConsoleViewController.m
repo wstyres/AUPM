@@ -58,6 +58,8 @@
   UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithTitle:@"Done" style:UIBarButtonItemStyleDone target:self action:@selector(postInstallActions)];
   UINavigationItem *navItem = self.navigationItem;
   navItem.rightBarButtonItem = doneButton;
+
+  [_queue clearQueue];
 }
 
 - (void)postInstallActions {

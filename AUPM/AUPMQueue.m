@@ -185,4 +185,12 @@
     }
   }
 }
+
+- (void)clearQueue {
+  _managedQueue = [NSMutableDictionary new];
+  [_managedQueue setObject:@[] forKey:@"install"];
+  [_managedQueue setObject:@[] forKey:@"remove"];
+  [_managedQueue setObject:@[] forKey:@"reinstall"];
+  [_managedQueue setObject:@[] forKey:@"upgrade"];
+}
 @end
