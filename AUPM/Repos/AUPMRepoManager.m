@@ -6,7 +6,7 @@
 #import "../AUPMAppDelegate.h"
 
 @interface AUPMRepoManager ()
-    @property (nonatomic, retain) NSMutableArray *repos;
+@property (nonatomic, retain) NSMutableArray *repos;
 @end
 
 @implementation AUPMRepoManager
