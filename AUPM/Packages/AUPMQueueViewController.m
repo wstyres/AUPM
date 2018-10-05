@@ -32,84 +32,38 @@
 #pragma mark - Table View Data Source
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-	return 4;
+	return [[_queue actionsToPerform] count];
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-  switch (section) {
-    case 0: {
-      return [_queue numberOfPackagesForQueue:@"install"];
-      break;
-    }
-    case 1: {
-      return [_queue numberOfPackagesForQueue:@"remove"];
-      break;
-    }
-    case 2: {
-      return [_queue numberOfPackagesForQueue:@"reinstall"];
-      break;
-    }
-    case 3: {
-      return [_queue numberOfPackagesForQueue:@"upgrade"];
-      break;
-    }
-    default: {
-      return 0;
-      break;
-    }
-  }
+  NSString *action = [[_queue actionsToPerform] objectAtIndex:section];
+  return [_queue numberOfPackagesForQueue:action];
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
-	switch (section) {
-    case 0: {
-      return @"Install";
-      break;
-    }
-    case 1: {
-      return @"Remove";
-      break;
-    }
-    case 2: {
-      return @"Reinstall";
-      break;
-    }
-    case 3: {
-      return @"Upgrade";
-      break;
-    }
-    default: {
-      return @"AXOLOTL";
-      break;
-    }
-  }
+	return [[_queue actionsToPerform] objectAtIndex:section];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
 	static NSString *identifier = @"QueuePackageTableViewCell";
 	UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:identifier];
+  NSString *action = [[_queue actionsToPerform] objectAtIndex:indexPath.section];
   NSString *package;
-  switch (indexPath.section) {
-    case 0: {
-      package = [_queue packageInQueueForAction:AUPMQueueActionInstall atIndex:indexPath.row];
-      break;
-    }
-    case 1: {
-      package = [_queue packageInQueueForAction:AUPMQueueActionRemove atIndex:indexPath.row];
-      break;
-    }
-    case 2: {
-      package = [_queue packageInQueueForAction:AUPMQueueActionReinstall atIndex:indexPath.row];
-      break;
-    }
-    case 3: {
-      package = [_queue packageInQueueForAction:AUPMQueueActionUpgrade atIndex:indexPath.row];
-      break;
-    }
-    default: {
-      package = @"MY TIME HAS COME TO BURN";
-      break;
-    }
+
+  if ([action isEqual:@"Install"]) {
+    package = [_queue packageInQueueForAction:AUPMQueueActionInstall atIndex:indexPath.row];
+  }
+  else if ([action isEqual:@"Remove"]) {
+    package = [_queue packageInQueueForAction:AUPMQueueActionRemove atIndex:indexPath.row];
+  }
+  else if ([action isEqual:@"Reinstall"]) {
+    package = [_queue packageInQueueForAction:AUPMQueueActionReinstall atIndex:indexPath.row];
+  }
+  else if ([action isEqual:@"Upgrade"]) {
+    package = [_queue packageInQueueForAction:AUPMQueueActionUpgrade atIndex:indexPath.row];
+  }
+  else {
+    package = @"MY TIME HAS COME TO BURN";
   }
 
 	if (!cell) {

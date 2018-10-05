@@ -24,8 +24,7 @@
 
 - (void)loadView {
   [super loadView];
-  CGFloat height = [[UIApplication sharedApplication] statusBarFrame].size.height + self.navigationController.navigationBar.frame.size.height;
-  _consoleOutputView = [[UITextView alloc] initWithFrame:CGRectMake(0,0, self.view.frame.size.width, self.view.frame.size.height - height)];
+  _consoleOutputView = [[UITextView alloc] initWithFrame:CGRectMake(0,0, self.view.frame.size.width, self.view.frame.size.height)];
   _consoleOutputView.editable = false;
   [self.view addSubview:_consoleOutputView];
 }

@@ -12,4 +12,5 @@
 - (int)numberOfPackagesForQueue:(NSString *)queue;
 - (NSString *)packageInQueueForAction:(AUPMQueueAction)action atIndex:(int)index;
 - (void)clearQueue;
+- (NSArray *)actionsToPerform;
 @end

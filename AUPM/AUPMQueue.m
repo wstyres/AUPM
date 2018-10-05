@@ -16,10 +16,10 @@
 
     if (self) {
         _managedQueue = [NSMutableDictionary new];
-        [_managedQueue setObject:@[] forKey:@"install"];
-        [_managedQueue setObject:@[] forKey:@"remove"];
-        [_managedQueue setObject:@[] forKey:@"reinstall"];
-        [_managedQueue setObject:@[] forKey:@"upgrade"];
+        [_managedQueue setObject:@[] forKey:@"Install"];
+        [_managedQueue setObject:@[] forKey:@"Remove"];
+        [_managedQueue setObject:@[] forKey:@"Reinstall"];
+        [_managedQueue setObject:@[] forKey:@"Upgrade"];
     }
 
     return self;
@@ -28,27 +28,27 @@
 - (void)addPackage:(AUPMPackage *)package toQueueWithAction:(AUPMQueueAction)action {
   switch (action) {
     case AUPMQueueActionInstall: {
-      NSMutableArray *installArray = [_managedQueue[@"install"] mutableCopy];
+      NSMutableArray *installArray = [_managedQueue[@"Install"] mutableCopy];
       [installArray addObject:[NSString stringWithFormat:@"%@=%@", [package packageIdentifier], [package version]]];
-      [_managedQueue setObject:installArray forKey:@"install"];
+      [_managedQueue setObject:installArray forKey:@"Install"];
       break;
     }
     case AUPMQueueActionRemove: {
-      NSMutableArray *removeArray = [_managedQueue[@"remove"] mutableCopy];
+      NSMutableArray *removeArray = [_managedQueue[@"Remove"] mutableCopy];
       [removeArray addObject:[package packageIdentifier]];
-      [_managedQueue setObject:removeArray forKey:@"remove"];
+      [_managedQueue setObject:removeArray forKey:@"Remove"];
       break;
     }
     case AUPMQueueActionReinstall: {
-      NSMutableArray *reinstallArray = [_managedQueue[@"reinstall"] mutableCopy];
+      NSMutableArray *reinstallArray = [_managedQueue[@"Reinstall"] mutableCopy];
       [reinstallArray addObject:[package packageIdentifier]];
-      [_managedQueue setObject:reinstallArray forKey:@"reinstall"];
+      [_managedQueue setObject:reinstallArray forKey:@"Reinstall"];
       break;
     }
     case AUPMQueueActionUpgrade: {
-      NSMutableArray *upgradeArray = [_managedQueue[@"upgrade"] mutableCopy];
+      NSMutableArray *upgradeArray = [_managedQueue[@"Upgrade"] mutableCopy];
       [upgradeArray addObject:[package packageIdentifier]];
-      [_managedQueue setObject:upgradeArray forKey:@"upgrade"];
+      [_managedQueue setObject:upgradeArray forKey:@"Upgrade"];
       break;
     }
   }
@@ -58,24 +58,28 @@
   for (AUPMPackage *package in packages) {
     switch (action) {
       case AUPMQueueActionInstall: {
-        NSMutableArray *installArray = [_managedQueue[@"install"] mutableCopy];
+        NSMutableArray *installArray = [_managedQueue[@"Install"] mutableCopy];
         [installArray addObject:[NSString stringWithFormat:@"%@=%@", [package packageIdentifier], [package version]]];
-        [_managedQueue setObject:installArray forKey:@"install"];
+        [_managedQueue setObject:installArray forKey:@"Install"];
+        break;
       }
       case AUPMQueueActionRemove: {
-        NSMutableArray *removeArray = [_managedQueue[@"remove"] mutableCopy];
+        NSMutableArray *removeArray = [_managedQueue[@"Remove"] mutableCopy];
         [removeArray addObject:[package packageIdentifier]];
-        [_managedQueue setObject:removeArray forKey:@"remove"];
+        [_managedQueue setObject:removeArray forKey:@"Remove"];
+        break;
       }
       case AUPMQueueActionReinstall: {
-        NSMutableArray *reinstallArray = [_managedQueue[@"reinstall"] mutableCopy];
+        NSMutableArray *reinstallArray = [_managedQueue[@"Reinstall"] mutableCopy];
         [reinstallArray addObject:[package packageIdentifier]];
-        [_managedQueue setObject:reinstallArray forKey:@"reinstall"];
+        [_managedQueue setObject:reinstallArray forKey:@"Reinstall"];
+        break;
       }
       case AUPMQueueActionUpgrade: {
-        NSMutableArray *upgradeArray = [_managedQueue[@"upgrade"] mutableCopy];
+        NSMutableArray *upgradeArray = [_managedQueue[@"Upgrade"] mutableCopy];
         [upgradeArray addObject:[package packageIdentifier]];
-        [_managedQueue setObject:upgradeArray forKey:@"upgrade"];
+        [_managedQueue setObject:upgradeArray forKey:@"Upgrade"];
+        break;
       }
     }
   }
@@ -84,24 +88,28 @@
 - (void)removePackage:(NSString *)packageIdentifier fromQueueWithAction:(AUPMQueueAction)action {
   switch (action) {
     case AUPMQueueActionInstall: {
-      NSMutableArray *installArray = [_managedQueue[@"install"] mutableCopy];
+      NSMutableArray *installArray = [_managedQueue[@"Install"] mutableCopy];
       [installArray removeObject:packageIdentifier];
-      [_managedQueue setObject:installArray forKey:@"install"];
+      [_managedQueue setObject:installArray forKey:@"Install"];
+      break;
     }
     case AUPMQueueActionRemove: {
-      NSMutableArray *removeArray = [_managedQueue[@"remove"] mutableCopy];
+      NSMutableArray *removeArray = [_managedQueue[@"Remove"] mutableCopy];
       [removeArray removeObject:packageIdentifier];
-      [_managedQueue setObject:removeArray forKey:@"remove"];
+      [_managedQueue setObject:removeArray forKey:@"Remove"];
+      break;
     }
     case AUPMQueueActionReinstall: {
-      NSMutableArray *reinstallArray = [_managedQueue[@"reinstall"] mutableCopy];
+      NSMutableArray *reinstallArray = [_managedQueue[@"Reinstall"] mutableCopy];
       [reinstallArray removeObject:packageIdentifier];
-      [_managedQueue setObject:reinstallArray forKey:@"reinstall"];
+      [_managedQueue setObject:reinstallArray forKey:@"Reinstall"];
+      break;
     }
     case AUPMQueueActionUpgrade: {
-      NSMutableArray *upgradeArray = [_managedQueue[@"upgrade"] mutableCopy];
+      NSMutableArray *upgradeArray = [_managedQueue[@"Upgrade"] mutableCopy];
       [upgradeArray removeObject:packageIdentifier];
-      [_managedQueue setObject:upgradeArray forKey:@"upgrade"];
+      [_managedQueue setObject:upgradeArray forKey:@"Upgrade"];
+      break;
     }
   }
 }
@@ -111,10 +119,10 @@
   NSLog(@"[AUPM] Queue! %@", _managedQueue);
   NSArray *baseCommand = [[NSArray alloc] initWithObjects:@"apt-get", @"-o", @"Dir::Etc::SourceList=/var/lib/aupm/aupm.list", @"-o", @"Dir::State::Lists=/var/lib/aupm/lists", @"-o", @"Dir::Etc::SourceParts=/var/lib/aupm/lists/partial/false", @"-y", @"--force-yes", nil];
 
-  NSMutableArray *installArray = [_managedQueue[@"install"] mutableCopy];
-  NSMutableArray *removeArray = [_managedQueue[@"remove"] mutableCopy];
-  NSMutableArray *reinstallArray = [_managedQueue[@"reinstall"] mutableCopy];
-  NSMutableArray *upgradeArray = [_managedQueue[@"upgrade"] mutableCopy];
+  NSMutableArray *installArray = [_managedQueue[@"Install"] mutableCopy];
+  NSMutableArray *removeArray = [_managedQueue[@"Remove"] mutableCopy];
+  NSMutableArray *reinstallArray = [_managedQueue[@"Reinstall"] mutableCopy];
+  NSMutableArray *upgradeArray = [_managedQueue[@"Upgrade"] mutableCopy];
 
   if ([installArray count] > 0) {
     NSMutableArray *installCommand = [baseCommand mutableCopy];
@@ -172,25 +180,48 @@
 - (NSString *)packageInQueueForAction:(AUPMQueueAction)action atIndex:(int)index {
   switch (action) {
     case AUPMQueueActionInstall: {
-      return [_managedQueue[@"install"] objectAtIndex:index];
+      return [_managedQueue[@"Install"] objectAtIndex:index];
     }
     case AUPMQueueActionRemove: {
-      return [_managedQueue[@"remove"] objectAtIndex:index];
+      return [_managedQueue[@"Remove"] objectAtIndex:index];
     }
     case AUPMQueueActionReinstall: {
-      return [_managedQueue[@"reinstall"] objectAtIndex:index];
+      return [_managedQueue[@"Reinstall"] objectAtIndex:index];
     }
     case AUPMQueueActionUpgrade: {
-      return [_managedQueue[@"upgrade"] objectAtIndex:index];
+      return [_managedQueue[@"Upgrade"] objectAtIndex:index];
     }
   }
 }
 
 - (void)clearQueue {
   _managedQueue = [NSMutableDictionary new];
-  [_managedQueue setObject:@[] forKey:@"install"];
-  [_managedQueue setObject:@[] forKey:@"remove"];
-  [_managedQueue setObject:@[] forKey:@"reinstall"];
-  [_managedQueue setObject:@[] forKey:@"upgrade"];
+  [_managedQueue setObject:@[] forKey:@"Install"];
+  [_managedQueue setObject:@[] forKey:@"Remove"];
+  [_managedQueue setObject:@[] forKey:@"Reinstall"];
+  [_managedQueue setObject:@[] forKey:@"Upgrade"];
+}
+
+- (NSArray *)actionsToPerform {
+  NSMutableArray *actions = [NSMutableArray new];
+  if ([_managedQueue[@"Install"] count] > 0) {
+    NSLog(@"Action is coming!");
+    [actions addObject:@"Install"];
+  }
+
+  if ([_managedQueue[@"Remove"] count] > 0) {
+    [actions addObject:@"Remove"];
+  }
+
+  if ([_managedQueue[@"Reinstall"] count] > 0) {
+    [actions addObject:@"Reinstall"];
+  }
+
+  if ([_managedQueue[@"Upgrade"] count] > 0) {
+    [actions addObject:@"Upgrade"];
+  }
+
+  NSLog(@"Action is coming! %@", actions);
+  return (NSArray *)actions;
 }
 @end
