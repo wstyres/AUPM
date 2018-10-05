@@ -28,7 +28,10 @@
 
   _consoleOutputView = [[UITextView alloc] initWithFrame:CGRectMake(0,0, self.view.frame.size.width, self.view.frame.size.height)];
   _consoleOutputView.editable = false;
+
   [self.view addSubview:_consoleOutputView];
+
+  self.title = @"Console";
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -44,13 +47,18 @@
     [task setLaunchPath:@"/Applications/AUPM.app/supersling"];
     [task setArguments:command];
 
-    NSPipe *pipe = [[NSPipe alloc] init];
-    NSFileHandle *output = [pipe fileHandleForReading];
+    NSPipe *outputPipe = [[NSPipe alloc] init];
+    NSFileHandle *output = [outputPipe fileHandleForReading];
     [output waitForDataInBackgroundAndNotify];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receivedData:) name:NSFileHandleDataAvailableNotification object:output];
 
-    [task setStandardOutput:pipe];
-    [task setStandardError:pipe];
+    NSPipe *errorPipe = [[NSPipe alloc] init];
+    NSFileHandle *error = [errorPipe fileHandleForReading];
+    [error waitForDataInBackgroundAndNotify];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receivedErrorData:) name:NSFileHandleDataAvailableNotification object:error];
+
+    [task setStandardOutput:outputPipe];
+    [task setStandardError:errorPipe];
 
     [task launch];
     [task waitUntilExit];
@@ -164,7 +172,28 @@
   if (data.length > 0) {
     [fh waitForDataInBackgroundAndNotify];
     NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-    [_consoleOutputView.textStorage appendAttributedString:[[NSAttributedString alloc] initWithString:str]];
+    UIFont *font = [UIFont fontWithName:@"CourierNewPSMT" size:12.0];
+    NSDictionary *attrs = @{ NSFontAttributeName: font };
+    [_consoleOutputView.textStorage appendAttributedString:[[NSAttributedString alloc] initWithString:str attributes:attrs]];
+
+    if (_consoleOutputView.text.length > 0 ) {
+      NSRange bottom = NSMakeRange(_consoleOutputView.text.length -1, 1);
+      [_consoleOutputView scrollRangeToVisible:bottom];
+    }
+  }
+}
+
+- (void)receivedErrorData:(NSNotification *)notif {
+  NSFileHandle *fh = [notif object];
+  NSData *data = [fh availableData];
+
+  if (data.length > 0) {
+    [fh waitForDataInBackgroundAndNotify];
+    NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+    UIColor *color = [UIColor redColor];
+    UIFont *font = [UIFont fontWithName:@"CourierNewPSMT" size:12.0];
+    NSDictionary *attrs = @{ NSForegroundColorAttributeName : color, NSFontAttributeName: font };
+    [_consoleOutputView.textStorage appendAttributedString:[[NSAttributedString alloc] initWithString:str attributes:attrs]];
 
     if (_consoleOutputView.text.length > 0 ) {
       NSRange bottom = NSMakeRange(_consoleOutputView.text.length -1, 1);
