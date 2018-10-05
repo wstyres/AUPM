@@ -14,7 +14,7 @@
   UIBarButtonItem *confirmButton = [[UIBarButtonItem alloc] initWithTitle:@"Confirm" style:UIBarButtonItemStyleDone target:self action:@selector(confirm)];
   self.navigationItem.rightBarButtonItem = confirmButton;
 
-  UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithTitle:@"Confirm" style:UIBarButtonItemStyleDone target:self action:@selector(cancel)];
+  UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithTitle:@"Cancel" style:UIBarButtonItemStyleCancel target:self action:@selector(cancel)];
   self.navigationItem.leftBarButtonItem = cancelButton;
 
   self.title = @"Queue";
