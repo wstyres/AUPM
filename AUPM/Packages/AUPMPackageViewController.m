@@ -137,6 +137,10 @@
 		else {
 			_progressBar.progress += 0.005;
 		}
+
+		if (_progressBar.progress == 1.0) {
+			[_webView loadHTMLString:[self generateDepiction] baseURL:nil];
+		}
 	}
 }
 
