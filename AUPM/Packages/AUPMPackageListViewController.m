@@ -46,11 +46,8 @@
 
 - (void)refreshTable {
 	AUPMDatabaseManager *databaseManager = ((AUPMAppDelegate *)[[UIApplication sharedApplication] delegate]).databaseManager;
-	NSLog(@"[AUPM] Refreshing package table");
 	_hasUpdates = [databaseManager hasPackagesThatNeedUpdates];
 	_updateObjects = [databaseManager updateObjects];
-
-	NSLog(@"[AUPM] Got my %d updates %@", [databaseManager numberOfPackagesThatNeedUpdates], _updateObjects);
 
 	if (_hasUpdates) {
 		UIBarButtonItem *upgradeItem = [[UIBarButtonItem alloc] initWithTitle:@"Upgrade All" style:UIBarButtonItemStyleDone target:self action:@selector(upgradeAllPackages)];
