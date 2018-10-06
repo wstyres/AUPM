@@ -16,7 +16,7 @@
   UIBarButtonItem *confirmButton = [[UIBarButtonItem alloc] initWithTitle:@"Confirm" style:UIBarButtonItemStyleDone target:self action:@selector(confirm)];
   self.navigationItem.rightBarButtonItem = confirmButton;
 
-  UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithTitle:@"Cancel" style:UIBarButtonItemStylePlain target:self action:@selector(cancel)];
+  UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemStop target:self action:@selector(cancel)];
   self.navigationItem.leftBarButtonItem = cancelButton;
 
   self.title = @"Queue";
@@ -78,5 +78,40 @@
 	cell.textLabel.text = package;
 
 	return cell;
+}
+
+#pragma mark - Table View Delegate
+
+- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
+  return YES;
+}
+
+- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
+	if (editingStyle == UITableViewCellEditingStyleDelete) {
+    NSString *action = [[_queue actionsToPerform] objectAtIndex:indexPath.section];
+
+    if ([action isEqual:@"Install"]) {
+      NSString *package = [_queue packageInQueueForAction:AUPMQueueActionInstall atIndex:indexPath.row];
+      [_queue removePackage:package fromQueueWithAction:AUPMQueueActionInstall];
+    }
+    else if ([action isEqual:@"Remove"]) {
+      NSString *package = [_queue packageInQueueForAction:AUPMQueueActionRemove atIndex:indexPath.row];
+      [_queue removePackage:package fromQueueWithAction:AUPMQueueActionRemove];
+    }
+    else if ([action isEqual:@"Reinstall"]) {
+      NSString *package = [_queue packageInQueueForAction:AUPMQueueActionReinstall atIndex:indexPath.row];
+      [_queue removePackage:package fromQueueWithAction:AUPMQueueActionReinstall];
+    }
+    else if ([action isEqual:@"Upgrade"]) {
+      NSString *package = [_queue packageInQueueForAction:AUPMQueueActionUpgrade atIndex:indexPath.row];
+      [_queue removePackage:package fromQueueWithAction:AUPMQueueActionUpgrade];
+    }
+    else {
+     NSLog(@"[AUPM] MY TIME HAS COME TO BURN");
+    }
+
+    [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
+
+	}
 }
 @end
