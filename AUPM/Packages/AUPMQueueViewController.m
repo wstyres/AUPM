@@ -110,7 +110,8 @@
      NSLog(@"[AUPM] MY TIME HAS COME TO BURN");
     }
 
-    [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
+    //[tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
+    [tableView reloadData];
 
 	}
 }
