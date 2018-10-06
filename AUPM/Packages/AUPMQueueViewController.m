@@ -1,6 +1,8 @@
 #import "AUPMQueueViewController.h"
 #import "../AUPMQueue.h"
 #import "../AUPMConsoleViewController.h"
+#import "../AUPMAppDelegate.h"
+#import "../AUPMTabBarController.h"
 
 @implementation AUPMQueueViewController {
   AUPMQueue *_queue;
@@ -26,6 +28,9 @@
 }
 
 - (void)cancel {
+  AUPMTabBarController *tabController = (AUPMTabBarController *)((AUPMAppDelegate *)[[UIApplication sharedApplication] delegate]).window.rootViewController;
+  [tabController updatePackageTableView];
+
   [self dismissViewControllerAnimated:true completion:nil];
 }
 

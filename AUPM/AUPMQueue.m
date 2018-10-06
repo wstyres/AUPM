@@ -221,7 +221,6 @@
 - (NSArray *)actionsToPerform {
   NSMutableArray *actions = [NSMutableArray new];
   if ([_managedQueue[@"Install"] count] > 0) {
-    NSLog(@"Action is coming!");
     [actions addObject:@"Install"];
   }
 
@@ -237,7 +236,26 @@
     [actions addObject:@"Upgrade"];
   }
 
-  NSLog(@"Action is coming! %@", actions);
   return (NSArray *)actions;
+}
+
+- (BOOL)hasObjects {
+  if ([_managedQueue[@"Install"] count] > 0) {
+    return true;
+  }
+
+  if ([_managedQueue[@"Remove"] count] > 0) {
+    return true;
+  }
+
+  if ([_managedQueue[@"Reinstall"] count] > 0) {
+    return true;
+  }
+
+  if ([_managedQueue[@"Upgrade"] count] > 0) {
+    return true;
+  }
+
+  return false;
 }
 @end

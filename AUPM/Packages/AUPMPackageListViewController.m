@@ -48,6 +48,15 @@
 	AUPMDatabaseManager *databaseManager = ((AUPMAppDelegate *)[[UIApplication sharedApplication] delegate]).databaseManager;
 	_hasUpdates = [databaseManager hasPackagesThatNeedUpdates];
 	_updateObjects = [databaseManager updateObjects];
+	AUPMQueue *queue = [AUPMQueue sharedInstance];
+
+	if ([queue hasObjects]) {
+		UIBarButtonItem *queueItem = [[UIBarButtonItem alloc] initWithTitle:@"Queue" style:UIBarButtonItemStylePlain target:self action:@selector(viewQueue)];
+		self.navigationItem.leftBarButtonItem = queueItem;
+	}
+	else {
+		self.navigationItem.leftBarButtonItems = nil;
+	}
 
 	if (_hasUpdates) {
 		UIBarButtonItem *upgradeItem = [[UIBarButtonItem alloc] initWithTitle:@"Upgrade All" style:UIBarButtonItemStyleDone target:self action:@selector(upgradeAllPackages)];
@@ -62,6 +71,12 @@
 	]];
 
 	[self.tableView reloadData];
+}
+
+- (void)viewQueue {
+	AUPMQueueViewController *queueVC = [[AUPMQueueViewController alloc] init];
+	UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:queueVC];
+	[self presentViewController:navController animated:true completion:nil];
 }
 
 - (void)upgradeAllPackages {

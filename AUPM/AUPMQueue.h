@@ -13,4 +13,5 @@
 - (NSString *)packageInQueueForAction:(AUPMQueueAction)action atIndex:(int)index;
 - (void)clearQueue;
 - (NSArray *)actionsToPerform;
+- (BOOL)hasObjects;
 @end
