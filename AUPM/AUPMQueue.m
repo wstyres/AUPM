@@ -132,7 +132,6 @@
 
 - (NSArray *)tasksForQueue {
   NSMutableArray<NSMutableArray *> *commands = [NSMutableArray new];
-  NSLog(@"[AUPM] Queue! %@", _managedQueue);
   NSArray *baseCommand = [[NSArray alloc] initWithObjects:@"apt-get", @"-o", @"Dir::Etc::SourceList=/var/lib/aupm/aupm.list", @"-o", @"Dir::State::Lists=/var/lib/aupm/lists", @"-o", @"Dir::Etc::SourceParts=/var/lib/aupm/lists/partial/false", @"-y", @"--force-yes", nil];
 
   NSMutableArray *installArray = [_managedQueue[@"Install"] mutableCopy];
@@ -185,7 +184,6 @@
     [commands addObject:upgradeCommand];
   }
 
-  NSLog(@"[AUPM] Commands to run: %@", commands);
   return (NSArray *)commands;
 }
 

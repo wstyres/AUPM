@@ -18,7 +18,7 @@
   UINavigationController *reposNavController = [[UINavigationController alloc] initWithRootViewController:[[AUPMRepoListViewController alloc] init]];
   UITabBarItem *repoIcon = [[UITabBarItem alloc] initWithTitle:@"Sources" image:[UIImage imageNamed:@"sources.png"] selectedImage:[UIImage imageNamed:@"sources.png"]];
   [reposNavController setTabBarItem:repoIcon];
-  
+
   UINavigationController *packagesNavController = [[UINavigationController alloc] initWithRootViewController:[[AUPMPackageListViewController alloc] init]];
   UITabBarItem *packageIcon = [[UITabBarItem alloc] initWithTitle:@"Packages" image:[UIImage imageNamed:@"packages.png"] selectedImage:[UIImage imageNamed:@"packages.png"]];
   [packagesNavController setTabBarItem:packageIcon];
@@ -78,7 +78,6 @@
   UINavigationController *packageNavController = self.viewControllers[2];
   AUPMPackageListViewController *packageVC = packageNavController.viewControllers[0];
   AUPMDatabaseManager *databaseManager = ((AUPMAppDelegate *)[[UIApplication sharedApplication] delegate]).databaseManager;
-  NSLog(@"[AUPM] Updating package table view with %d updates", [databaseManager numberOfPackagesThatNeedUpdates]);
   if ([databaseManager hasPackagesThatNeedUpdates]) {
     [packageNavController tabBarItem].badgeValue = [NSString stringWithFormat:@"%lu", (unsigned long)[databaseManager numberOfPackagesThatNeedUpdates]];
     [packageVC refreshTable];
