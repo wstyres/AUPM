@@ -37,8 +37,8 @@ NSArray *packages_to_array(const char *path)
                 CFStringRef key = CFStringCreateWithBytes(kCFAllocatorDefault, bytes, colonIndex, kCFStringEncodingUTF8, true);
                 bytes += colonIndex + 2;
                 CFStringRef value = CFStringCreateWithBytes(kCFAllocatorDefault, bytes, len - (colonIndex + 1), kCFStringEncodingUTF8, true);
-                if (key != NULL && value != NULL) {            
-                  CFDictionaryAddValue(package, key, value);
+                if (key != NULL && value != NULL && CFStringGetLength(value) != 0) {
+                    CFDictionaryAddValue(package, key, value);
                 }
             }
         }
