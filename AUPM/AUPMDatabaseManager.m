@@ -51,7 +51,7 @@ bool packages_file_changed(FILE* f1, FILE* f2);
       [[self realm] addObject:repo];
 
       @try {
-        [[self realm] addObjects:packagesArray];
+        [[self realm] addOrUpdateObjects:packagesArray];
       }
       @catch (NSException *e) {
         NSLog(@"[AUPM] Could not add object to realm: %@", e);
