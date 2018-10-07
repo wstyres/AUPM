@@ -29,6 +29,16 @@ static int verrevcmp(const char *val, const char *ref) {
     if (!val) val= "";
     if (!ref) ref= "";
 
+		//Custom, not included in dpkg source, merely a cheap hack to deal with epochs in jailbreak packages, erica utils
+		//is the only packages that has an epoch that i've seen so if a version has an epoch version, it is probably greater
+		//than the other ones.
+		if (strchr(val, ':') != NULL) {
+			return 1;
+		}
+		if (strchr(ref, ':') != NULL) {
+			return -1;
+		}
+
     while (*val || *ref) {
         int first_diff= 0;
 
