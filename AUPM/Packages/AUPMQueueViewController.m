@@ -3,6 +3,7 @@
 #import "../AUPMConsoleViewController.h"
 #import "../AUPMAppDelegate.h"
 #import "../AUPMTabBarController.h"
+#import "AUPMPackage.h"
 
 @implementation AUPMQueueViewController {
   AUPMQueue *_queue;
@@ -53,7 +54,7 @@
 	static NSString *identifier = @"QueuePackageTableViewCell";
 	UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:identifier];
   NSString *action = [[_queue actionsToPerform] objectAtIndex:indexPath.section];
-  NSString *package;
+  AUPMPackage *package;
 
   if ([action isEqual:@"Install"]) {
     package = [_queue packageInQueueForAction:AUPMQueueActionInstall atIndex:indexPath.row];
@@ -67,15 +68,37 @@
   else if ([action isEqual:@"Upgrade"]) {
     package = [_queue packageInQueueForAction:AUPMQueueActionUpgrade atIndex:indexPath.row];
   }
-  else {
-    package = @"MY TIME HAS COME TO BURN";
+
+  if (!cell) {
+    cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:identifier];
   }
 
-	if (!cell) {
-		cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:identifier];
-	}
+  NSString *section = [[package section] stringByReplacingOccurrencesOfString:@" " withString:@"_"];
+  if ([section characterAtIndex:[section length] - 1] == ')') {
+    NSArray *items = [section componentsSeparatedByString:@"("]; //Remove () from section
+    section = [items[0] substringToIndex:[items[0] length] - 1];
+  }
+  NSString *iconPath = [NSString stringWithFormat:@"/Applications/Cydia.app/Sections/%@.png", section];
+  NSError *error;
+  NSData *data = [NSData dataWithContentsOfFile:iconPath options:0 error:&error];
+  UIImage *sectionImage = [UIImage imageWithData:data];
+  if (sectionImage != NULL) {
+    cell.imageView.image = sectionImage;
+  }
 
-	cell.textLabel.text = package;
+  if (error != nil) {
+    NSLog(@"[AUPM] %@", error);
+  }
+
+  cell.textLabel.text = [package packageName];
+  cell.detailTextLabel.text = [NSString stringWithFormat:@"%@ (%@)", [package packageIdentifier], [package version]];
+
+  CGSize itemSize = CGSizeMake(35, 35);
+  UIGraphicsBeginImageContextWithOptions(itemSize, NO, UIScreen.mainScreen.scale);
+  CGRect imageRect = CGRectMake(0.0, 0.0, itemSize.width, itemSize.height);
+  [cell.imageView.image drawInRect:imageRect];
+  cell.imageView.image = UIGraphicsGetImageFromCurrentImageContext();
+  UIGraphicsEndImageContext();
 
 	return cell;
 }
@@ -91,19 +114,19 @@
     NSString *action = [[_queue actionsToPerform] objectAtIndex:indexPath.section];
 
     if ([action isEqual:@"Install"]) {
-      NSString *package = [_queue packageInQueueForAction:AUPMQueueActionInstall atIndex:indexPath.row];
+      AUPMPackage *package = [_queue packageInQueueForAction:AUPMQueueActionInstall atIndex:indexPath.row];
       [_queue removePackage:package fromQueueWithAction:AUPMQueueActionInstall];
     }
     else if ([action isEqual:@"Remove"]) {
-      NSString *package = [_queue packageInQueueForAction:AUPMQueueActionRemove atIndex:indexPath.row];
+      AUPMPackage *package = [_queue packageInQueueForAction:AUPMQueueActionRemove atIndex:indexPath.row];
       [_queue removePackage:package fromQueueWithAction:AUPMQueueActionRemove];
     }
     else if ([action isEqual:@"Reinstall"]) {
-      NSString *package = [_queue packageInQueueForAction:AUPMQueueActionReinstall atIndex:indexPath.row];
+      AUPMPackage *package = [_queue packageInQueueForAction:AUPMQueueActionReinstall atIndex:indexPath.row];
       [_queue removePackage:package fromQueueWithAction:AUPMQueueActionReinstall];
     }
     else if ([action isEqual:@"Upgrade"]) {
-      NSString *package = [_queue packageInQueueForAction:AUPMQueueActionUpgrade atIndex:indexPath.row];
+      AUPMPackage *package = [_queue packageInQueueForAction:AUPMQueueActionUpgrade atIndex:indexPath.row];
       [_queue removePackage:package fromQueueWithAction:AUPMQueueActionUpgrade];
     }
     else {
