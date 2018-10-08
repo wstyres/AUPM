@@ -1,3 +1,8 @@
+do::
+	/Applications/Xcode.app/Contents/Developer/usr/bin/actool AUPM/Assets/Assets.xcassets --compile AUPM/Resources --platform iphoneos  --minimum-deployment-target 8.0 --app-icon AppIcon --output-partial-info-plist fake.plist
+	rm fake.plist
+	#ibtool --compile AUPM/Resources/LaunchScreen.storyboardc AUPM/Assets/LaunchScreen.storyboard
+
 TARGET = iphone::10.3:8.0
 include $(THEOS)/makefiles/common.mk
 
