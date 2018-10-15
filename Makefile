@@ -1,5 +1,5 @@
 do::
-	/Applications/Xcode.app/Contents/Developer/usr/bin/actool AUPM/Assets/Assets.xcassets --compile AUPM/Resources --platform iphoneos  --minimum-deployment-target 8.0 --app-icon AppIcon --output-partial-info-plist fake.plist
+	/Applications/Xcode.app/Contents/Developer/usr/bin/actool AUPM/Assets/Assets.xcassets --compile AUPM/Resources --platform iphoneos  --minimum-deployment-target 8.0 --app-icon AppIcon --launch-image LaunchImage --output-partial-info-plist fake.plist
 	rm fake.plist
 	#ibtool --compile AUPM/Resources/LaunchScreen.storyboardc AUPM/Assets/LaunchScreen.storyboard
 
