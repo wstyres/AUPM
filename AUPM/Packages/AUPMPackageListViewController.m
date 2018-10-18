@@ -157,6 +157,7 @@
 
 	cell.textLabel.text = [package packageName];
 	cell.detailTextLabel.text = [NSString stringWithFormat:@"%@ (%@)", [package packageIdentifier], [package version]];
+	cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 
 	CGSize itemSize = CGSizeMake(35, 35);
   UIGraphicsBeginImageContextWithOptions(itemSize, NO, UIScreen.mainScreen.scale);
