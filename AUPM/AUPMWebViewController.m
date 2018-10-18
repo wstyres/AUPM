@@ -74,6 +74,10 @@
 
 - (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation {
   [self.navigationItem setTitle:[webView title]];
+
+  if (_url == NULL) {
+    [_webView evaluateJavaScript:[NSString stringWithFormat:@"document.getElementById(\"version\").innerHTML = \"You are running AUPM Version %@\"", PACKAGE_VERSION] completionHandler:nil];
+  }
 }
 
 - (NSString *)generateHomepage {
@@ -83,9 +87,7 @@
 		HBLogError(@"Error reading file: %@", error);
 	}
 
-	NSString *html = [NSString stringWithFormat:rawDepiction, PACKAGE_VERSION];
-
-	return html;
+	return rawDepiction;
 }
 
 - (void)nukeDatabase {
