@@ -4,6 +4,7 @@
 
 @implementation AUPMWebViewController {
   WKWebView *_webView;
+  UIProgressView *_progressView;
   NSURL *_url;
 }
 
@@ -40,7 +41,30 @@
     [_webView loadRequest:[[NSURLRequest alloc] initWithURL:_url]];
   }
 
+  [_webView addObserver:self forKeyPath:NSStringFromSelector(@selector(estimatedProgress)) options:NSKeyValueObservingOptionNew context:NULL];
+
+  _progressView = [[UIProgressView alloc] initWithFrame:CGRectMake(0.0f, self.navigationController.navigationBar.frame.size.height + [UIApplication sharedApplication].statusBarFrame.size.height, [[UIScreen mainScreen] bounds].size.width, 9)];
+  [_webView addSubview:_progressView];
+
   [self.view addSubview:_webView];
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+    if ([keyPath isEqualToString:NSStringFromSelector(@selector(estimatedProgress))] && object == _webView) {
+        [_progressView setAlpha:1.0f];
+        [_progressView setProgress:_webView.estimatedProgress animated:YES];
+
+        if(_webView.estimatedProgress >= 1.0f) {
+            [UIView animateWithDuration:0.3 delay:0.3 options:UIViewAnimationOptionCurveEaseOut animations:^{
+                [_progressView setAlpha:0.0f];
+            } completion:^(BOOL finished) {
+                [_progressView setProgress:0.0f animated:NO];
+            }];
+        }
+    }
+    else {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+    }
 }
 
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id <UIViewControllerTransitionCoordinator>)coordinator {
