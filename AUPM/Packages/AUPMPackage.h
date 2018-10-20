@@ -11,6 +11,7 @@
 @property NSString *packageDescription;
 @property NSString *depictionURL;
 @property NSString *repoVersion;
+@property NSString *tags;
 @property BOOL installed;
 @property AUPMRepo *repo;
 - (BOOL)isInstalled;

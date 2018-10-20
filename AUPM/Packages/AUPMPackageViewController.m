@@ -34,6 +34,7 @@
 	[_webView setNavigationDelegate:self];
 	NSURL *depictionURL = [NSURL URLWithString: [_package depictionURL]];
 	NSLog(@"[AUPM] Depiction URL: %@", [_package depictionURL]);
+	NSLog(@"[AUPM] Tag: %@", [_package tags]);
 	if (depictionURL != NULL) {
 		[_webView loadRequest:[[NSURLRequest alloc] initWithURL:depictionURL]];
 	}

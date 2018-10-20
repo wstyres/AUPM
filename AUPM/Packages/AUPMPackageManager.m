@@ -27,6 +27,8 @@ NSArray *packages_to_array(const char *path);
         package.packageDescription = [dict[@"Description"] substringToIndex:[dict[@"Description"] length] - 1];
         package.repoVersion = [NSString stringWithFormat:@"local~%@", dict[@"Package"]];
 
+        package.tags = [dict[@"Tag"] substringToIndex:[dict[@"Tag"] length] - 1];
+
         NSString *urlString = [dict[@"Depiction"] stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
         urlString = [urlString substringToIndex:[urlString length] - 3]; //idk why this is here
         package.depictionURL = urlString;
