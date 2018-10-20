@@ -159,6 +159,10 @@
 		cell.textLabel.textColor = [UIColor colorWithRed:0.62 green:0.67 blue:0.90 alpha:1.0];
 		cell.detailTextLabel.textColor = [UIColor colorWithRed:0.62 green:0.67 blue:0.90 alpha:1.0];
 	}
+	else {
+		cell.textLabel.textColor = [UIColor blackColor];
+		cell.detailTextLabel.textColor = [UIColor blackColor];
+	}
 
 	cell.textLabel.text = [package packageName];
 	cell.detailTextLabel.text = [NSString stringWithFormat:@"%@ (%@)", [package packageIdentifier], [package version]];
