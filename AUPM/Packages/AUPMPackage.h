@@ -14,5 +14,6 @@
 @property BOOL installed;
 @property AUPMRepo *repo;
 - (BOOL)isInstalled;
+- (BOOL)isFromRepo;
 @end
 RLM_ARRAY_TYPE(AUPMPackage)

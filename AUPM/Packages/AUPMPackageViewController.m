@@ -33,6 +33,7 @@
 	_webView = [[WKWebView alloc] initWithFrame:CGRectMake(0,0, self.view.frame.size.width, self.view.frame.size.height - height)];
 	[_webView setNavigationDelegate:self];
 	NSURL *depictionURL = [NSURL URLWithString: [_package depictionURL]];
+	NSLog(@"[AUPM] Depiction URL: %@", [_package depictionURL]);
 	if (depictionURL != NULL) {
 		[_webView loadRequest:[[NSURLRequest alloc] initWithURL:depictionURL]];
 	}
@@ -74,14 +75,55 @@
   }
 	else {
 		if ([_package isInstalled]) {
-			UIBarButtonItem *removeButton = [[UIBarButtonItem alloc] initWithTitle:@"Remove" style:UIBarButtonItemStylePlain target:self action:@selector(removePackage)];
-			self.navigationItem.rightBarButtonItem = removeButton;
+			if ([_package isFromRepo]) {
+				UIBarButtonItem *removeButton = [[UIBarButtonItem alloc] initWithTitle:@"Modify" style:UIBarButtonItemStylePlain target:self action:@selector(modifyPackage)];
+				self.navigationItem.rightBarButtonItem = removeButton;
+			}
+			else {
+				UIBarButtonItem *removeButton = [[UIBarButtonItem alloc] initWithTitle:@"Remove" style:UIBarButtonItemStylePlain target:self action:@selector(removePackage)];
+				self.navigationItem.rightBarButtonItem = removeButton;
+			}
 		}
 		else {
 			UIBarButtonItem *installButton = [[UIBarButtonItem alloc] initWithTitle:@"Install" style:UIBarButtonItemStylePlain target:self action:@selector(installPackage)];
 			self.navigationItem.rightBarButtonItem = installButton;
 		}
 	}
+}
+
+- (void)modifyPackage {
+	UIAlertController* alert = [UIAlertController alertControllerWithTitle:nil message:nil preferredStyle:UIAlertControllerStyleActionSheet];
+
+	UIAlertAction *removeAction = [UIAlertAction actionWithTitle:@"Remove" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+		[alert dismissViewControllerAnimated:true completion:nil];
+
+		AUPMQueue *queue = [AUPMQueue sharedInstance];
+		[queue addPackage:_package toQueueWithAction:AUPMQueueActionRemove];
+
+		AUPMQueueViewController *queueVC = [[AUPMQueueViewController alloc] init];
+		UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:queueVC];
+		[self presentViewController:navController animated:true completion:nil];
+	}];
+
+	UIAlertAction *reinstallAction = [UIAlertAction actionWithTitle:@"Reinstall" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+		[alert dismissViewControllerAnimated:true completion:nil];
+
+		AUPMQueue *queue = [AUPMQueue sharedInstance];
+		[queue addPackage:_package toQueueWithAction:AUPMQueueActionReinstall];
+
+		AUPMQueueViewController *queueVC = [[AUPMQueueViewController alloc] init];
+		UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:queueVC];
+		[self presentViewController:navController animated:true completion:nil];
+	}];
+
+	UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction * action) {
+		[alert dismissViewControllerAnimated:true completion:nil];
+	}];
+
+	[alert addAction:removeAction];
+	[alert addAction:reinstallAction];
+	[alert addAction:cancelAction];
+	[self presentViewController:alert animated:YES completion:nil];
 }
 
 - (void)installPackage {
