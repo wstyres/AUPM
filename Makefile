@@ -1,4 +1,4 @@
-do::
+clean::
 	python3 /usr/local/bin/carify/carify.py AUPM/Assets/Images AUPM/Resources
 	ibtool --compile AUPM/Resources/LaunchScreen.storyboardc AUPM/Assets/LaunchScreen.storyboard
 
