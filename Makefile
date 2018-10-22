@@ -1,8 +1,6 @@
-# do::
-# 	/Applications/Xcode.app/Contents/Developer/usr/bin/actool AUPM/Assets/Assets.xcassets --compile AUPM/Resources --platform iphoneos  --minimum-deployment-target 8.0 --app-icon AppIcon --output-partial-info-plist tmp.plist
-# 	/usr/libexec/PlistBuddy -x -c "Merge tmp.plist" AUPM/Resources/Info.plist
-# 	rm tmp.plist
-# 	ibtool --compile AUPM/Resources/LaunchScreen.storyboardc AUPM/Assets/LaunchScreen.storyboard
+do::
+	python3 /usr/local/bin/carify/carify.py AUPM/Assets/Images AUPM/Resources
+	ibtool --compile AUPM/Resources/LaunchScreen.storyboardc AUPM/Assets/LaunchScreen.storyboard
 
 TARGET = iphone::10.3:8.0
 include $(THEOS)/makefiles/common.mk
