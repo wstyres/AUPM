@@ -30,10 +30,15 @@
 - (void)loadView {
 	[super loadView];
 
-	[self.view setBackgroundColor:[UIColor whiteColor]]; //Fixes a weird animation issue when pushing
+	[self.view setBackgroundColor:[UIColor colorWithRed:0.94 green:0.94 blue:0.96 alpha:1.0]];
 	CGFloat height = [[UIApplication sharedApplication] statusBarFrame].size.height + self.navigationController.navigationBar.frame.size.height + self.tabBarController.tabBar.frame.size.height;
 	_webView = [[WKWebView alloc] initWithFrame:CGRectMake(0,0, self.view.frame.size.width, self.view.frame.size.height - height)];
+	_webView.customUserAgent = @"Cydia/ButActuallyAUPM";
 	[_webView setNavigationDelegate:self];
+
+	_webView.opaque = false;
+	_webView.backgroundColor = [UIColor clearColor];
+	_webView.scrollView.backgroundColor = [UIColor clearColor];
 
 	[_webView loadHTMLString:[self generateDepiction] baseURL:nil];
 
