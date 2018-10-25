@@ -33,9 +33,10 @@
   configuration.userContentController = controller;
 
   _webView = [[WKWebView alloc] initWithFrame:self.view.frame configuration:configuration];
+  _webView.customUserAgent = [NSString stringWithFormat:@"AUPM-%@", PACKAGE_VERSION];
   _webView.navigationDelegate = self;
   if (_url == NULL) {
-    [_webView loadHTMLString:[self generateHomepage] baseURL:nil];
+    [_webView loadFileURL:[NSURL URLWithString:@"file:///Applications/AUPM.app/html/home.html"] allowingReadAccessToURL:[NSURL URLWithString:@"file:///Applications/AUPM.app/html/"]];
   }
   else {
     [_webView loadRequest:[[NSURLRequest alloc] initWithURL:_url]];
@@ -102,16 +103,6 @@
   if (_url == NULL) {
     [_webView evaluateJavaScript:[NSString stringWithFormat:@"document.getElementById(\"version\").innerHTML = \"You are running AUPM Version %@\"", PACKAGE_VERSION] completionHandler:nil];
   }
-}
-
-- (NSString *)generateHomepage {
-	NSError *error;
-	NSString *rawDepiction = [NSString stringWithContentsOfFile:@"/Applications/AUPM.app/home.html" encoding:NSUTF8StringEncoding error:&error];
-	if (error != nil) {
-		HBLogError(@"Error reading file: %@", error);
-	}
-
-	return rawDepiction;
 }
 
 - (void)nukeDatabase {

@@ -36,11 +36,7 @@
 	_webView.customUserAgent = @"Cydia/ButActuallyAUPM";
 	[_webView setNavigationDelegate:self];
 
-	_webView.opaque = false;
-	_webView.backgroundColor = [UIColor clearColor];
-	_webView.scrollView.backgroundColor = [UIColor clearColor];
-
-	[_webView loadHTMLString:[self generateDepiction] baseURL:nil];
+	[_webView loadFileURL:[NSURL URLWithString:@"file:///Applications/AUPM.app/html/package_depiction.html"] allowingReadAccessToURL:[NSURL URLWithString:@"file:///Applications/AUPM.app/html/"]];
 
 	_webView.allowsBackForwardNavigationGestures = true;
 	_progressBar = [[UIProgressView alloc] initWithFrame:CGRectMake(0, 0, [[UIScreen mainScreen] bounds].size.width, 9)];
@@ -162,6 +158,11 @@
 
 	NSURL *depictionURL = [NSURL URLWithString:[_package depictionURL]];
 	if (depictionURL != NULL) {
+		[_webView evaluateJavaScript:[NSString stringWithFormat:@"document.getElementById('package').innerHTML = '%@ (%@)';", [_package packageName], [_package packageIdentifier]] completionHandler:nil];
+		[_webView evaluateJavaScript:[NSString stringWithFormat:@"document.getElementById('version').innerHTML = 'Version %@';", [_package version]] completionHandler:nil];
+		[_webView evaluateJavaScript:[NSString stringWithFormat:@"document.getElementById('desc').innerHTML = '%@';", [_package packageDescription]] completionHandler:^(id Result, NSError * error) {
+			NSLog(@"[AUPM] Error: %@ Description: %@", error, [_package packageDescription]);
+		}];
 		NSString *command = [NSString stringWithFormat:@"document.getElementById('depiction-src').src = '%@';", [depictionURL absoluteString]];
 		[_webView evaluateJavaScript:command completionHandler:^(id Result, NSError * error) {
 			NSLog(@"[AUPM] Error: %@", error);
