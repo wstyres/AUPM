@@ -8,6 +8,7 @@
 #import "../AUPMAppDelegate.h"
 #import "../AUPMTabBarController.h"
 #import <Realm/Realm.h>
+#import <MobileGestalt/MobileGestalt.h>
 
 @interface AUPMRepoListViewController ()
 @property (nonatomic, strong) RLMResults *objects;
@@ -154,6 +155,13 @@
 
 	NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:10];
 	request.HTTPMethod = @"HEAD";
+
+	NSString *version = [[UIDevice currentDevice] systemVersion];
+	CFStringRef youDID = MGCopyAnswer(CFSTR("UniqueDeviceID"));
+	NSString *udid = (__bridge NSString *)youDID;
+	[request addValue:@"Telesphoreo APT-HTTP/1.0.592" forHTTPHeaderField:@"User-Agent"];
+	[request addValue:version forHTTPHeaderField:@"X-Firmware"];
+	[request addValue:udid forHTTPHeaderField:@"X-Unique-ID"];
 
 	NSURLSessionDataTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
 		dispatch_async(dispatch_get_main_queue(), ^{

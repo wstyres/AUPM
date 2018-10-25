@@ -4,6 +4,8 @@
 #import "../AUPMQueue.h"
 #import "../AUPMQueueAction.h"
 #import "AUPMQueueViewController.h"
+#import <MobileGestalt/MobileGestalt.h>
+#include <sys/sysctl.h>
 
 @implementation AUPMPackageViewController {
 	BOOL _isFinishedLoading;
@@ -32,15 +34,9 @@
 	CGFloat height = [[UIApplication sharedApplication] statusBarFrame].size.height + self.navigationController.navigationBar.frame.size.height + self.tabBarController.tabBar.frame.size.height;
 	_webView = [[WKWebView alloc] initWithFrame:CGRectMake(0,0, self.view.frame.size.width, self.view.frame.size.height - height)];
 	[_webView setNavigationDelegate:self];
-	NSURL *depictionURL = [NSURL URLWithString: [_package depictionURL]];
-	NSLog(@"[AUPM] Depiction URL: %@", [_package depictionURL]);
-	NSLog(@"[AUPM] Tag: %@", [_package tags]);
-	if (depictionURL != NULL) {
-		[_webView loadRequest:[[NSURLRequest alloc] initWithURL:depictionURL]];
-	}
-	else {
-		[_webView loadHTMLString:[self generateDepiction] baseURL:nil];
-	}
+
+	[_webView loadHTMLString:[self generateDepiction] baseURL:nil];
+
 	_webView.allowsBackForwardNavigationGestures = true;
 	_progressBar = [[UIProgressView alloc] initWithFrame:CGRectMake(0, 0, [[UIScreen mainScreen] bounds].size.width, 9)];
 	[_webView addSubview:_progressBar];
@@ -60,8 +56,9 @@
 - (NSString *)generateDepiction {
 	NSError *error;
 	NSString *rawDepiction = [NSString stringWithContentsOfFile:@"/Applications/AUPM.app/package_depiction.html" encoding:NSUTF8StringEncoding error:&error];
+
 	if (error != nil) {
-		HBLogError(@"Error reading file: %@", error);
+		NSLog(@"[AUPM] Error reading file: %@", error);
 	}
 
 	NSString *html = [NSString stringWithFormat:rawDepiction, [_package packageName], [_package packageName], [_package packageIdentifier], [_package version], [_package packageDescription]];
@@ -157,6 +154,14 @@
 
 - (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation {
 	_isFinishedLoading = TRUE;
+
+	NSURL *depictionURL = [NSURL URLWithString:[_package depictionURL]];
+	if (depictionURL != NULL) {
+		NSString *command = [NSString stringWithFormat:@"document.getElementById('depiction-src').src = '%@';", [depictionURL absoluteString]];
+		[_webView evaluateJavaScript:command completionHandler:^(id Result, NSError * error) {
+			NSLog(@"[AUPM] Error: %@", error);
+		}];
+	}
 }
 
 -(void)refreshProgress {
