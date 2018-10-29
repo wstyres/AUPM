@@ -7,7 +7,6 @@
 #import "../AUPMDatabaseManager.h"
 #import "../AUPMAppDelegate.h"
 #import "../AUPMTabBarController.h"
-#import <Realm/Realm.h>
 #import <MobileGestalt/MobileGestalt.h>
 
 @interface AUPMRepoListViewController ()
@@ -118,7 +117,12 @@
 
 #pragma mark - Adding Repos
 
-- (void)showAddRepoAlert {
+- (void)addRepo {
+	[self showAddRepoAlert:NULL];
+}
+
+- (void)showAddRepoAlert:(NSURL *)url {
+	NSLog(@"URL %@", url);
 	UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Enter URL" message:nil preferredStyle:UIAlertControllerStyleAlert];
 
 	[alertController addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil]];
@@ -130,7 +134,12 @@
 	}
 	]];
 	[alertController addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
-		textField.text = @"http://";
+		if (url != NULL) {
+			textField.text = [url absoluteString];
+		}
+		else {
+			textField.text = @"http://";
+		}
 		textField.autocapitalizationType = UITextAutocapitalizationTypeNone;
 		textField.autocorrectionType = UITextAutocorrectionTypeNo;
 		textField.keyboardType = UIKeyboardTypeURL;
@@ -163,9 +172,14 @@
 	[request addValue:version forHTTPHeaderField:@"X-Firmware"];
 	[request addValue:udid forHTTPHeaderField:@"X-Unique-ID"];
 
+	UIAlertController *wait = [UIAlertController alertControllerWithTitle:@"Please Wait..." message:@"Verifying Source" preferredStyle:UIAlertControllerStyleAlert];
+	[self presentViewController:wait animated:true completion:nil];
+
 	NSURLSessionDataTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
 		dispatch_async(dispatch_get_main_queue(), ^{
-			[self receivedPackageVerification:response error:error];
+			[wait dismissViewControllerAnimated:true completion:^{
+				[self receivedPackageVerification:response error:error];
+			}];
 		});
 	}];
 	[task resume];
@@ -174,17 +188,18 @@
 - (void)receivedPackageVerification:(NSURLResponse *)response error:(NSError *)error {
 	if (error) {
 		NSLog(@"[AUPM] Error verifying repository: %@", error);
-		[self presentVerificationFailedAlert:error.localizedDescription];
+		NSURL *url = [(NSURL *)[error.userInfo objectForKey:@"NSErrorFailingURLKey"] URLByDeletingLastPathComponent];
+		[self presentVerificationFailedAlert:error.localizedDescription url:url];
 		return;
 	}
 
 	NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
-
 	NSURL *url = [httpResponse.URL URLByDeletingLastPathComponent];
+
 	if (httpResponse.statusCode != 200) {
 		NSString *errorMessage = [NSString stringWithFormat:@"Expected status from url %@, received: %d", url, (int)httpResponse.statusCode];
 		NSLog(@"[AUPM] %@", errorMessage);
-		[self presentVerificationFailedAlert:errorMessage];
+		[self presentVerificationFailedAlert:errorMessage url:url];
 		return;
 	}
 
@@ -192,10 +207,14 @@
 	[self addRepository:url];
 }
 
-- (void)presentVerificationFailedAlert:(NSString *)message {
+- (void)presentVerificationFailedAlert:(NSString *)message url:(NSURL *)url {
 	UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Unable to verify Repo" message:message preferredStyle:UIAlertControllerStyleAlert];
 
-	[alertController addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleCancel handler:nil]];
+	UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+		[alertController dismissViewControllerAnimated:true completion:nil];
+		[self showAddRepoAlert:url];
+	}];
+	[alertController addAction:okAction];
 
 	[self presentViewController:alertController animated:true completion:nil];
 }
