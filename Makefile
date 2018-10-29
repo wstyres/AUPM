@@ -1,6 +1,13 @@
 clean::
-	python3 /usr/local/bin/carify/carify.py AUPM/Assets/Images AUPM/Resources
+	python3 /usr/local/bin/carify/carify.py AUPM/Assets AUPM/Resources
 	ibtool --compile AUPM/Resources/LaunchScreen.storyboardc AUPM/Assets/LaunchScreen.storyboard
+
+simulate:
+	$(MAKE) all TARGET=simulator::10.3:8.0 $(APPLICATION_NAME)_FILES=AUPMSimulatorHelper.m TARGET_CODESIGN=
+	open -a Simulator
+	xcrun simctl boot E553D875-BCB7-4463-9054-1EDD2D1AC1D9 || true
+	xcrun simctl install E553D875-BCB7-4463-9054-1EDD2D1AC1D9 $(THEOS_OBJ_DIR)/$(APPLICATION_NAME).app
+	xcrun simctl launch booted xyz.willy.aupm
 
 TARGET = iphone::10.3:8.0
 include $(THEOS)/makefiles/common.mk

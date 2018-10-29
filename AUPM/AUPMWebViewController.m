@@ -100,11 +100,11 @@
 - (void)_webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation {
   [self.navigationItem setTitle:[webView title]];
   if (_url == NULL) {
-    #if TARGET_IPHONE_SIMULATOR
+#ifdef TARGET_IPHONE_SIMULATOR
     [webView evaluateJavaScript:@"document.getElementById('neo').innerHTML = 'Wake up, Neo...'" completionHandler:nil];
-    #else
+#else
     [webView evaluateJavaScript:[NSString stringWithFormat:@"document.getElementById('neo').innerHTML = \"You are running AUPM Version %@\"", PACKAGE_VERSION] completionHandler:nil];
-    #endif
+#endif
   }
 }
 
