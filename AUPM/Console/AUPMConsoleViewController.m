@@ -1,11 +1,13 @@
 #import "AUPMConsoleViewController.h"
-#import "NSTask.h"
-#import "AUPMAppDelegate.h"
-#import "AUPMDatabaseManager.h"
-#import "AUPMTabBarController.h"
+
+#import "Database/AUPMDatabaseManager.h"
 #import "Packages/AUPMPackage.h"
 #import "Packages/AUPMPackageManager.h"
-#import "AUPMQueue.h"
+#import "Queue/AUPMQueue.h"
+
+#import "AUPMAppDelegate.h"
+#import "AUPMTabBarController.h"
+#import "NSTask.h"
 
 @implementation AUPMConsoleViewController {
   UITextView *_consoleOutputView;

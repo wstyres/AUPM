@@ -1,12 +1,14 @@
 #import "AUPMPackageViewController.h"
-#import "AUPMPackage.h"
-#import "../AUPMConsoleViewController.h"
-#import "../AUPMQueue.h"
-#import "../AUPMQueueAction.h"
-#import "AUPMQueueViewController.h"
-#import "../AUPMWebViewController.h"
+
+#import "Console/AUPMConsoleViewController.h"
+#import "Queue/AUPMQueue.h"
+#import "Queue/AUPMQueueAction.h"
+#import "Queue/AUPMQueueViewController.h"
 #import <MobileGestalt/MobileGestalt.h>
-#include <sys/sysctl.h>
+#import <sys/sysctl.h>
+
+#import "AUPMPackage.h"
+#import "AUPMWebViewController.h"
 
 @interface AUPMPackageViewController () {
 	BOOL _isFinishedLoading;

@@ -19,13 +19,17 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#include <string.h>
+#include <ctype.h>
+#include "dpkgver.h"
+
 #define order(x) ((x) == '~' ? -1 \
 		: isdigit((x)) ? 0 \
 		: !(x) ? 0 \
 		: isalpha((x)) ? (x) \
 		: (x) + 256)
 
-static int verrevcmp(const char *val, const char *ref) {
+int verrevcmp(const char *val, const char *ref) {
     if (!val) val= "";
     if (!ref) ref= "";
 

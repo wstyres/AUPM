@@ -1,13 +1,15 @@
 #import "AUPMRepoListViewController.h"
-#import "../AUPMConsoleViewController.h"
+
+#import "Console/AUPMConsoleViewController.h"
+#import "Database/AUPMRefreshViewController.h"
+#import "Packages/AUPMPackageListViewController.h"
+#import "Database/AUPMDatabaseManager.h"
+#import <MobileGestalt/MobileGestalt.h>
+
 #import "AUPMRepo.h"
 #import "AUPMRepoManager.h"
-#import "../AUPMRefreshViewController.h"
-#import "../Packages/AUPMPackageListViewController.h"
-#import "../AUPMDatabaseManager.h"
-#import "../AUPMAppDelegate.h"
-#import "../AUPMTabBarController.h"
-#import <MobileGestalt/MobileGestalt.h>
+#import "AUPMAppDelegate.h"
+#import "AUPMTabBarController.h"
 
 @interface AUPMRepoListViewController ()
 @property (nonatomic, strong) RLMResults *objects;

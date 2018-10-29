@@ -1,9 +1,11 @@
 #import "AUPMQueueViewController.h"
-#import "../AUPMQueue.h"
-#import "../AUPMConsoleViewController.h"
-#import "../AUPMAppDelegate.h"
-#import "../AUPMTabBarController.h"
-#import "AUPMPackage.h"
+
+#import "Console/AUPMConsoleViewController.h"
+#import "Packages/AUPMPackage.h"
+
+#import "AUPMQueue.h"
+#import "AUPMAppDelegate.h"
+#import "AUPMTabBarController.h"
 
 @implementation AUPMQueueViewController {
   AUPMQueue *_queue;

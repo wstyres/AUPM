@@ -6,7 +6,7 @@ simulate:
 	$(MAKE) all TARGET=simulator::10.3:8.0 TARGET_CODESIGN=
 	open -a Simulator
 	xcrun simctl boot E553D875-BCB7-4463-9054-1EDD2D1AC1D9 || true
-	xcrun simctl install E553D875-BCB7-4463-9054-1EDD2D1AC1D9 $(THEOS_OBJ_DIR)/$(APPLICATION_NAME).app
+	xcrun simctl install E553D875-BCB7-4463-9054-1EDD2D1AC1D9 ./.theos/obj/iphone_simulator/debug/$(APPLICATION_NAME).app
 	xcrun simctl launch booted xyz.willy.aupm
 
 TARGET = iphone::10.3:8.0
@@ -19,7 +19,7 @@ AUPM_FRAMEWORKS = UIKit CoreGraphics WebKit
 AUPM_EXTRA_FRAMEWORKS = Realm
 AUPM_BUNDLE_RESOURCES = AUPM/Resources/
 AUPM_CODESIGN_FLAGS = -SAUPM/ent.plist
-AUPM_CFLAGS = -fobjc-arc -DPACKAGE_VERSION='@"$(THEOS_PACKAGE_BASE_VERSION)"'
+AUPM_CFLAGS = -fobjc-arc -DPACKAGE_VERSION='@"$(THEOS_PACKAGE_BASE_VERSION)"' -I ./AUPM/
 AUPM_LDFLAGS = -lz
 
 include $(THEOS_MAKE_PATH)/application.mk

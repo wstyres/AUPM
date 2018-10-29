@@ -1,5 +1,6 @@
 #import "AUPMRepo.h"
-#import "../Packages/AUPMPackage.h"
+
+#import "Packages/AUPMPackage.h"
 
 @implementation AUPMRepo
 + (NSString *)primaryKey {

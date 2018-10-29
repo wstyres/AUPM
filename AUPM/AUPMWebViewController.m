@@ -1,6 +1,6 @@
 #import "AUPMWebViewController.h"
-#import "AUPMRefreshViewController.h"
-#import <Realm/Realm.h>
+
+#import "Database/AUPMRefreshViewController.h"
 
 @interface AUPMWebViewController () {
   WKWebView *_webView;

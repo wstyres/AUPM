@@ -1,14 +1,15 @@
 #ifdef TARGET_IPHONE_SIMULATOR
 #import "AUPMSimulatorHelper.h"
+
 #import "Packages/AUPMPackage.h"
 #import "Repos/AUPMRepo.h"
-#include "Parser/dpkgver.c"
+#import "Parser/dpkgver.h"
 
 @implementation AUPMSimulatorHelper
 
 NSArray *packages_to_array(const char *path);
 
-- (NSArray *)managedRepoList {
++ (NSArray *)managedRepoList {
     NSMutableArray *array = [NSMutableArray new];
     NSError *readError;
     NSString *path = @"xtm3x.github.io_repo_._Release";
@@ -74,7 +75,7 @@ NSArray *packages_to_array(const char *path);
 
     return (NSArray*)[array sortedArrayUsingDescriptors:sortDescriptors];
 }
-- (NSArray<AUPMPackage *> *)packageListForRepo:(AUPMRepo *)repo {
++ (NSArray<AUPMPackage *> *)packageListForRepo:(AUPMRepo *)repo {
     NSDate *methodStart = [NSDate date];
     NSString *cachedPackagesFile = [[NSBundle mainBundle] pathForResource:@"Packages" ofType:@"tx"];
 
@@ -117,7 +118,7 @@ NSArray *packages_to_array(const char *path);
     return [cleanedArray sortedArrayUsingDescriptors:sortDescriptors];
 }
 
-- (NSArray *)cleanUpDuplicatePackages:(NSArray *)packageList {
++ (NSArray *)cleanUpDuplicatePackages:(NSArray *)packageList {
   NSMutableDictionary *packageVersionDict = [[NSMutableDictionary alloc] init];
   NSMutableArray *cleanedPackageList = [packageList mutableCopy];
 

@@ -1,10 +1,12 @@
 #import "AUPMTabBarController.h"
+
 #import "Repos/AUPMRepoListViewController.h"
 #import "Packages/AUPMPackageListViewController.h"
 #import "Search/AUPMSearchViewController.h"
-#import "AUPMWebViewController.h"
-#import "AUPMDatabaseManager.h"
+#import "Database/AUPMDatabaseManager.h"
+
 #import "AUPMAppDelegate.h"
+#import "AUPMWebViewController.h"
 
 @implementation AUPMTabBarController
 

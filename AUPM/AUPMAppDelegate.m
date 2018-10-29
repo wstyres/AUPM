@@ -1,11 +1,12 @@
 #import "AUPMAppDelegate.h"
+
 #import "Repos/AUPMRepoListViewController.h"
 #import "Packages/AUPMPackageListViewController.h"
-#import "AUPMRefreshViewController.h"
-#import "AUPMDatabaseManager.h"
+#import "Database/AUPMRefreshViewController.h"
+#import "Database/AUPMDatabaseManager.h"
+
 #import "AUPMTabBarController.h"
 #import "NSTask.h"
-#import <Realm/Realm.h>
 
 @implementation AUPMAppDelegate
 

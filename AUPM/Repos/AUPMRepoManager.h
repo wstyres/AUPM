@@ -5,7 +5,6 @@
 @class AUPMPackage;
 
 @interface AUPMRepoManager : NSObject
-+ (id)sharedInstance;
 - (id)init;
 - (NSArray *)managedRepoList;
 - (NSArray<AUPMPackage *> *)packageListForRepo:(AUPMRepo *)repo;

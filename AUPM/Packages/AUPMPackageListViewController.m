@@ -1,16 +1,18 @@
 #import "AUPMPackageListViewController.h"
+
+#import "Console/AUPMConsoleViewController.h"
+#import "Queue/AUPMQueueAction.h"
+#import "Queue/AUPMQueue.h"
+#import "Queue/AUPMQueueViewController.h"
+#import "Database/AUPMDatabaseManager.h"
+#import "Repos/AUPMRepo.h"
+
 #import "AUPMPackageManager.h"
 #import "AUPMPackage.h"
 #import "AUPMPackageViewController.h"
-#import "../AUPMDatabaseManager.h"
-#import "../Repos/AUPMRepo.h"
-#import "../AUPMAppDelegate.h"
-#import "../AUPMTabBarController.h"
-#import "../NSTask.h"
-#import "../AUPMConsoleViewController.h"
-#import "../AUPMQueueAction.h"
-#import "../AUPMQueue.h"
-#import "AUPMQueueViewController.h"
+#import "AUPMAppDelegate.h"
+#import "AUPMTabBarController.h"
+#import "NSTask.h"
 
 @implementation AUPMPackageListViewController {
 	NSArray *_updateObjects;

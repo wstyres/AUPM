@@ -1,3 +1,5 @@
+#import <Realm/Realm.h>
+
 @class AUPMDatabaseManager;
 @class AUPMQueue;
 

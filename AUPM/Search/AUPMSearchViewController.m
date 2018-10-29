@@ -1,7 +1,8 @@
 #import "AUPMSearchViewController.h"
-#import "../Packages/AUPMPackage.h"
-#import "../Repos/AUPMRepo.h"
-#import "../Packages/AUPMPackageViewController.h"
+
+#import "Packages/AUPMPackage.h"
+#import "Repos/AUPMRepo.h"
+#import "Packages/AUPMPackageViewController.h"
 
 @interface AUPMSearchViewController ()
 @property (nonatomic, strong) RLMResults<AUPMPackage *> *results;

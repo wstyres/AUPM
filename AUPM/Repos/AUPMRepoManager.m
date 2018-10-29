@@ -1,9 +1,11 @@
 #import "AUPMRepoManager.h"
+
+#import "Packages/AUPMPackage.h"
+#import "Database/AUPMDatabaseManager.h"
+
 #import "AUPMRepo.h"
-#import "../Packages/AUPMPackage.h"
-#include "dpkgver.c"
-#import "../AUPMDatabaseManager.h"
-#import "../AUPMAppDelegate.h"
+#import "AUPMAppDelegate.h"
+#import "Parser/dpkgver.h"
 
 #ifdef TARGET_IPHONE_SIMULATOR
 #import "AUPMSimulatorHelper.h"

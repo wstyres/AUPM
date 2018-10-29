@@ -1,10 +1,11 @@
-#import "AUPMAppDelegate.h"
 #import "AUPMRefreshViewController.h"
-#import "AUPMDatabaseManager.h"
+
 #import "Repos/AUPMRepoListViewController.h"
 #import "Packages/AUPMPackageListViewController.h"
-#import "AUPMTabBarController.h"
+
 #import "AUPMAppDelegate.h"
+#import "AUPMDatabaseManager.h"
+#import "AUPMTabBarController.h"
 
 @interface AUPMRefreshViewController () {
     BOOL _action;

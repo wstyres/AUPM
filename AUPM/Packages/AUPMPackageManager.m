@@ -1,6 +1,7 @@
 #import "AUPMPackageManager.h"
+
 #import "AUPMPackage.h"
-#import "../NSTask.h"
+#import "NSTask.h"
 
 @implementation AUPMPackageManager
 
