@@ -97,7 +97,7 @@
   }
 }
 
-- (void)_webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation {
+- (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation {
   [self.navigationItem setTitle:[webView title]];
   if (_url == NULL) {
 #ifdef TARGET_IPHONE_SIMULATOR
