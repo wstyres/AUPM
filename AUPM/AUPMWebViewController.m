@@ -42,7 +42,7 @@
   _webView.opaque = false;
   _webView.backgroundColor = [UIColor clearColor];
   if (_url == NULL) {
-    NSURL *url = [[NSBundle mainBundle] URLForResource:@"home" withExtension:@".html"];
+    NSURL *url = [[NSBundle mainBundle] URLForResource:@"home" withExtension:@".html" subdirectory:@"html"];
     [_webView loadFileURL:url allowingReadAccessToURL:[url URLByDeletingLastPathComponent]];
   }
   else {

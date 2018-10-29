@@ -51,7 +51,7 @@
 		[_webView loadRequest:[[NSURLRequest alloc] initWithURL:depictionURL]];
 	}
 	else {
-		NSURL *url = [[NSBundle mainBundle] URLForResource:@"package_depiction" withExtension:@".html"];
+		NSURL *url = [[NSBundle mainBundle] URLForResource:@"package_depiction" withExtension:@".html" subdirectory:@"html"];
 		[_webView loadFileURL:url allowingReadAccessToURL:[url URLByDeletingLastPathComponent]];
 	}
 
@@ -66,13 +66,20 @@
 - (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
 	NSURLRequest *request = [navigationAction request];
 	NSURL *url = [request URL];
+	NSLog(@"[AUPM] Navigation Type: %ld Request: %@", navigationAction.navigationType, url);
 
-	if ([[url absoluteString] isEqualToString:[_package depictionURL]] || [_package depictionURL] == NULL || loadFailed) {
+	if (navigationAction.navigationType == -1 && [[url absoluteString] isEqualToString:[_package depictionURL]]) {
 		decisionHandler(WKNavigationActionPolicyAllow);
 	}
-	else {
+	else if ([_package depictionURL] == NULL || loadFailed) {
+		decisionHandler(WKNavigationActionPolicyAllow);
+	}
+	else if (navigationAction.navigationType != -1) {
 		AUPMWebViewController *webViewController = [[AUPMWebViewController alloc] initWithURL:url];
 		[[self navigationController] pushViewController:webViewController animated:true];
+		decisionHandler(WKNavigationActionPolicyCancel);
+	}
+	else {
 		decisionHandler(WKNavigationActionPolicyCancel);
 	}
 }
@@ -83,19 +90,6 @@
 	[coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context) {
 		self->_webView.frame = self.view.frame;
 	} completion:nil];
-}
-
-- (NSString *)generateDepiction {
-	NSError *error;
-	NSString *rawDepiction = [NSString stringWithContentsOfFile:@"/Applications/AUPM.app/package_depiction.html" encoding:NSUTF8StringEncoding error:&error];
-
-	if (error != nil) {
-		NSLog(@"[AUPM] Error reading file: %@", error);
-	}
-
-	NSString *html = [NSString stringWithFormat:rawDepiction, [_package packageName], [_package packageName], [_package packageIdentifier], [_package version], [_package packageDescription]];
-
-	return html;
 }
 
 - (void)configureNavButton {
