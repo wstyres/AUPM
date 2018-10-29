@@ -34,7 +34,7 @@ bool packages_file_changed(FILE* f1, FILE* f2);
     [[self realm] deleteAllObjects];
   }];
 
-#ifdef TARGET_IPHONE_SIMULATOR
+#if TARGET_OS_SIMULATOR
 #else
   //Update APT
   NSTask *task = [[NSTask alloc] init];
@@ -79,7 +79,7 @@ bool packages_file_changed(FILE* f1, FILE* f2);
 - (void)updatePopulation:(void (^)(BOOL success))completion {
   HBLogInfo(@"Performing partial database population...");
 
-#ifdef TARGET_IPHONE_SIMULATOR
+#if TARGET_OS_SIMULATOR
 #else
   NSTask *removeCacheTask = [[NSTask alloc] init];
   [removeCacheTask setLaunchPath:@"/Applications/AUPM.app/supersling"];
@@ -132,7 +132,7 @@ bool packages_file_changed(FILE* f1, FILE* f2);
 
   NSLog(@"[AUPM] Populating installed database");
 
-#ifdef TARGET_IPHONE_SIMULATOR
+#if TARGET_OS_SIMULATOR
 #else
   NSTask *deletePackageCache = [[NSTask alloc] init];
   [deletePackageCache setLaunchPath:@"/Applications/AUPM.app/supersling"];

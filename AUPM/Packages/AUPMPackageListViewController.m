@@ -152,7 +152,7 @@
 	else if (_repo != NULL) {
 		cell.imageView.image = [UIImage imageWithData:[_repo icon]];
 	}
-#ifdef TARGET_IPHONE_SIMULATOR
+#if TARGET_OS_SIMULATOR
 #else
 	if (error != nil) {
 		NSLog(@"[AUPM] %@", error);

@@ -9,7 +9,7 @@ NSArray *packages_to_array(const char *path);
 
 //Parse installed package list from dpkg and create an AUPMPackage for each one and return an array
 - (NSArray *)installedPackageList {
-#ifdef TARGET_IPHONE_SIMULATOR
+#if TARGET_OS_SIMULATOR
     NSString *dbPath = [[NSBundle mainBundle] pathForResource:@"status" ofType:@"tx"];
 #else
     NSString *dbPath = @"/var/lib/dpkg/status";

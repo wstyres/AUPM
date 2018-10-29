@@ -1,4 +1,4 @@
-#ifdef TARGET_IPHONE_SIMULATOR
+#if TARGET_OS_SIMULATOR
 #import "AUPMSimulatorHelper.h"
 
 #import "Packages/AUPMPackage.h"

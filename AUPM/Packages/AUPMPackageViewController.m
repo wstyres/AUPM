@@ -66,7 +66,6 @@
 - (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
 	NSURLRequest *request = [navigationAction request];
 	NSURL *url = [request URL];
-	NSLog(@"[AUPM] Navigation Type: %ld Request: %@", navigationAction.navigationType, url);
 
 	if (navigationAction.navigationType == -1 && [[url absoluteString] isEqualToString:[_package depictionURL]]) {
 		decisionHandler(WKNavigationActionPolicyAllow);

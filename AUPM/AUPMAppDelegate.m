@@ -18,7 +18,7 @@
 
 	self.databaseManager = [[AUPMDatabaseManager alloc] init];
 
-#ifdef TARGET_IPHONE_SIMULATOR
+#if TARGET_OS_SIMULATOR
 	NSLog(@"[AUPM] Wake up, neo...");
 	RLMRealm *realm = [RLMRealm defaultRealm];
 #else

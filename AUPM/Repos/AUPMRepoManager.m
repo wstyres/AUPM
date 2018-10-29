@@ -7,7 +7,7 @@
 #import "AUPMAppDelegate.h"
 #import "Parser/dpkgver.h"
 
-#ifdef TARGET_IPHONE_SIMULATOR
+#if TARGET_OS_SIMULATOR
 #import "AUPMSimulatorHelper.h"
 #endif
 
@@ -30,7 +30,7 @@ NSArray *packages_to_array(const char *path);
 }
 
 - (NSArray *)managedRepoList {
-#ifdef TARGET_IPHONE_SIMULATOR
+#if TARGET_OS_SIMULATOR
   return [AUPMSimulatorHelper managedRepoList];
 #endif
 
@@ -134,7 +134,7 @@ NSArray *packages_to_array(const char *path);
 }
 
 - (NSArray<AUPMPackage *> *)packageListForRepo:(AUPMRepo *)repo {
-#ifdef TARGET_IPHONE_SIMULATOR
+#if TARGET_OS_SIMULATOR
   return [AUPMSimulatorHelper packageListForRepo:repo];
 #endif
 
