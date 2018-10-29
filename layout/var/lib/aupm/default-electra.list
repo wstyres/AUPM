@@ -1,0 +1,4 @@
+deb https://xtm3x.github.io/repo/ ./
+deb https://repounclutter.coolstar.org/ ./
+deb https://electrarepo64.coolstar.org/ ./
+deb http://electrarepo64.coolstar.org/substrate-shim/ ./
