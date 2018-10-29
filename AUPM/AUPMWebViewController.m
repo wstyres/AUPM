@@ -103,7 +103,7 @@
     #if TARGET_IPHONE_SIMULATOR
     [webView evaluateJavaScript:@"document.getElementById('neo').innerHTML = 'Wake up, Neo...'" completionHandler:nil];
     #else
-    [webView evaluateJavaScript:[NSString stringWithFormat:@"document.getElementById('neo').innerHTML = \"You are running AUPM Version %@\"", @"1.0~beta15"] completionHandler:nil];
+    [webView evaluateJavaScript:[NSString stringWithFormat:@"document.getElementById('neo').innerHTML = \"You are running AUPM Version %@\"", PACKAGE_VERSION] completionHandler:nil];
     #endif
   }
 }
@@ -120,7 +120,7 @@
     NSString *iosVersion = [NSString stringWithFormat:@"%@ running iOS %@", [[UIDevice currentDevice] model], [[UIDevice currentDevice] systemVersion]];
     RLMRealmConfiguration *config = [RLMRealmConfiguration defaultConfiguration];
     NSString *databaseLocation = [[config fileURL] absoluteString];
-    NSString *message = [NSString stringWithFormat:@"iOS Version: %@\nAUPM Version: 1.0~beta15\nAUPM Database Location: %@\n\nPlease describe the bug you are experiencing or feature you are requesting below: \n\n", iosVersion, databaseLocation];
+    NSString *message = [NSString stringWithFormat:@"iOS Version: %@\nAUPM Version: %@\nAUPM Database Location: %@\n\nPlease describe the bug you are experiencing or feature you are requesting below: \n\n", iosVersion, PACKAGE_VERSION, databaseLocation];
 
     MFMailComposeViewController *mail = [[MFMailComposeViewController alloc] init];
     mail.mailComposeDelegate = self;

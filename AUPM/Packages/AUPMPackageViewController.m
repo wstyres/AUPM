@@ -4,6 +4,7 @@
 #import "../AUPMQueue.h"
 #import "../AUPMQueueAction.h"
 #import "AUPMQueueViewController.h"
+#import "../AUPMWebViewController.h"
 #import <MobileGestalt/MobileGestalt.h>
 #include <sys/sysctl.h>
 
