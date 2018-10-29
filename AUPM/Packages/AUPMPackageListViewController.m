@@ -152,10 +152,12 @@
 	else if (_repo != NULL) {
 		cell.imageView.image = [UIImage imageWithData:[_repo icon]];
 	}
-
+#ifdef TARGET_IPHONE_SIMULATOR
+#else
 	if (error != nil) {
 		NSLog(@"[AUPM] %@", error);
 	}
+#endif
 
 	if ([package tags] != NULL && [[package tags] rangeOfString:@"cydia::commercial"].location != NSNotFound) {
 		cell.textLabel.textColor = [UIColor colorWithRed:0.62 green:0.67 blue:0.90 alpha:1.0];

@@ -10,11 +10,13 @@
 
 @implementation AUPMAppDelegate
 
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+- (void)applicationDidFinishLaunching:(UIApplication *)application {
 	NSLog(@"[AUPM] AUPM Version %@", PACKAGE_VERSION);
 	self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
 	self.window.backgroundColor = [UIColor whiteColor]; //Fixes a weird visual issue after pushing a vc
 	self.window.tintColor = [UIColor colorWithRed:0.62 green:0.67 blue:0.90 alpha:1.0];
+
+	self.databaseManager = [[AUPMDatabaseManager alloc] init];
 
 #ifdef TARGET_IPHONE_SIMULATOR
 	NSLog(@"[AUPM] Wake up, neo...");
@@ -26,8 +28,6 @@
 	config.fileURL = [NSURL URLWithString:@"/var/lib/aupm/database/aupm.realm"];
 	config.deleteRealmIfMigrationNeeded = YES;
 	[RLMRealmConfiguration setDefaultConfiguration:config];
-
-	self.databaseManager = [[AUPMDatabaseManager alloc] init];
 
 	if (![[NSFileManager defaultManager] fileExistsAtPath:@"/var/lib/aupm/aupm.list"]) {
 		NSTask *cpTask = [[NSTask alloc] init];
@@ -78,7 +78,6 @@
 	}
 
 	[self.window makeKeyAndVisible];
-	return 0;
 }
 
 @end

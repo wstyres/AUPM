@@ -51,10 +51,14 @@
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
 
+    NSLog(@"[AUPM] Starting refresh");
+
     AUPMDatabaseManager *databaseManager = ((AUPMAppDelegate *)[[UIApplication sharedApplication] delegate]).databaseManager;
     if (_action == 0) {
+      NSLog(@"[AUPM] Full refresh");
         NSDate *methodStart = [NSDate date];
         [databaseManager firstLoadPopulation:^(BOOL success) {
+          NSLog(@"[AUPM] Done");
             [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"firstSetupComplete"];
             [[NSUserDefaults standardUserDefaults] synchronize];
 

@@ -34,6 +34,8 @@ bool packages_file_changed(FILE* f1, FILE* f2);
     [[self realm] deleteAllObjects];
   }];
 
+#ifdef TARGET_IPHONE_SIMULATOR
+#else
   //Update APT
   NSTask *task = [[NSTask alloc] init];
   [task setLaunchPath:@"/Applications/AUPM.app/supersling"];
@@ -43,6 +45,7 @@ bool packages_file_changed(FILE* f1, FILE* f2);
 
   [task launch];
   [task waitUntilExit];
+#endif
 
   AUPMRepoManager *repoManager = [[AUPMRepoManager alloc] init];
   NSArray *repoArray = [repoManager managedRepoList];
@@ -76,6 +79,8 @@ bool packages_file_changed(FILE* f1, FILE* f2);
 - (void)updatePopulation:(void (^)(BOOL success))completion {
   HBLogInfo(@"Performing partial database population...");
 
+#ifdef TARGET_IPHONE_SIMULATOR
+#else
   NSTask *removeCacheTask = [[NSTask alloc] init];
   [removeCacheTask setLaunchPath:@"/Applications/AUPM.app/supersling"];
   NSArray *rmArgs = [[NSArray alloc] initWithObjects: @"rm", @"-rf", @"/var/mobile/Library/Caches/xyz.willy.aupm/lists", nil];
@@ -99,6 +104,7 @@ bool packages_file_changed(FILE* f1, FILE* f2);
 
   [refreshTask launch];
   [refreshTask waitUntilExit];
+#endif
 
   AUPMRepoManager *repoManager = [[AUPMRepoManager alloc] init];
   NSArray *bill = [self billOfReposToUpdate];
@@ -126,12 +132,15 @@ bool packages_file_changed(FILE* f1, FILE* f2);
 
   NSLog(@"[AUPM] Populating installed database");
 
+#ifdef TARGET_IPHONE_SIMULATOR
+#else
   NSTask *deletePackageCache = [[NSTask alloc] init];
   [deletePackageCache setLaunchPath:@"/Applications/AUPM.app/supersling"];
   NSArray *packageArgs = [[NSArray alloc] initWithObjects: @"rm", @"-rf", @"/var/mobile/Library/Caches/xyz.willy.aupm/lists", nil];
   [deletePackageCache setArguments:packageArgs];
 
   [deletePackageCache launch];
+#endif
 
   NSDate *newUpdateDate = [NSDate date];
   [[NSUserDefaults standardUserDefaults] setObject:newUpdateDate forKey:@"lastUpdatedDate"];
