@@ -3,7 +3,7 @@ clean::
 	ibtool --compile AUPM/Resources/LaunchScreen.storyboardc AUPM/Assets/LaunchScreen.storyboard
 
 simulate:
-	$(MAKE) all TARGET=simulator::10.3:8.0 $(APPLICATION_NAME)_FILES=AUPMSimulatorHelper.m TARGET_CODESIGN=
+	$(MAKE) all TARGET=simulator::10.3:8.0 TARGET_CODESIGN=
 	open -a Simulator
 	xcrun simctl boot E553D875-BCB7-4463-9054-1EDD2D1AC1D9 || true
 	xcrun simctl install E553D875-BCB7-4463-9054-1EDD2D1AC1D9 $(THEOS_OBJ_DIR)/$(APPLICATION_NAME).app
