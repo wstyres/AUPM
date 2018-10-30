@@ -38,7 +38,6 @@
   _webView = [[WKWebView alloc] initWithFrame:self.view.frame configuration:configuration];
   _webView.customUserAgent = @"AUPM-1.0~beta15";
   _webView.navigationDelegate = self;
-  [_webView setBackgroundColor:[UIColor colorWithRed:0.94 green:0.94 blue:0.96 alpha:1.0]];
   _webView.opaque = false;
   _webView.backgroundColor = [UIColor clearColor];
   if (_url == NULL) {
