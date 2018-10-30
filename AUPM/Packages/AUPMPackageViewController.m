@@ -223,7 +223,7 @@
 
 		if (_progressBar.progress == 1.0) {
 			loadFailed = true;
-			NSURL *url = [[NSBundle mainBundle] URLForResource:@"package_depiction" withExtension:@".html"];
+			NSURL *url = [[NSBundle mainBundle] URLForResource:@"package_depiction" withExtension:@".html" subdirectory:@"html"];
 			[_webView loadFileURL:url allowingReadAccessToURL:[url URLByDeletingLastPathComponent]];
 		}
 	}
