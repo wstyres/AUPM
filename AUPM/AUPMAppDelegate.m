@@ -29,35 +29,6 @@
 	config.deleteRealmIfMigrationNeeded = YES;
 	[RLMRealmConfiguration setDefaultConfiguration:config];
 
-	if (![[NSFileManager defaultManager] fileExistsAtPath:@"/var/lib/aupm/aupm.list"]) {
-		NSTask *cpTask = [[NSTask alloc] init];
-		[cpTask setLaunchPath:@"/Applications/AUPM.app/supersling"];
-		NSArray *cpArgs;
-
-		if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"11.0")) {
-			if ([[NSFileManager defaultManager] fileExistsAtPath:@"/Applcations/electra1131.app"] || [[NSFileManager defaultManager] fileExistsAtPath:@"/Applcations/Electra.app"]) {
-				NSLog(@"[AUPM] Electra detected, installing electra repos");
-
-				cpArgs = [[NSArray alloc] initWithObjects: @"cp", @"-fR", @"/var/lib/aupm/default-electra.list", @"/var/lib/aupm/aupm.list", nil];
-			}
-			else if ([[NSFileManager defaultManager] fileExistsAtPath:@"/Applcations/Undecimus.app"]) {
-				NSLog(@"[AUPM] unc0ver detected, installing unc0ver repos");
-
-				cpArgs = [[NSArray alloc] initWithObjects: @"cp", @"-fR", @"/var/lib/aupm/default-uncover.list", @"/var/lib/aupm/aupm.list", nil];
-			}
-		}
-		else {
-			NSLog(@"[AUPM] System version is less that 11.0, installing Cydia's repo");
-
-			cpArgs = [[NSArray alloc] initWithObjects: @"cp", @"-fR", @"/var/lib/aupm/default.list", @"/var/lib/aupm/aupm.list", nil];
-		}
-
-		[cpTask setArguments:cpArgs];
-
-		[cpTask launch];
-		[cpTask waitUntilExit];
-	}
-
 	NSError *configError;
 	RLMRealm *realm = [RLMRealm realmWithConfiguration:config error:&configError];
 
