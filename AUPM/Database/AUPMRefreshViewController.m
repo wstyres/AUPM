@@ -59,9 +59,12 @@ CFArrayRef SBSCopyApplicationDisplayIdentifiers(bool onlyActive, bool debuggable
 
     AUPMDatabaseManager *databaseManager = ((AUPMAppDelegate *)[[UIApplication sharedApplication] delegate]).databaseManager;
     if (_action == 0) {
+#if TARGET_CPU_ARM
       if (![[NSFileManager defaultManager] fileExistsAtPath:@"/var/lib/aupm/aupm.list"]) {
         [self createList];
       }
+#endif
+
 
       NSLog(@"[AUPM] Full refresh");
         NSDate *methodStart = [NSDate date];
