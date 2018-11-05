@@ -186,9 +186,6 @@
 		[_webView evaluateJavaScript:@"var element = document.getElementById('main-holder').style.marginBottom = '0px';" completionHandler:nil];
 		NSString *command = [NSString stringWithFormat:@"document.getElementById('depiction-src').src = '%@';", [depictionURL absoluteString]];
 		[_webView evaluateJavaScript:command completionHandler:nil];
-
-		//document.getElementById("desc-holder").style.color = "blue";
-		//style="margin-bottom:0px;"
 	}
 	else {
 		[_webView evaluateJavaScript:@"var element = document.getElementById('depiction-src').outerHTML = '';" completionHandler:nil];
