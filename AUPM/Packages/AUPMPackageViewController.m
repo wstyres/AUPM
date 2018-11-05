@@ -47,7 +47,6 @@
 	[_webView setNavigationDelegate:self];
 
 	NSURL *url = [[NSBundle mainBundle] URLForResource:@"package_depiction" withExtension:@".html" subdirectory:@"html"];
-	NSLog(@"[AUPM] Resource: %@", url);
 	[_webView loadFileURL:url allowingReadAccessToURL:[url URLByDeletingLastPathComponent]];
 
 	_webView.allowsBackForwardNavigationGestures = true;
@@ -58,25 +57,26 @@
 	self.title = [_package packageName];
 }
 
-// - (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
-// 	NSURLRequest *request = [navigationAction request];
-// 	NSURL *url = [request URL];
-//
-// 	if (navigationAction.navigationType == -1 && [[url absoluteString] isEqualToString:[_package depictionURL]]) {
-// 		decisionHandler(WKNavigationActionPolicyAllow);
-// 	}
-// 	else if ([_package depictionURL] == NULL || loadFailed) {
-// 		decisionHandler(WKNavigationActionPolicyAllow);
-// 	}
-// 	else if (navigationAction.navigationType != -1) {
-// 		AUPMWebViewController *webViewController = [[AUPMWebViewController alloc] initWithURL:url];
-// 		[[self navigationController] pushViewController:webViewController animated:true];
-// 		decisionHandler(WKNavigationActionPolicyCancel);
-// 	}
-// 	else {
-// 		decisionHandler(WKNavigationActionPolicyCancel);
-// 	}
-// }
+- (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
+	NSURLRequest *request = [navigationAction request];
+	NSURL *url = [request URL];
+
+	int type = navigationAction.navigationType;
+	NSLog(@"[AUPM] Navigation Type %d", type);
+
+	if ([navigationAction.request.URL isFileURL] || (type == -1 && [navigationAction.request.URL isEqual:[NSURL URLWithString:[_package depictionURL]]])) {
+		decisionHandler(WKNavigationActionPolicyAllow);
+	}
+	else if (![navigationAction.request.URL isEqual:[NSURL URLWithString:@"about:blank"]]){
+		NSLog(@"[AUPM] %@", navigationAction.request.URL);
+		AUPMWebViewController *webViewController = [[AUPMWebViewController alloc] initWithURL:url];
+		[[self navigationController] pushViewController:webViewController animated:true];
+		decisionHandler(WKNavigationActionPolicyCancel);
+	}
+	else {
+		decisionHandler(WKNavigationActionPolicyCancel);
+	}
+}
 
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id <UIViewControllerTransitionCoordinator>)coordinator {
 	[super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
