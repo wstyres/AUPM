@@ -67,11 +67,16 @@
 	if ([navigationAction.request.URL isFileURL] || (type == -1 && [navigationAction.request.URL isEqual:[NSURL URLWithString:[_package depictionURL]]])) {
 		decisionHandler(WKNavigationActionPolicyAllow);
 	}
-	else if (![navigationAction.request.URL isEqual:[NSURL URLWithString:@"about:blank"]]){
-		NSLog(@"[AUPM] %@", navigationAction.request.URL);
-		AUPMWebViewController *webViewController = [[AUPMWebViewController alloc] initWithURL:url];
-		[[self navigationController] pushViewController:webViewController animated:true];
-		decisionHandler(WKNavigationActionPolicyCancel);
+	else if (![navigationAction.request.URL isEqual:[NSURL URLWithString:@"about:blank"]]) {
+		if (type != -1) {
+			NSLog(@"[AUPM] %@", navigationAction.request.URL);
+			AUPMWebViewController *webViewController = [[AUPMWebViewController alloc] initWithURL:url];
+			[[self navigationController] pushViewController:webViewController animated:true];
+			decisionHandler(WKNavigationActionPolicyCancel);
+		}
+		else {
+			decisionHandler(WKNavigationActionPolicyAllow);
+		}
 	}
 	else {
 		decisionHandler(WKNavigationActionPolicyCancel);
