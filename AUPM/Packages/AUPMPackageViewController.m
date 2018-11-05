@@ -45,15 +45,10 @@
 	_webView.opaque = false;
 	_webView.backgroundColor = [UIColor clearColor];
 	[_webView setNavigationDelegate:self];
-	NSURL *depictionURL = [NSURL URLWithString: [_package depictionURL]];
 
-	if (depictionURL != NULL) {
-		[_webView loadRequest:[[NSURLRequest alloc] initWithURL:depictionURL]];
-	}
-	else {
-		NSURL *url = [[NSBundle mainBundle] URLForResource:@"package_depiction" withExtension:@".html" subdirectory:@"html"];
-		[_webView loadFileURL:url allowingReadAccessToURL:[url URLByDeletingLastPathComponent]];
-	}
+	NSURL *url = [[NSBundle mainBundle] URLForResource:@"package_depiction" withExtension:@".html" subdirectory:@"html"];
+	NSLog(@"[AUPM] Resource: %@", url);
+	[_webView loadFileURL:url allowingReadAccessToURL:[url URLByDeletingLastPathComponent]];
 
 	_webView.allowsBackForwardNavigationGestures = true;
 	_progressBar = [[UIProgressView alloc] initWithFrame:CGRectMake(0, 0, [[UIScreen mainScreen] bounds].size.width, 9)];
@@ -63,25 +58,25 @@
 	self.title = [_package packageName];
 }
 
-- (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
-	NSURLRequest *request = [navigationAction request];
-	NSURL *url = [request URL];
-
-	if (navigationAction.navigationType == -1 && [[url absoluteString] isEqualToString:[_package depictionURL]]) {
-		decisionHandler(WKNavigationActionPolicyAllow);
-	}
-	else if ([_package depictionURL] == NULL || loadFailed) {
-		decisionHandler(WKNavigationActionPolicyAllow);
-	}
-	else if (navigationAction.navigationType != -1) {
-		AUPMWebViewController *webViewController = [[AUPMWebViewController alloc] initWithURL:url];
-		[[self navigationController] pushViewController:webViewController animated:true];
-		decisionHandler(WKNavigationActionPolicyCancel);
-	}
-	else {
-		decisionHandler(WKNavigationActionPolicyCancel);
-	}
-}
+// - (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
+// 	NSURLRequest *request = [navigationAction request];
+// 	NSURL *url = [request URL];
+//
+// 	if (navigationAction.navigationType == -1 && [[url absoluteString] isEqualToString:[_package depictionURL]]) {
+// 		decisionHandler(WKNavigationActionPolicyAllow);
+// 	}
+// 	else if ([_package depictionURL] == NULL || loadFailed) {
+// 		decisionHandler(WKNavigationActionPolicyAllow);
+// 	}
+// 	else if (navigationAction.navigationType != -1) {
+// 		AUPMWebViewController *webViewController = [[AUPMWebViewController alloc] initWithURL:url];
+// 		[[self navigationController] pushViewController:webViewController animated:true];
+// 		decisionHandler(WKNavigationActionPolicyCancel);
+// 	}
+// 	else {
+// 		decisionHandler(WKNavigationActionPolicyCancel);
+// 	}
+// }
 
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id <UIViewControllerTransitionCoordinator>)coordinator {
 	[super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
@@ -181,21 +176,23 @@
 	_isFinishedLoading = TRUE;
 
 	NSURL *depictionURL = [NSURL URLWithString:[_package depictionURL]];
-	if (depictionURL == NULL || loadFailed) {
-		[_webView evaluateJavaScript:[NSString stringWithFormat:@"document.getElementById('package').innerHTML = '%@ (%@)';", [_package packageName], [_package packageIdentifier]] completionHandler:nil];
-		[_webView evaluateJavaScript:[NSString stringWithFormat:@"document.getElementById('version').innerHTML = 'Version %@';", [_package version]] completionHandler:nil];
 
-		NSLog(@"%@", [_package packageDescription]);
-		if ([_package packageDescription] == NULL || [[_package packageDescription] isEqual:@""])  {
-			[_webView evaluateJavaScript:@"var element = document.getElementById('desc');element.parentNode.parentNode.outerHTML = '';" completionHandler:nil];
-		}
-		else {
-			[_webView evaluateJavaScript:[NSString stringWithFormat:@"document.getElementById('desc').innerHTML = \"%@\";", [_package packageDescription]] completionHandler:nil];
-		}
-		//        NSString *command = [NSString stringWithFormat:@"document.getElementById('depiction-src').src = '%@';", [depictionURL absoluteString]];
-		//        [_webView evaluateJavaScript:command completionHandler:^(id Result, NSError * error) {
-		//            NSLog(@"[AUPM] Error: %@", error);
-		//        }];
+	[_webView evaluateJavaScript:[NSString stringWithFormat:@"document.getElementById('package').innerHTML = '%@ (%@)';", [_package packageName], [_package packageIdentifier]] completionHandler:nil];
+	[_webView evaluateJavaScript:[NSString stringWithFormat:@"document.getElementById('version').innerHTML = 'Version %@';", [_package version]] completionHandler:nil];
+
+	NSLog(@"%@", [_package packageDescription]);
+	if ([_package packageDescription] == NULL || [[_package packageDescription] isEqual:@""] || [_package depictionURL] != NULL)  {
+		[_webView evaluateJavaScript:@"var element = document.getElementById('desc-holder').outerHTML = '';" completionHandler:nil];
+		[_webView evaluateJavaScript:@"var element = document.getElementById('main-holder').style.marginBottom = '0px';" completionHandler:nil];
+		NSString *command = [NSString stringWithFormat:@"document.getElementById('depiction-src').src = '%@';", [depictionURL absoluteString]];
+		[_webView evaluateJavaScript:command completionHandler:nil];
+
+		//document.getElementById("desc-holder").style.color = "blue";
+		//style="margin-bottom:0px;"
+	}
+	else {
+		[_webView evaluateJavaScript:@"var element = document.getElementById('depiction-src').outerHTML = '';" completionHandler:nil];
+		[_webView evaluateJavaScript:[NSString stringWithFormat:@"document.getElementById('desc').innerHTML = \"%@\";", [_package packageDescription]] completionHandler:nil];
 	}
 }
 
