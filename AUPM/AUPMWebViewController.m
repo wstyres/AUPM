@@ -31,12 +31,13 @@
   [self.view setBackgroundColor:[UIColor colorWithRed:0.94 green:0.94 blue:0.96 alpha:1.0]]; //Fixes a weird animation issue when pushing
 
   WKWebViewConfiguration *configuration = [[WKWebViewConfiguration alloc] init];
+  configuration.applicationNameForUserAgent = [NSString stringWithFormat:@"AUPM/%@", PACKAGE_VERSION];
+
   WKUserContentController *controller = [[WKUserContentController alloc] init];
   [controller addScriptMessageHandler:self name:@"observe"];
   configuration.userContentController = controller;
 
   _webView = [[WKWebView alloc] initWithFrame:self.view.frame configuration:configuration];
-  _webView.customUserAgent = @"AUPM-1.0~beta15";
   _webView.navigationDelegate = self;
   _webView.opaque = false;
   _webView.backgroundColor = [UIColor clearColor];
@@ -88,8 +89,6 @@
   NSString *destination = (NSString *)contents[0];
   NSString *action = contents[1];
 
-  NSLog(@"[AUPM] Web message %@", contents);
-
   if ([destination isEqual:@"local"]) {
     if ([action isEqual:@"nuke"]) {
       [self nukeDatabase];
@@ -116,7 +115,6 @@
 }
 
 - (void)nukeDatabase {
-  NSLog(@"Nuke action");
   AUPMRefreshViewController *refreshViewController = [[AUPMRefreshViewController alloc] init];
 
   [[UIApplication sharedApplication] keyWindow].rootViewController = refreshViewController;
