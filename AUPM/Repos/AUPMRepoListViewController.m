@@ -5,6 +5,7 @@
 #import "Packages/AUPMPackageListViewController.h"
 #import "Database/AUPMDatabaseManager.h"
 #import <MobileGestalt/MobileGestalt.h>
+#import <sys/sysctl.h>
 
 #import "AUPMRepo.h"
 #import "AUPMRepoManager.h"
@@ -170,9 +171,23 @@
 	NSString *version = [[UIDevice currentDevice] systemVersion];
 	CFStringRef youDID = MGCopyAnswer(CFSTR("UniqueDeviceID"));
 	NSString *udid = (__bridge NSString *)youDID;
-	[request addValue:@"Telesphoreo APT-HTTP/1.0.592" forHTTPHeaderField:@"User-Agent"];
-	[request addValue:version forHTTPHeaderField:@"X-Firmware"];
-	[request addValue:udid forHTTPHeaderField:@"X-Unique-ID"];
+
+	size_t size;
+  sysctlbyname("hw.machine", NULL, &size, NULL, 0);
+
+  char *answer = malloc(size);
+  sysctlbyname("hw.machine", answer, &size, NULL, 0);
+
+  NSString *machineIdentifier = [NSString stringWithCString:answer encoding: NSUTF8StringEncoding];
+
+	[request setValue:@"Telesphoreo APT-HTTP/1.0.592" forHTTPHeaderField:@"User-Agent"];
+	[request setValue:version forHTTPHeaderField:@"X-Firmware"];
+	[request setValue:udid forHTTPHeaderField:@"X-Unique-ID"];
+	[request setValue:machineIdentifier forHTTPHeaderField:@"X-Machine"];
+
+    if ([[url scheme] isEqualToString:@"https"]) {
+        [request setValue:udid forHTTPHeaderField:@"X-Cydia-Id"];
+    }
 
 	UIAlertController *wait = [UIAlertController alertControllerWithTitle:@"Please Wait..." message:@"Verifying Source" preferredStyle:UIAlertControllerStyleAlert];
 	[self presentViewController:wait animated:true completion:nil];
