@@ -108,6 +108,51 @@
     AUPMWebViewController *_webViewController = [[AUPMWebViewController alloc] initWithURL:[NSURL URLWithString:action]];
     [[self navigationController] pushViewController:_webViewController animated:true];
   }
+  else if ([destination isEqual:@"repo"]) {
+    [self handleRepoAdd:action local:false];
+  }
+  else if ([destination isEqual:@"repo-local"]) {
+    [self handleRepoAdd:action local:true];
+  }
+}
+
+- (void)handleRepoAdd:(NSString *)repo local:(BOOL)local {
+  if (local) {
+    NSArray *options = @[
+  		@"transfer",
+  		@"cydia",
+  		@"electra",
+  		@"uncover",
+      @"bigboss",
+      @"modmyi",
+    ];
+
+    switch ([options indexOfObject:repo]) {
+      case 0:
+        NSLog(@"[AUPM] Transferring Sources from Cydia");
+        break;
+      case 1:
+        NSLog(@"[AUPM] Adding Telesphoreo");
+        break;
+      case 2:
+        NSLog(@"[AUPM] Adding Electra repos");
+        break;
+      case 3:
+        NSLog(@"[AUPM] Adding unc0ver");
+        break;
+      case 4:
+        NSLog(@"[AUPM] Adding BigBoss");
+        break;
+      case 5:
+        NSLog(@"[AUPM] Adding ModMyi");
+        break;
+      default:
+        break;
+    }
+  }
+  else {
+    NSLog(@"[AUPM] Adding repository from URL %@", repo);
+  }
 }
 
 - (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation {
