@@ -56,6 +56,13 @@
   [_webView addSubview:_progressView];
 
   [self.view addSubview:_webView];
+
+  UIBarButtonItem *refreshButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(refresh)];
+  self.navigationItem.rightBarButtonItem = refreshButton;
+}
+
+- (void)refresh {
+  [_webView reload];
 }
 
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id <UIViewControllerTransitionCoordinator>)coordinator {
