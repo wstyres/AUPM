@@ -156,6 +156,9 @@
       default:
         break;
     }
+
+    AUPMRefreshViewController *refreshViewController = [[AUPMRefreshViewController alloc] initWithAction:1];
+		[self presentViewController:refreshViewController animated:true completion:nil];
   }
   else {
     NSLog(@"[AUPM] Adding repository from URL %@", repo);

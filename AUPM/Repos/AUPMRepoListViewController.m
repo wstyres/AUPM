@@ -146,8 +146,11 @@
 					}];
 				}
 				else {
-					[wait dismissViewControllerAnimated:true completion:nil];
-					NSLog(@"[AUPM] Added source.");
+					[wait dismissViewControllerAnimated:true completion:^{
+						NSLog(@"[AUPM] Added source.");
+						AUPMRefreshViewController *refreshViewController = [[AUPMRefreshViewController alloc] initWithAction:1];
+						[self presentViewController:refreshViewController animated:true completion:nil];
+					}];
 				}
 			}];
 		}
@@ -181,14 +184,6 @@
 
 		[self presentViewController:alertController animated:true completion:nil];
 	});
-}
-
-- (void)addSourceWithURL:(NSString *)urlString {
-	NSURL *url = [NSURL URLWithString:urlString];
-	if (!url) {
-		NSLog(@"[AUPM] Invalid URL: %@", urlString);
-		return;
-	}
 }
 
 @end

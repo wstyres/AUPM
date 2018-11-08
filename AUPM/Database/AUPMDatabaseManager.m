@@ -79,8 +79,7 @@ bool packages_file_changed(FILE* f1, FILE* f2);
 - (void)updatePopulation:(void (^)(BOOL success))completion {
   HBLogInfo(@"Performing partial database population...");
 
-#if TARGET_OS_SIMULATOR
-#else
+#if TARGET_CPU_ARM
   NSTask *removeCacheTask = [[NSTask alloc] init];
   [removeCacheTask setLaunchPath:@"/Applications/AUPM.app/supersling"];
   NSArray *rmArgs = [[NSArray alloc] initWithObjects: @"rm", @"-rf", @"/var/mobile/Library/Caches/xyz.willy.aupm/lists", nil];
@@ -131,16 +130,6 @@ bool packages_file_changed(FILE* f1, FILE* f2);
   }
 
   NSLog(@"[AUPM] Populating installed database");
-
-#if TARGET_OS_SIMULATOR
-#else
-  NSTask *deletePackageCache = [[NSTask alloc] init];
-  [deletePackageCache setLaunchPath:@"/Applications/AUPM.app/supersling"];
-  NSArray *packageArgs = [[NSArray alloc] initWithObjects: @"rm", @"-rf", @"/var/mobile/Library/Caches/xyz.willy.aupm/lists", nil];
-  [deletePackageCache setArguments:packageArgs];
-
-  [deletePackageCache launch];
-#endif
 
   NSDate *newUpdateDate = [NSDate date];
   [[NSUserDefaults standardUserDefaults] setObject:newUpdateDate forKey:@"lastUpdatedDate"];
