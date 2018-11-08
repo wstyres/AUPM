@@ -2,10 +2,12 @@
 
 #import "Packages/AUPMPackage.h"
 #import "Database/AUPMDatabaseManager.h"
+#import "Parser/dpkgver.h"
+#import <MobileGestalt/MobileGestalt.h>
+#import <sys/sysctl.h>
 
 #import "AUPMRepo.h"
 #import "AUPMAppDelegate.h"
-#import "Parser/dpkgver.h"
 
 #if TARGET_OS_SIMULATOR
 #import "AUPMSimulatorHelper.h"
@@ -183,7 +185,85 @@ NSArray *packages_to_array(const char *path);
   return [cleanedArray sortedArrayUsingDescriptors:sortDescriptors];
 }
 
-- (void)addSource:(NSURL *)sourceURL completion:(void (^)(BOOL success))completion {
+//Source management
+
+- (void)addSourceWithURL:(NSString *)urlString response:(void (^)(BOOL success, NSString *error, NSURL *url))respond {
+  NSLog(@"[AUPM] Attempting to add %@ to sources list", urlString);
+
+  NSURL *sourceURL = [NSURL URLWithString:urlString];
+  if (!sourceURL) {
+  	NSLog(@"[AUPM] Invalid URL: %@", urlString);
+    respond(false, [NSString stringWithFormat:@"Invalid URL: %@", urlString], sourceURL);
+  	return;
+  }
+
+  [self verifySourceExists:sourceURL completion:^(NSURLResponse *response, NSError *error) {
+    if (error) {
+  		NSLog(@"[AUPM] Error verifying repository: %@", error);
+  		NSURL *url = [(NSURL *)[error.userInfo objectForKey:@"NSErrorFailingURLKey"] URLByDeletingLastPathComponent];
+  		respond(false, error.localizedDescription, url);
+      return;
+  	}
+
+  	NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
+  	NSURL *url = [httpResponse.URL URLByDeletingLastPathComponent];
+
+  	if (httpResponse.statusCode != 200) {
+  		NSString *errorMessage = [NSString stringWithFormat:@"Expected status from url %@, received: %d", url, (int)httpResponse.statusCode];
+  		NSLog(@"[AUPM] %@", errorMessage);
+  		respond(false, errorMessage, url);
+  		return;
+  	}
+
+  	NSLog(@"[AUPM] Verified source %@", url);
+
+    [self addSource:sourceURL completion:^(BOOL success, NSError *addError) {
+  		if (success) {
+  			respond(true, NULL, NULL);
+  		}
+  		else {
+  			respond(false, addError.localizedDescription, url);
+  		}
+  	}];
+  }];
+}
+
+- (void)verifySourceExists:(NSURL *)sourceURL completion:(void (^)(NSURLResponse *response, NSError *error))completion {
+  NSURL *url = [sourceURL URLByAppendingPathComponent:@"Packages.bz2"];
+	NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
+	NSURLSession *session = [NSURLSession sessionWithConfiguration:configuration];
+
+	NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:10];
+	request.HTTPMethod = @"HEAD";
+
+	NSString *version = [[UIDevice currentDevice] systemVersion];
+	CFStringRef youDID = MGCopyAnswer(CFSTR("UniqueDeviceID"));
+	NSString *udid = (__bridge NSString *)youDID;
+
+	size_t size;
+  sysctlbyname("hw.machine", NULL, &size, NULL, 0);
+
+  char *answer = malloc(size);
+  sysctlbyname("hw.machine", answer, &size, NULL, 0);
+
+  NSString *machineIdentifier = [NSString stringWithCString:answer encoding: NSUTF8StringEncoding];
+
+	[request setValue:@"Telesphoreo APT-HTTP/1.0.592" forHTTPHeaderField:@"User-Agent"];
+	[request setValue:version forHTTPHeaderField:@"X-Firmware"];
+	[request setValue:udid forHTTPHeaderField:@"X-Unique-ID"];
+	[request setValue:machineIdentifier forHTTPHeaderField:@"X-Machine"];
+
+    if ([[url scheme] isEqualToString:@"https"]) {
+      [request setValue:udid forHTTPHeaderField:@"X-Cydia-Id"];
+    }
+
+  	NSURLSessionDataTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+  		completion(response, error);
+  	}];
+  	[task resume];
+}
+
+- (void)addSource:(NSURL *)sourceURL completion:(void (^)(BOOL success, NSError *error))completion {
   NSString *URL = [sourceURL absoluteString];
   NSString *output = @"";
 
@@ -210,7 +290,7 @@ NSArray *packages_to_array(const char *path);
   [output writeToFile:filePath atomically:TRUE encoding:NSUTF8StringEncoding error:&error];
   if (error != NULL) {
     NSLog(@"[AUPM] Error while writing sources to file: %@", error);
-    completion(false);
+    completion(false, error);
   }
   else {
 #if TARGET_CPU_ARM
@@ -221,10 +301,8 @@ NSArray *packages_to_array(const char *path);
 
     [updateListTask launch];
     [updateListTask waitUntilExit];
-
 #endif
-
-    completion(true);
+    completion(true, NULL);
   }
 }
 

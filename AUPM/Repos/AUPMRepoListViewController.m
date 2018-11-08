@@ -4,8 +4,6 @@
 #import "Database/AUPMRefreshViewController.h"
 #import "Packages/AUPMPackageListViewController.h"
 #import "Database/AUPMDatabaseManager.h"
-#import <MobileGestalt/MobileGestalt.h>
-#import <sys/sysctl.h>
 
 #import "AUPMRepo.h"
 #import "AUPMRepoManager.h"
@@ -125,17 +123,36 @@
 }
 
 - (void)showAddRepoAlert:(NSURL *)url {
-	NSLog(@"URL %@", url);
 	UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Enter URL" message:nil preferredStyle:UIAlertControllerStyleAlert];
 
 	[alertController addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil]];
 	[alertController addAction:[UIAlertAction actionWithTitle:@"Add"
-	style:UIAlertActionStyleDefault
-	handler:^(UIAlertAction * _Nonnull action) {
-		UITextField *textField = alertController.textFields[0];
-		[self addSourceWithURL:textField.text];
-	}
+		style:UIAlertActionStyleDefault
+		handler:^(UIAlertAction * _Nonnull action) {
+			[self dismissViewControllerAnimated:true completion:nil];
+
+			AUPMRepoManager *repoManager = [[AUPMRepoManager alloc] init];
+			NSString *sourceURL = alertController.textFields[0].text;
+
+			UIAlertController *wait = [UIAlertController alertControllerWithTitle:@"Please Wait..." message:@"Verifying Source" preferredStyle:UIAlertControllerStyleAlert];
+			[self presentViewController:wait animated:true completion:nil];
+
+			[repoManager addSourceWithURL:sourceURL response:^(BOOL success, NSString *error, NSURL *url) {
+				if (!success) {
+					NSLog(@"[AUPM] Could not add source %@ due to error %@", url.absoluteString, error);
+
+	  			[wait dismissViewControllerAnimated:true completion:^{
+						[self presentVerificationFailedAlert:error url:url];
+					}];
+				}
+				else {
+					[wait dismissViewControllerAnimated:true completion:nil];
+					NSLog(@"[AUPM] Added source.");
+				}
+			}];
+		}
 	]];
+
 	[alertController addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
 		if (url != NULL) {
 			textField.text = [url absoluteString];
@@ -148,106 +165,30 @@
 		textField.keyboardType = UIKeyboardTypeURL;
 		textField.returnKeyType = UIReturnKeyNext;
 	}];
+
 	[self presentViewController:alertController animated:true completion:nil];
+}
+
+- (void)presentVerificationFailedAlert:(NSString *)message url:(NSURL *)url {
+	dispatch_async(dispatch_get_main_queue(), ^{
+		UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Unable to verify Repo" message:message preferredStyle:UIAlertControllerStyleAlert];
+
+		UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+			[alertController dismissViewControllerAnimated:true completion:nil];
+			[self showAddRepoAlert:url];
+		}];
+		[alertController addAction:okAction];
+
+		[self presentViewController:alertController animated:true completion:nil];
+	});
 }
 
 - (void)addSourceWithURL:(NSString *)urlString {
 	NSURL *url = [NSURL URLWithString:urlString];
 	if (!url) {
-		NSLog(@"invalid URL: %@", urlString);
+		NSLog(@"[AUPM] Invalid URL: %@", urlString);
 		return;
 	}
-
-	[self verifySourceExists:[url URLByAppendingPathComponent:@"Packages.bz2"]];
-}
-
-- (void)verifySourceExists:(NSURL *)url {
-	NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
-	NSURLSession *session = [NSURLSession sessionWithConfiguration:configuration];
-
-	NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:10];
-	request.HTTPMethod = @"HEAD";
-
-	NSString *version = [[UIDevice currentDevice] systemVersion];
-	CFStringRef youDID = MGCopyAnswer(CFSTR("UniqueDeviceID"));
-	NSString *udid = (__bridge NSString *)youDID;
-
-	size_t size;
-  sysctlbyname("hw.machine", NULL, &size, NULL, 0);
-
-  char *answer = malloc(size);
-  sysctlbyname("hw.machine", answer, &size, NULL, 0);
-
-  NSString *machineIdentifier = [NSString stringWithCString:answer encoding: NSUTF8StringEncoding];
-
-	[request setValue:@"Telesphoreo APT-HTTP/1.0.592" forHTTPHeaderField:@"User-Agent"];
-	[request setValue:version forHTTPHeaderField:@"X-Firmware"];
-	[request setValue:udid forHTTPHeaderField:@"X-Unique-ID"];
-	[request setValue:machineIdentifier forHTTPHeaderField:@"X-Machine"];
-
-    if ([[url scheme] isEqualToString:@"https"]) {
-        [request setValue:udid forHTTPHeaderField:@"X-Cydia-Id"];
-    }
-
-	UIAlertController *wait = [UIAlertController alertControllerWithTitle:@"Please Wait..." message:@"Verifying Source" preferredStyle:UIAlertControllerStyleAlert];
-	[self presentViewController:wait animated:true completion:nil];
-
-	NSURLSessionDataTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
-		dispatch_async(dispatch_get_main_queue(), ^{
-			[wait dismissViewControllerAnimated:true completion:^{
-				[self receivedPackageVerification:response error:error];
-			}];
-		});
-	}];
-	[task resume];
-}
-
-- (void)receivedPackageVerification:(NSURLResponse *)response error:(NSError *)error {
-	if (error) {
-		NSLog(@"[AUPM] Error verifying repository: %@", error);
-		NSURL *url = [(NSURL *)[error.userInfo objectForKey:@"NSErrorFailingURLKey"] URLByDeletingLastPathComponent];
-		[self presentVerificationFailedAlert:error.localizedDescription url:url];
-		return;
-	}
-
-	NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
-	NSURL *url = [httpResponse.URL URLByDeletingLastPathComponent];
-
-	if (httpResponse.statusCode != 200) {
-		NSString *errorMessage = [NSString stringWithFormat:@"Expected status from url %@, received: %d", url, (int)httpResponse.statusCode];
-		NSLog(@"[AUPM] %@", errorMessage);
-		[self presentVerificationFailedAlert:errorMessage url:url];
-		return;
-	}
-
-	NSLog(@"[AUPM] Verified source %@", url);
-	[self addRepository:url];
-}
-
-- (void)presentVerificationFailedAlert:(NSString *)message url:(NSURL *)url {
-	UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Unable to verify Repo" message:message preferredStyle:UIAlertControllerStyleAlert];
-
-	UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
-		[alertController dismissViewControllerAnimated:true completion:nil];
-		[self showAddRepoAlert:url];
-	}];
-	[alertController addAction:okAction];
-
-	[self presentViewController:alertController animated:true completion:nil];
-}
-
-- (void)addRepository:(NSURL *)sourceURL {
-	NSLog(@"[AUPM] Adding %@ to database", sourceURL);
-	AUPMRepoManager *repoManager = [[AUPMRepoManager alloc] init];
-	[repoManager addSource:sourceURL completion:^(BOOL success) {
-		if (success) {
-			AUPMRefreshViewController *refreshViewController = [[AUPMRefreshViewController alloc] initWithAction:1];
-			[self presentViewController:refreshViewController animated:true completion:nil];
-		}
-		else {
-			NSLog(@"[AUPM] Failed to add repo");
-		}
-	}];
 }
 
 @end
