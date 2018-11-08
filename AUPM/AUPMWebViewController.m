@@ -118,6 +118,7 @@
 }
 
 - (void)handleRepoAdd:(NSString *)repo local:(BOOL)local {
+  AUPMRepoManager *repoManager = [[AUPMRepoManager alloc] init];
   if (local) {
     NSArray *options = @[
   		@"transfer",
@@ -128,40 +129,56 @@
       @"modmyi",
     ];
 
-    AUPMRepoManager *repoManager = [[AUPMRepoManager alloc] init];
     switch ([options indexOfObject:repo]) {
       case 0:
         NSLog(@"[AUPM] Transferring Sources from Cydia");
         break;
       case 1:
-        NSLog(@"[AUPM] Adding Telesphoreo");
         [repoManager addDebLine:@"deb http://apt.saurik.com/ ios/1349.70 main\n"];
         break;
       case 2:
-        NSLog(@"[AUPM] Adding Electra repos");
         [repoManager addDebLine:@"deb https://electrarepo64.coolstar.org/ ./\ndeb https://electrarepo64.coolstar.org/substrate-shim/ ./\n"];
         break;
       case 3:
-        NSLog(@"[AUPM] Adding unc0ver");
-        [repoManager addDebLine:@"deb http://apt.saurik.com/ ios/1349.70 main\n"];
+        [repoManager addDebLine:@"deb http://repo.bingner.com/ ./\n"];
         break;
       case 4:
-        NSLog(@"[AUPM] Adding BigBoss");
         [repoManager addDebLine:@"deb http://apt.thebigboss.org/repofiles/cydia/ stable main\n"];
         break;
       case 5:
-        NSLog(@"[AUPM] Adding ModMyi");
         [repoManager addDebLine:@"deb http://apt.modmyi.com/ stable main\n"];
         break;
       default:
-        break;
+        return;
     }
 
     AUPMRefreshViewController *refreshViewController = [[AUPMRefreshViewController alloc] initWithAction:1];
 		[self presentViewController:refreshViewController animated:true completion:nil];
   }
   else {
-    NSLog(@"[AUPM] Adding repository from URL %@", repo);
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Are you sure?" message:@"Are you sure you want to add this repo?" preferredStyle:UIAlertControllerStyleAlert];
+
+    UIAlertAction *yesAction = [UIAlertAction actionWithTitle:@"Do it." style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+      [repoManager addSourceWithURL:repo response:^(BOOL success, NSString *error, NSURL *url) {
+        if (!success) {
+          NSLog(@"[AUPM] Could not add source %@ due to error %@", url.absoluteString, error);
+        }
+        else {
+          NSLog(@"[AUPM] Added source.");
+          AUPMRefreshViewController *refreshViewController = [[AUPMRefreshViewController alloc] initWithAction:1];
+          [self presentViewController:refreshViewController animated:true completion:nil];
+        }
+      }];
+    }];
+
+    UIAlertAction *noAction = [UIAlertAction actionWithTitle:@"No way!" style:UIAlertActionStyleCancel handler:^(UIAlertAction * action) {
+      [alert dismissViewControllerAnimated:true completion:nil];
+    }];
+
+    [alert addAction:yesAction];
+    [alert addAction:noAction];
+
+    [self presentViewController:alert animated:YES completion:nil];
   }
 }
 
