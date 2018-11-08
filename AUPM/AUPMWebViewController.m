@@ -118,6 +118,7 @@
 }
 
 - (void)handleRepoAdd:(NSString *)repo local:(BOOL)local {
+  NSLog(@"[AUPM] Handling repo add");
   AUPMRepoManager *repoManager = [[AUPMRepoManager alloc] init];
   if (local) {
     NSArray *options = @[

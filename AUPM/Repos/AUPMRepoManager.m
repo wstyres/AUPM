@@ -284,7 +284,7 @@ NSArray *packages_to_array(const char *path);
 
   NSArray *searchPaths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
   NSString *documentPath = [searchPaths objectAtIndex:0];
-  NSString *filePath = [documentPath stringByAppendingString:@"aupm.list"];
+  NSString *filePath = [documentPath stringByAppendingString:@"/aupm.list"];
 
   NSError *error;
   [output writeToFile:filePath atomically:TRUE encoding:NSUTF8StringEncoding error:&error];
@@ -326,7 +326,7 @@ NSArray *packages_to_array(const char *path);
 
   NSArray *searchPaths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
   NSString *documentPath = [searchPaths objectAtIndex:0];
-  NSString *filePath = [documentPath stringByAppendingString:@"aupm.list"];
+  NSString *filePath = [documentPath stringByAppendingString:@"/aupm.list"];
 
   NSError *error;
   [output writeToFile:filePath atomically:TRUE encoding:NSUTF8StringEncoding error:&error];
@@ -352,7 +352,14 @@ NSArray *packages_to_array(const char *path);
 - (void)addDebLine:(NSString *)sourceLine {
   NSArray *searchPaths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
   NSString *documentPath = [searchPaths objectAtIndex:0];
-  NSString *filePath = [documentPath stringByAppendingString:@"aupm.list"];
+  NSString *filePath = [documentPath stringByAppendingString:@"/aupm.list"];
+  NSLog(@"[AUPM] %@", filePath);
+
+  NSError *error;
+  [@"" writeToFile:filePath atomically:TRUE encoding:NSUTF8StringEncoding error:&error];
+  if (error != NULL) {
+    NSLog(@"[AUPM] Error while writing sources to file: %@", error);
+  }
 
   NSFileHandle *fileHandle = [NSFileHandle fileHandleForWritingAtPath:filePath];
   [fileHandle seekToEndOfFile];
