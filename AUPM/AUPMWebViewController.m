@@ -1,6 +1,7 @@
 #import "AUPMWebViewController.h"
 
 #import "Database/AUPMRefreshViewController.h"
+#import "Repos/AUPMRepoManager.h"
 
 @interface AUPMWebViewController () {
   WKWebView *_webView;
@@ -127,24 +128,30 @@
       @"modmyi",
     ];
 
+    AUPMRepoManager *repoManager = [[AUPMRepoManager alloc] init];
     switch ([options indexOfObject:repo]) {
       case 0:
         NSLog(@"[AUPM] Transferring Sources from Cydia");
         break;
       case 1:
         NSLog(@"[AUPM] Adding Telesphoreo");
+        [repoManager addDefaultRepo:0];
         break;
       case 2:
         NSLog(@"[AUPM] Adding Electra repos");
+        [repoManager addElectraRepos];
         break;
       case 3:
         NSLog(@"[AUPM] Adding unc0ver");
+        [repoManager addUncoverRepo];
         break;
       case 4:
         NSLog(@"[AUPM] Adding BigBoss");
+        [repoManager addDefaultRepo:1];
         break;
       case 5:
         NSLog(@"[AUPM] Adding ModMyi");
+        [repoManager addDefaultRepo:2];
         break;
       default:
         break;
@@ -153,6 +160,19 @@
   else {
     NSLog(@"[AUPM] Adding repository from URL %@", repo);
   }
+}
+
+- (void)presentVerificationFailedAlert:(NSString *)message url:(NSURL *)url {
+	dispatch_async(dispatch_get_main_queue(), ^{
+		UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Unable to verify Repo" message:message preferredStyle:UIAlertControllerStyleAlert];
+
+		UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+			[alertController dismissViewControllerAnimated:true completion:nil];
+		}];
+		[alertController addAction:okAction];
+
+		[self presentViewController:alertController animated:true completion:nil];
+	});
 }
 
 - (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation {
