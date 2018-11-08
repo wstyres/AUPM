@@ -349,57 +349,7 @@ NSArray *packages_to_array(const char *path);
 
 //Add extra repos
 
-- (void)addElectraRepos {
-  NSString *firstURL = @"https://electrarepo64.coolstar.org/";
-  [self addSourceWithURL:firstURL response:^(BOOL success, NSString *error, NSURL *url) {
-    if (!success) {
-      NSLog(@"[AUPM] Could not add source %@ due to error %@", url.absoluteString, error);
-    }
-    else {
-      NSLog(@"[AUPM] Added source.");
-    }
-  }];
-
-  NSString *secondURL = @"https://electrarepo64.coolstar.org/substrate-shim/";
-  [self addSourceWithURL:secondURL response:^(BOOL success, NSString *error, NSURL *url) {
-    if (!success) {
-      NSLog(@"[AUPM] Could not add source %@ due to error %@", url.absoluteString, error);
-    }
-    else {
-      NSLog(@"[AUPM] Added source.");
-    }
-  }];
-}
-
-- (void)addUncoverRepo {
-  NSString *sourceURL = @"http://repo.bingner.com/";
-  [self addSourceWithURL:sourceURL response:^(BOOL success, NSString *error, NSURL *url) {
-    if (!success) {
-      NSLog(@"[AUPM] Could not add source %@ due to error %@", url.absoluteString, error);
-    }
-    else {
-      NSLog(@"[AUPM] Added source.");
-    }
-  }];
-}
-
-- (void)addDefaultRepo:(int)repo {
-  NSString *sourceLine;
-
-  switch (repo) {
-    case 0:
-      sourceLine = @"deb http://apt.saurik.com/ ios/1349.70 main\n";
-      break;
-    case 1:
-      sourceLine = @"deb http://apt.thebigboss.org/repofiles/cydia/ stable main\n";
-      break;
-    case 2:
-      sourceLine = @"deb http://apt.modmyi.com/ stable main\n";
-      break;
-    default:
-      return;
-  }
-
+- (void)addDebLine:(NSString *)sourceLine {
   NSArray *searchPaths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
   NSString *documentPath = [searchPaths objectAtIndex:0];
   NSString *filePath = [documentPath stringByAppendingString:@"aupm.list"];

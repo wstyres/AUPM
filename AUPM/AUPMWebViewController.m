@@ -135,23 +135,23 @@
         break;
       case 1:
         NSLog(@"[AUPM] Adding Telesphoreo");
-        [repoManager addDefaultRepo:0];
+        [repoManager addDebLine:@"deb http://apt.saurik.com/ ios/1349.70 main\n"];
         break;
       case 2:
         NSLog(@"[AUPM] Adding Electra repos");
-        [repoManager addElectraRepos];
+        [repoManager addDebLine:@"deb https://electrarepo64.coolstar.org/ ./\ndeb https://electrarepo64.coolstar.org/substrate-shim/ ./\n"];
         break;
       case 3:
         NSLog(@"[AUPM] Adding unc0ver");
-        [repoManager addUncoverRepo];
+        [repoManager addDebLine:@"deb http://apt.saurik.com/ ios/1349.70 main\n"];
         break;
       case 4:
         NSLog(@"[AUPM] Adding BigBoss");
-        [repoManager addDefaultRepo:1];
+        [repoManager addDebLine:@"deb http://apt.thebigboss.org/repofiles/cydia/ stable main\n"];
         break;
       case 5:
         NSLog(@"[AUPM] Adding ModMyi");
-        [repoManager addDefaultRepo:2];
+        [repoManager addDebLine:@"deb http://apt.modmyi.com/ stable main\n"];
         break;
       default:
         break;
