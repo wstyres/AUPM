@@ -14,7 +14,7 @@
 	BOOL _isFinishedLoading;
 	WKWebView *_webView;
 	AUPMPackage *_package;
-	UIProgressView *_progressBar;
+	UIProgressView *_progressView;
 	NSTimer *_progressTimer;
 	BOOL loadFailed;
 }
@@ -35,26 +35,49 @@
 	[self configureNavButton];
 }
 
-- (void)loadView {
-	[super loadView];
+- (void)viewDidLoad {
+	[super viewDidLoad];
+
+	[self.view setBackgroundColor:[UIColor colorWithRed:0.94 green:0.94 blue:0.96 alpha:1.0]];
 
 	WKWebViewConfiguration *configuration = [[WKWebViewConfiguration alloc] init];
 	configuration.applicationNameForUserAgent = [NSString stringWithFormat:@"AUPM/%@ (Cydia)", PACKAGE_VERSION];
 
-	[self.view setBackgroundColor:[UIColor colorWithRed:0.94 green:0.94 blue:0.96 alpha:1.0]];
-	CGFloat height = [[UIApplication sharedApplication] statusBarFrame].size.height + self.navigationController.navigationBar.frame.size.height + self.tabBarController.tabBar.frame.size.height;
-	_webView = [[WKWebView alloc] initWithFrame:CGRectMake(0,0, self.view.frame.size.width, self.view.frame.size.height - height) configuration:configuration];
+	_webView = [[WKWebView alloc] initWithFrame:CGRectMake(0,0,0,0) configuration:configuration];
+  _webView.translatesAutoresizingMaskIntoConstraints = NO;
+
+  [self.view addSubview:_webView];
+
+  _progressView = [[UIProgressView alloc] initWithFrame:CGRectMake(0,0,0,0)];
+  _progressView.translatesAutoresizingMaskIntoConstraints = NO;
+
+  [_webView addSubview:_progressView];
+
+  //Web View Layout
+
+  NSLayoutConstraint *webTop = [NSLayoutConstraint constraintWithItem:_webView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self.topLayoutGuide attribute:NSLayoutAttributeBottom multiplier:1 constant:0.f];
+  NSLayoutConstraint *webLeading = [NSLayoutConstraint constraintWithItem:_webView attribute:NSLayoutAttributeLeading relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeLeading multiplier:1 constant:0.f];
+  NSLayoutConstraint *webBottom = [NSLayoutConstraint constraintWithItem:_webView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self.bottomLayoutGuide attribute:NSLayoutAttributeTop multiplier:1 constant:0.f];
+  NSLayoutConstraint *webTrailing = [NSLayoutConstraint constraintWithItem:_webView attribute:NSLayoutAttributeTrailing relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeTrailing multiplier:1 constant:0.f];
+
+  [self.view addConstraints:@[webTop, webLeading, webBottom, webTrailing]];
+
+  //Progress View Layout
+
+  NSLayoutConstraint *progressTrailing = [NSLayoutConstraint constraintWithItem:_webView attribute:NSLayoutAttributeTrailing relatedBy:NSLayoutRelationEqual toItem:_progressView attribute:NSLayoutAttributeTrailing multiplier:1 constant:0.f];
+  NSLayoutConstraint *progressLeading = [NSLayoutConstraint constraintWithItem:_progressView attribute:NSLayoutAttributeLeading relatedBy:NSLayoutRelationEqual toItem:_webView attribute:NSLayoutAttributeLeading multiplier:1 constant:0.f];
+  NSLayoutConstraint *progressTop = [NSLayoutConstraint constraintWithItem:_progressView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:_webView attribute:NSLayoutAttributeTop multiplier:1 constant:0.f];
+
+  [_webView addConstraints:@[progressTrailing, progressLeading, progressTop]];
+
+  _webView.navigationDelegate = self;
+
 	_webView.opaque = false;
 	_webView.backgroundColor = [UIColor clearColor];
 	[_webView setNavigationDelegate:self];
 
 	NSURL *url = [[NSBundle mainBundle] URLForResource:@"package_depiction" withExtension:@".html" subdirectory:@"html"];
 	[_webView loadFileURL:url allowingReadAccessToURL:[url URLByDeletingLastPathComponent]];
-
-	_webView.allowsBackForwardNavigationGestures = true;
-	_progressBar = [[UIProgressView alloc] initWithFrame:CGRectMake(0, 0, [[UIScreen mainScreen] bounds].size.width, 9)];
-	[_webView addSubview:_progressBar];
-	[self.view addSubview:_webView];
 
 	self.title = [_package packageName];
 }
@@ -83,14 +106,6 @@
 	else {
 		decisionHandler(WKNavigationActionPolicyCancel);
 	}
-}
-
-- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id <UIViewControllerTransitionCoordinator>)coordinator {
-	[super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
-
-	[coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context) {
-		self->_webView.frame = self.view.frame;
-	} completion:nil];
 }
 
 - (void)configureNavButton {
@@ -171,10 +186,10 @@
 
 - (void)webView:(WKWebView *)webView didStartProvisionalNavigation:(WKNavigation *)navigation {
 	[_progressTimer invalidate];
-	_progressBar.hidden = false;
-	_progressBar.alpha = 1.0;
-	_progressBar.progress = 0;
-	_progressBar.trackTintColor = [UIColor clearColor];
+	_progressView.hidden = false;
+	_progressView.alpha = 1.0;
+	_progressView.progress = 0;
+	_progressView.trackTintColor = [UIColor clearColor];
 	_isFinishedLoading = false;
 	_progressTimer = [NSTimer scheduledTimerWithTimeInterval:0.01667 target:self selector:@selector(refreshProgress) userInfo:nil repeats:YES];
 }
@@ -202,27 +217,27 @@
 
 -(void)refreshProgress {
 	if (_isFinishedLoading) {
-		if (_progressBar.progress >= 1) {
+		if (_progressView.progress >= 1) {
 			[UIView animateWithDuration:0.3 delay:0.3 options:0 animations:^{
-				self->_progressBar.alpha = 0.0;
+				self->_progressView.alpha = 0.0;
 			} completion:^(BOOL finished) {
 				[self->_progressTimer invalidate];
 				self->_progressTimer = nil;
 			}];
 		}
 		else {
-			_progressBar.progress += 0.1;
+			_progressView.progress += 0.1;
 		}
 	}
 	else {
-		if (_progressBar.progress >= _webView.estimatedProgress) {
-			_progressBar.progress = _webView.estimatedProgress;
+		if (_progressView.progress >= _webView.estimatedProgress) {
+			_progressView.progress = _webView.estimatedProgress;
 		}
 		else {
-			_progressBar.progress += 0.005;
+			_progressView.progress += 0.005;
 		}
 
-		if (_progressBar.progress == 1.0) {
+		if (_progressView.progress == 1.0) {
 			loadFailed = true;
 			NSURL *url = [[NSBundle mainBundle] URLForResource:@"package_depiction" withExtension:@".html" subdirectory:@"html"];
 			[_webView loadFileURL:url allowingReadAccessToURL:[url URLByDeletingLastPathComponent]];

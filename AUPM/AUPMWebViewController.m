@@ -26,10 +26,10 @@
   return self;
 }
 
-- (void)loadView {
-  [super loadView];
+- (void)viewDidLoad {
+  [super viewDidLoad];
 
-  [self.view setBackgroundColor:[UIColor colorWithRed:0.94 green:0.94 blue:0.96 alpha:1.0]]; //Fixes a weird animation issue when pushing
+  [self.view setBackgroundColor:[UIColor colorWithRed:0.94 green:0.94 blue:0.96 alpha:1.0]];
 
   WKWebViewConfiguration *configuration = [[WKWebViewConfiguration alloc] init];
   configuration.applicationNameForUserAgent = [NSString stringWithFormat:@"AUPM/%@", PACKAGE_VERSION];
@@ -38,10 +38,37 @@
   [controller addScriptMessageHandler:self name:@"observe"];
   configuration.userContentController = controller;
 
-  _webView = [[WKWebView alloc] initWithFrame:self.view.frame configuration:configuration];
+  _webView = [[WKWebView alloc] initWithFrame:CGRectMake(0,0,0,0) configuration:configuration];
+  _webView.translatesAutoresizingMaskIntoConstraints = NO;
+
+  [self.view addSubview:_webView];
+
+  _progressView = [[UIProgressView alloc] initWithFrame:CGRectMake(0,0,0,0)];
+  _progressView.translatesAutoresizingMaskIntoConstraints = NO;
+
+  [_webView addSubview:_progressView];
+
+  //Web View Layout
+
+  NSLayoutConstraint *webTop = [NSLayoutConstraint constraintWithItem:_webView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self.topLayoutGuide attribute:NSLayoutAttributeBottom multiplier:1 constant:0.f];
+  NSLayoutConstraint *webLeading = [NSLayoutConstraint constraintWithItem:_webView attribute:NSLayoutAttributeLeading relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeLeading multiplier:1 constant:0.f];
+  NSLayoutConstraint *webBottom = [NSLayoutConstraint constraintWithItem:_webView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self.bottomLayoutGuide attribute:NSLayoutAttributeTop multiplier:1 constant:0.f];
+  NSLayoutConstraint *webTrailing = [NSLayoutConstraint constraintWithItem:_webView attribute:NSLayoutAttributeTrailing relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeTrailing multiplier:1 constant:0.f];
+
+  [self.view addConstraints:@[webTop, webLeading, webBottom, webTrailing]];
+
+  //Progress View Layout
+
+  NSLayoutConstraint *progressTrailing = [NSLayoutConstraint constraintWithItem:_webView attribute:NSLayoutAttributeTrailing relatedBy:NSLayoutRelationEqual toItem:_progressView attribute:NSLayoutAttributeTrailing multiplier:1 constant:0.f];
+  NSLayoutConstraint *progressLeading = [NSLayoutConstraint constraintWithItem:_progressView attribute:NSLayoutAttributeLeading relatedBy:NSLayoutRelationEqual toItem:_webView attribute:NSLayoutAttributeLeading multiplier:1 constant:0.f];
+  NSLayoutConstraint *progressTop = [NSLayoutConstraint constraintWithItem:_progressView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:_webView attribute:NSLayoutAttributeTop multiplier:1 constant:0.f];
+
+  [_webView addConstraints:@[progressTrailing, progressLeading, progressTop]];
+
   _webView.navigationDelegate = self;
   _webView.opaque = false;
   _webView.backgroundColor = [UIColor clearColor];
+
   if (_url == NULL) {
     NSURL *url = [[NSBundle mainBundle] URLForResource:@"home" withExtension:@".html" subdirectory:@"html"];
     [_webView loadFileURL:url allowingReadAccessToURL:[url URLByDeletingLastPathComponent]];
@@ -52,26 +79,12 @@
 
   [_webView addObserver:self forKeyPath:NSStringFromSelector(@selector(estimatedProgress)) options:NSKeyValueObservingOptionNew context:NULL];
 
-  CGFloat height = [[UIApplication sharedApplication] statusBarFrame].size.height + self.navigationController.navigationBar.frame.size.height;
-  _progressView = [[UIProgressView alloc] initWithFrame:CGRectMake(0, height, [[UIScreen mainScreen] bounds].size.width, 9)];
-  [_webView addSubview:_progressView];
-
-  [self.view addSubview:_webView];
-
   UIBarButtonItem *refreshButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(refresh)];
   self.navigationItem.rightBarButtonItem = refreshButton;
 }
 
 - (void)refresh {
   [_webView reload];
-}
-
-- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id <UIViewControllerTransitionCoordinator>)coordinator {
-	[super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
-
-	[coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context) {
-		self->_webView.frame = self.view.frame;
-	} completion:nil];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
