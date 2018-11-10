@@ -282,9 +282,7 @@ NSArray *packages_to_array(const char *path);
   }
   output = [output stringByAppendingFormat:@"deb %@ ./\n", URL];
 
-  NSArray *searchPaths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-  NSString *documentPath = [searchPaths objectAtIndex:0];
-  NSString *filePath = [documentPath stringByAppendingString:@"/aupm.list"];
+  NSString *filePath = @"/var/mobile/Library/Caches/xyz.willy.aupm/aupm.list";
 
   NSError *error;
   [output writeToFile:filePath atomically:TRUE encoding:NSUTF8StringEncoding error:&error];
@@ -324,9 +322,7 @@ NSArray *packages_to_array(const char *path);
     }
   }
 
-  NSArray *searchPaths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-  NSString *documentPath = [searchPaths objectAtIndex:0];
-  NSString *filePath = [documentPath stringByAppendingString:@"/aupm.list"];
+  NSString *filePath = @"/var/mobile/Library/Caches/xyz.willy.aupm/aupm.list";
 
   NSError *error;
   [output writeToFile:filePath atomically:TRUE encoding:NSUTF8StringEncoding error:&error];
@@ -350,10 +346,7 @@ NSArray *packages_to_array(const char *path);
 //Add extra repos
 
 - (void)addDebLine:(NSString *)sourceLine {
-  NSArray *searchPaths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-  NSString *documentPath = [searchPaths objectAtIndex:0];
-  NSString *filePath = [documentPath stringByAppendingString:@"/aupm.list"];
-  NSLog(@"[AUPM] %@", filePath);
+  NSString *filePath = @"/var/mobile/Library/Caches/xyz.willy.aupm/aupm.list";
 
   NSError *error;
   [@"" writeToFile:filePath atomically:TRUE encoding:NSUTF8StringEncoding error:&error];
