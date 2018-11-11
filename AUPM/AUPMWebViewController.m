@@ -146,7 +146,7 @@
 
     switch ([options indexOfObject:repo]) {
       case 0:
-        NSLog(@"[AUPM] Transferring Sources from Cydia");
+        [repoManager transferFromCydia];
         break;
       case 1:
         [repoManager addDebLine:@"deb http://apt.saurik.com/ ios/1349.70 main\n"];

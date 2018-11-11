@@ -394,4 +394,50 @@ NSArray *packages_to_array(const char *path);
 #endif
 }
 
+- (void)transferFromCydia {
+  NSString *fullPath = @"/var/mobile/Library/Caches/com.saurik.Cydia/sources.list";
+  NSError *error;
+  NSString *cydiaSources = [NSString stringWithContentsOfFile:fullPath encoding:NSUTF8StringEncoding error:&error];
+
+  NSString *output = @"";
+  for (AUPMRepo *repo in _repos) {
+    if ([repo defaultRepo]) {
+      if ([[repo repoName] isEqual:@"Cydia/Telesphoreo"]) {
+        output = [output stringByAppendingFormat:@"deb http://apt.saurik.com/ ios/%.2f main\n",kCFCoreFoundationVersionNumber];
+      }
+      else {
+        output = [output stringByAppendingFormat:@"deb %@ %@ %@\n", [repo repoURL], [repo suite], [repo components]];
+      }
+    }
+    else {
+      output = [output stringByAppendingFormat:@"deb %@ ./\n", [repo repoURL]];
+    }
+  }
+
+  NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
+  NSString *cacheDirectory = [paths objectAtIndex:0];
+
+  NSString *filePath = [cacheDirectory stringByAppendingString:@"/aupm.list"];
+
+  [output writeToFile:filePath atomically:TRUE encoding:NSUTF8StringEncoding error:&error];
+  if (error != NULL) {
+    NSLog(@"[AUPM] Error while writing sources to file: %@", error);
+  }
+
+  NSFileHandle *fileHandle = [NSFileHandle fileHandleForWritingAtPath:filePath];
+  [fileHandle seekToEndOfFile];
+  [fileHandle writeData:[cydiaSources dataUsingEncoding:NSUTF8StringEncoding]];
+  [fileHandle closeFile];
+
+#if TARGET_CPU_ARM
+  NSTask *updateListTask = [[NSTask alloc] init];
+  [updateListTask setLaunchPath:@"/Applications/AUPM.app/supersling"];
+  NSArray *updateArgs = [[NSArray alloc] initWithObjects:@"cp", filePath, @"/var/lib/aupm/aupm.list", nil];
+  [updateListTask setArguments:updateArgs];
+
+  [updateListTask launch];
+  [updateListTask waitUntilExit];
+#endif
+}
+
 @end

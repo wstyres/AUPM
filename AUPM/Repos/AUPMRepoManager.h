@@ -12,4 +12,5 @@
 - (void)addSourceWithURL:(NSString *)url response:(void (^)(BOOL success, NSString *error, NSURL *url))response;
 - (void)deleteSource:(AUPMRepo *)delRepo;
 - (void)addDebLine:(NSString *)sourceLine;
+- (void)transferFromCydia;
 @end
