@@ -37,6 +37,7 @@
 
 - (void)viewDidLoad {
 	[super viewDidLoad];
+	self.edgesForExtendedLayout = UIRectEdgeNone;
 
 	[self.view setBackgroundColor:[UIColor colorWithRed:0.94 green:0.94 blue:0.96 alpha:1.0]];
 
@@ -74,7 +75,7 @@
 
 	_webView.opaque = false;
 	_webView.backgroundColor = [UIColor clearColor];
-	[_webView setNavigationDelegate:self];
+	_webView.navigationDelegate = self;
 
 	NSURL *url = [[NSBundle mainBundle] URLForResource:@"package_depiction" withExtension:@".html" subdirectory:@"html"];
 	[_webView loadFileURL:url allowingReadAccessToURL:[url URLByDeletingLastPathComponent]];
