@@ -282,7 +282,10 @@ NSArray *packages_to_array(const char *path);
   }
   output = [output stringByAppendingFormat:@"deb %@ ./\n", URL];
 
-  NSString *filePath = @"/var/mobile/Library/Caches/xyz.willy.aupm/aupm.list";
+  NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
+  NSString *cacheDirectory = [paths objectAtIndex:0];
+
+  NSString *filePath = [cacheDirectory stringByAppendingString:@"/aupm.list"];
 
   NSError *error;
   [output writeToFile:filePath atomically:TRUE encoding:NSUTF8StringEncoding error:&error];
@@ -322,7 +325,10 @@ NSArray *packages_to_array(const char *path);
     }
   }
 
-  NSString *filePath = @"/var/mobile/Library/Caches/xyz.willy.aupm/aupm.list";
+  NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
+  NSString *cacheDirectory = [paths objectAtIndex:0];
+
+  NSString *filePath = [cacheDirectory stringByAppendingString:@"/aupm.list"];
 
   NSError *error;
   [output writeToFile:filePath atomically:TRUE encoding:NSUTF8StringEncoding error:&error];
@@ -346,10 +352,28 @@ NSArray *packages_to_array(const char *path);
 //Add extra repos
 
 - (void)addDebLine:(NSString *)sourceLine {
-  NSString *filePath = @"/var/mobile/Library/Caches/xyz.willy.aupm/aupm.list";
+  NSString *output = @"";
+  for (AUPMRepo *repo in _repos) {
+    if ([repo defaultRepo]) {
+      if ([[repo repoName] isEqual:@"Cydia/Telesphoreo"]) {
+        output = [output stringByAppendingFormat:@"deb http://apt.saurik.com/ ios/%.2f main\n",kCFCoreFoundationVersionNumber];
+      }
+      else {
+        output = [output stringByAppendingFormat:@"deb %@ %@ %@\n", [repo repoURL], [repo suite], [repo components]];
+      }
+    }
+    else {
+      output = [output stringByAppendingFormat:@"deb %@ ./\n", [repo repoURL]];
+    }
+  }
+
+  NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
+  NSString *cacheDirectory = [paths objectAtIndex:0];
+
+  NSString *filePath = [cacheDirectory stringByAppendingString:@"/aupm.list"];
 
   NSError *error;
-  [@"" writeToFile:filePath atomically:TRUE encoding:NSUTF8StringEncoding error:&error];
+  [output writeToFile:filePath atomically:TRUE encoding:NSUTF8StringEncoding error:&error];
   if (error != NULL) {
     NSLog(@"[AUPM] Error while writing sources to file: %@", error);
   }
