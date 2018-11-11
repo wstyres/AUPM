@@ -309,8 +309,10 @@ NSArray *packages_to_array(const char *path);
 
 - (void)deleteSource:(AUPMRepo *)delRepo {
   NSString *output = @"";
+  NSLog(@"[AUPM] Repo to delete: %@", [delRepo repoBaseFileName]);
   for (AUPMRepo *repo in _repos) {
-    if (![[delRepo repoBaseFileName] isEqual:[repo repoBaseFileName]]) {
+    if (![[delRepo repoBaseFileName] isEqualToString:[repo repoBaseFileName]]) {
+      NSLog(@"[AUPM] delRepo %@ repo %@", [delRepo repoBaseFileName], [repo repoBaseFileName]);
       if ([repo defaultRepo]) {
         if ([[repo repoName] isEqual:@"Cydia/Telesphoreo"]) {
           output = [output stringByAppendingFormat:@"deb http://apt.saurik.com/ ios/%.2f main\n",kCFCoreFoundationVersionNumber];
@@ -329,6 +331,7 @@ NSArray *packages_to_array(const char *path);
   NSString *cacheDirectory = [paths objectAtIndex:0];
 
   NSString *filePath = [cacheDirectory stringByAppendingString:@"/aupm.list"];
+  NSLog(@"[AUPM] filePath %@", filePath);
 
   NSError *error;
   [output writeToFile:filePath atomically:TRUE encoding:NSUTF8StringEncoding error:&error];
@@ -336,6 +339,9 @@ NSArray *packages_to_array(const char *path);
     NSLog(@"[AUPM] Error while writing sources to file: %@", error);
   }
   else {
+    AUPMDatabaseManager *databaseManager = ((AUPMAppDelegate *)[[UIApplication sharedApplication] delegate]).databaseManager;
+    [databaseManager deleteRepo:delRepo];
+
     NSTask *updateListTask = [[NSTask alloc] init];
     [updateListTask setLaunchPath:@"/Applications/AUPM.app/supersling"];
     NSArray *updateArgs = [[NSArray alloc] initWithObjects:@"cp", filePath, @"/var/lib/aupm/aupm.list", nil];
@@ -343,9 +349,6 @@ NSArray *packages_to_array(const char *path);
 
     [updateListTask launch];
     [updateListTask waitUntilExit];
-
-    AUPMDatabaseManager *databaseManager = ((AUPMAppDelegate *)[[UIApplication sharedApplication] delegate]).databaseManager;
-    [databaseManager deleteRepo:delRepo];
   }
 }
 
