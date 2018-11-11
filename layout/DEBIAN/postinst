@@ -1,6 +1,6 @@
 #!/bin/sh
 
-mkdir /var/mobile/Library/Caches/xyz.willy.aupm/
+mkdir -p /var/mobile/Library/Caches/xyz.willy.aupm/
 chown mobile:mobile /var/mobile/Library/Caches/xyz.willy.aupm/
 
 chown root:wheel /Applications/AUPM.app/supersling
