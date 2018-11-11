@@ -1,6 +1,6 @@
 Package: xyz.willy.aupm
 Name: AUPM (BETA)
-Version: 1.0~beta17
+Version: 1.0~beta18
 Architecture: iphoneos-arm
 Depends: dpkg, cydia, apt7
 Description: A Useless Package Manager
