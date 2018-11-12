@@ -21,6 +21,8 @@
 #if TARGET_OS_SIMULATOR
 	NSLog(@"[AUPM] Wake up, neo...");
 	RLMRealm *realm = [RLMRealm defaultRealm];
+	RLMRealmConfiguration *config = [RLMRealmConfiguration defaultConfiguration];
+	NSLog(@"[AUPM] Database Location: %@", config.fileURL);
 #else
 	NSLog(@"[AUPM] I'm a real boy!");
 	RLMRealmConfiguration *config = [RLMRealmConfiguration defaultConfiguration];

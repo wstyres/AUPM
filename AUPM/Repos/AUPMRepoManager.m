@@ -151,9 +151,11 @@ NSArray *packages_to_array(const char *path);
 
   for (NSDictionary *dict in packageArray) {
     AUPMPackage *package = [AUPMPackage createWithDictionary:dict];
+    NSLog(@"[AUPM] Repo Package: %@", dict);
 
     package.repoVersion = [NSString stringWithFormat:@"%@~%@", [repo repoBaseFileName], dict[@"Package"]];
     package.repo = repo;
+    package.filename = [dict[@"Filename"] substringToIndex:[dict[@"Filename"] length] - 1];
 
     if ([dict[@"Package"] rangeOfString:@"gsc"].location == NSNotFound && [dict[@"Package"] rangeOfString:@"saffron-jailbreak"].location == NSNotFound && [dict[@"Package"] rangeOfString:@"cy+"].location == NSNotFound) {
       [packageListForRepo addObject:package];

@@ -10,8 +10,12 @@
 @property NSString *section;
 @property NSString *packageDescription;
 @property NSString *depictionURL;
-@property NSString *repoVersion;
 @property NSString *tags;
+@property NSString *maintainer;
+@property NSString *filename;
+@property int installedSize;
+@property NSString *dependencies;
+@property NSString *repoVersion;
 @property BOOL installed;
 @property AUPMRepo *repo;
 + (AUPMPackage *)createWithDictionary:(NSDictionary *)dict;
