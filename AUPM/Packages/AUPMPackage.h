@@ -14,6 +14,7 @@
 @property NSString *tags;
 @property BOOL installed;
 @property AUPMRepo *repo;
++ (AUPMPackage *)createWithDictionary:(NSDictionary *)dict;
 - (BOOL)isInstalled;
 - (BOOL)isFromRepo;
 @end
