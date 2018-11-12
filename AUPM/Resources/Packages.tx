@@ -1,33 +1,3 @@
-Package: com.xtm3x.airconditioning
-Version: 1.0
-Section: Tweaks
-Maintainer: xTheMaster3x
-Depends: mobilesubstrate
-Architecture: iphoneos-arm
-Filename: ./pkgfiles/com.xtm3x.airconditioning_1.0_iphoneos-arm.deb
-Size: 5898
-Installed-Size: 136
-MD5sum: 1f0aa273267b2e53dfec9d99bd76c414
-Description: Color Navigation Bars based on icon color.
-Name: Adaptive Bar
-Author: xTheMaster3x
-Depiction: http://repo.tm3dev.com/depics/ac.html
-
-Package: com.xtm3x.airconditioning
-Version: 1.1
-Section: Tweaks
-Maintainer: xTheMaster3x
-Depends: mobilesubstrate
-Architecture: iphoneos-arm
-Filename: ./pkgfiles/com.xtm3x.airconditioning_1.1_iphoneos-arm.deb
-Size: 6856
-Installed-Size: 136
-MD5sum: 37e49073742a7ccd98bdae825dcf6c3f
-Description: Color Navigation Bars based on icon color.
-Name: Adaptive Bar
-Author: xTheMaster3x
-Depiction: http://repo.tm3dev.com/depics/ac.html
-
 Package: com.xtm3x.asquared
 Version: 0.0.4-8
 Section: Tweaks
@@ -250,21 +220,6 @@ MD5sum: b7acf0d1b56c8fb55aa47441c8153dd4
 Description: Why did I make this...
 Name: Börk
 Author: xTheMaster3x
-
-Package: com.xtm3x.dye
-Version: 1.1-7
-Section: Tweaks
-Maintainer: xTheMaster3x
-Depends: mobilesubstrate
-Architecture: iphoneos-arm
-Filename: ./pkgfiles/com.xtm3x.dye_1.1-7_iphoneos-arm.deb
-Size: 98176
-Installed-Size: 564
-MD5sum: be7836dc1169b5a86840a6878c75d90a
-Description: Change your iOS tint colors.
-Name: Dye
-Author: xTheMaster3x
-Depiction: http://repo.tm3dev.com/depics/dye.html
 
 Package: com.xtm3x.integrate
 Version: 0.0.2
@@ -728,35 +683,6 @@ Name: Presentation
 Author: xTheMaster3x
 Depiction: http://repo.tm3dev.com/depics/present.html
 
-Package: com.xtm3x.reachall
-Version: 0.0.2-48
-Section: Tweaks
-Maintainer: xTheMaster3x
-Depends: mobilesubstrate, libactivator (>= 1.9.1~beta1)
-Architecture: iphoneos-arm
-Filename: ./pkgfiles/com.xtm3x.reachall_0.0.2-48_iphoneos-arm.deb
-Size: 62622
-Installed-Size: 404
-MD5sum: a2d5dab3afe23a2b9d21dd82ee921c0a
-Description: Reachability on all iOS 8 devices.
-Name: ReachAll
-Author: xTheMaster3x
-Depiction: http://repo.tm3dev.com/depics/reach.html
-
-Package: com.xtm3x.replaceblur
-Version: 0.0.1-3
-Section: Tweaks
-Maintainer: xTheMaster3x
-Depends: mobilesubstrate
-Architecture: iphoneos-arm
-Filename: ./pkgfiles/com.xtm3x.replaceblur_0.0.1-3_iphoneos-arm.deb
-Size: 3874
-Installed-Size: 136
-MD5sum: 68c34859970eb125a7bc76e0e0c7c6fa
-Description: Replace wallpaper blurs.
-Name: ReplaceBlur
-Author: xTheMaster3x
-
 Package: com.xtm3x.sixbar
 Version: 0.0.5-beta-2
 Section: Tweaks
@@ -831,20 +757,6 @@ Description: Removes the background on system keys.
 Name: SleekKey
 Author: xTheMaster3x
 Depiction: http://repo.tm3dev.com/depics/sleekkey.html
-
-Package: com.xtm3x.slf
-Version: 0.0.1
-Section: Tweaks
-Maintainer: xTheMaster3x
-Depends: mobilesubstrate
-Architecture: iphoneos-arm
-Filename: ./pkgfiles/com.xtm3x.slf_0.0.1_iphoneos-arm.deb
-Size: 3428
-Installed-Size: 120
-MD5sum: 6a9155c5c67f6f13edd60f56b7013b8e
-Description: An awesome MobileSubstrate tweak!
-Name: Settings Layout Fix
-Author: xTheMaster3x
 
 Package: com.xtm3x.sweepup
 Version: 0.0.1-1
@@ -923,6 +835,21 @@ Author: Wilson Styres <wilson@styres.me>
 Depiction: https://xtm3x.github.io/aupm/index.html
 
 Package: xyz.willy.aupm
+Version: 1.0~beta17
+Section: Packaging
+Maintainer: Wilson Styres <wilson@styres.me>
+Depends: dpkg, cydia, apt7
+Architecture: iphoneos-arm
+Filename: ./pkgfiles/xyz.willy.aupm_1.0~beta17_iphoneos-arm.deb
+Size: 2373668
+Installed-Size: 9548
+MD5sum: 194d8603b72cfcc4f2feb8147661686b
+Description: A Useless Package Manager
+Name: AUPM (BETA)
+Author: Wilson Styres <wilson@styres.me>
+Depiction: https://xtm3x.github.io/aupm/
+
+Package: xyz.willy.aupm
 Version: 1.0~beta6
 Section: Packaging
 Maintainer: Wilson Styres <wilson@styres.me>
@@ -938,6 +865,21 @@ Author: Wilson Styres <wilson@styres.me>
 Depiction: https://xtm3x.github.io/aupm/index.html
 
 Package: xyz.willy.aupm
+Version: 1.0~beta18
+Section: Packaging
+Maintainer: Wilson Styres <wilson@styres.me>
+Depends: dpkg, cydia, apt7
+Architecture: iphoneos-arm
+Filename: ./pkgfiles/xyz.willy.aupm_1.0~beta18_iphoneos-arm.deb
+Size: 2380558
+Installed-Size: 9556
+MD5sum: 1f997ecb4c5b3b5e0c243854685fda0f
+Description: A Useless Package Manager
+Name: AUPM (BETA)
+Author: Wilson Styres <wilson@styres.me>
+Depiction: https://xtm3x.github.io/aupm/
+
+Package: xyz.willy.aupm
 Version: 1.0~beta8
 Section: Packaging
 Maintainer: Wilson Styres <wilson@styres.me>
@@ -947,6 +889,21 @@ Filename: ./pkgfiles/xyz.willy.aupm_1.0~beta8_iphoneos-arm.deb
 Size: 2287706
 Installed-Size: 9260
 MD5sum: 2541482f8c49ec1a8b85398f0ef7cffb
+Description: A Useless Package Manager
+Name: AUPM (BETA)
+Author: Wilson Styres <wilson@styres.me>
+Depiction: https://xtm3x.github.io/aupm/index.html
+
+Package: xyz.willy.aupm
+Version: 1.0~beta15
+Section: Packaging
+Maintainer: Wilson Styres <wilson@styres.me>
+Depends: dpkg, cydia, apt7
+Architecture: iphoneos-arm
+Filename: ./pkgfiles/xyz.willy.aupm_1.0~beta15_iphoneos-arm.deb
+Size: 2372822
+Installed-Size: 9548
+MD5sum: 35e390bf12646a0d78e4ea98ac9c0123
 Description: A Useless Package Manager
 Name: AUPM (BETA)
 Author: Wilson Styres <wilson@styres.me>
@@ -1028,6 +985,21 @@ Author: Wilson Styres <wilson@styres.me>
 Depiction: https://xtm3x.github.io/aupm/index.html
 
 Package: xyz.willy.aupm
+Version: 1.0~beta19
+Section: Packaging
+Maintainer: Wilson Styres <wilson@styres.me>
+Depends: dpkg, cydia, apt7
+Architecture: iphoneos-arm
+Filename: ./pkgfiles/xyz.willy.aupm_1.0~beta19_iphoneos-arm.deb
+Size: 2380192
+Installed-Size: 9556
+MD5sum: b2f816fa963be23cd0e16c9686cb0629
+Description: A Useless Package Manager
+Name: AUPM (BETA)
+Author: Wilson Styres <wilson@styres.me>
+Depiction: https://xtm3x.github.io/aupm/
+
+Package: xyz.willy.aupm
 Version: 1.0~beta5
 Section: Packaging
 Maintainer: Wilson Styres <wilson@styres.me>
@@ -1087,3 +1059,17 @@ Name: AUPM (BETA)
 Author: Wilson Styres <wilson@styres.me>
 Depiction: https://xtm3x.github.io/aupm/index.html
 
+Package: xyz.willy.aupm
+Version: 1.0~beta16
+Section: Packaging
+Maintainer: Wilson Styres <wilson@styres.me>
+Depends: dpkg, cydia, apt7
+Architecture: iphoneos-arm
+Filename: ./pkgfiles/xyz.willy.aupm_1.0~beta16_iphoneos-arm.deb
+Size: 2372162
+Installed-Size: 9548
+MD5sum: 6a352c4aea06f673ffb3c3ec176da061
+Description: A Useless Package Manager
+Name: AUPM (BETA)
+Author: Wilson Styres <wilson@styres.me>
+Depiction: https://xtm3x.github.io/aupm/
