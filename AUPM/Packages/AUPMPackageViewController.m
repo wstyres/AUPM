@@ -53,23 +53,19 @@
   _progressView.translatesAutoresizingMaskIntoConstraints = NO;
 
   [_webView addSubview:_progressView];
+	
+	//Web View Layout
 
-  //Web View Layout
-
-  NSLayoutConstraint *webTop = [NSLayoutConstraint constraintWithItem:_webView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self.topLayoutGuide attribute:NSLayoutAttributeBottom multiplier:1 constant:0.f];
-  NSLayoutConstraint *webLeading = [NSLayoutConstraint constraintWithItem:_webView attribute:NSLayoutAttributeLeading relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeLeading multiplier:1 constant:0.f];
-  NSLayoutConstraint *webBottom = [NSLayoutConstraint constraintWithItem:_webView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self.bottomLayoutGuide attribute:NSLayoutAttributeTop multiplier:1 constant:0.f];
-  NSLayoutConstraint *webTrailing = [NSLayoutConstraint constraintWithItem:_webView attribute:NSLayoutAttributeTrailing relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeTrailing multiplier:1 constant:0.f];
-
-  [self.view addConstraints:@[webTop, webLeading, webBottom, webTrailing]];
+  [_webView.topAnchor constraintEqualToAnchor:self.topLayoutGuide.bottomAnchor].active = YES;
+  [_webView.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor].active = YES;
+  [_webView.bottomAnchor constraintEqualToAnchor:self.bottomLayoutGuide.topAnchor].active = YES;
+  [_webView.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor].active = YES;
 
   //Progress View Layout
 
-  NSLayoutConstraint *progressTrailing = [NSLayoutConstraint constraintWithItem:_webView attribute:NSLayoutAttributeTrailing relatedBy:NSLayoutRelationEqual toItem:_progressView attribute:NSLayoutAttributeTrailing multiplier:1 constant:0.f];
-  NSLayoutConstraint *progressLeading = [NSLayoutConstraint constraintWithItem:_progressView attribute:NSLayoutAttributeLeading relatedBy:NSLayoutRelationEqual toItem:_webView attribute:NSLayoutAttributeLeading multiplier:1 constant:0.f];
-  NSLayoutConstraint *progressTop = [NSLayoutConstraint constraintWithItem:_progressView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:_webView attribute:NSLayoutAttributeTop multiplier:1 constant:0.f];
-
-  [_webView addConstraints:@[progressTrailing, progressLeading, progressTop]];
+  [_progressView.trailingAnchor constraintEqualToAnchor:_webView.trailingAnchor].active = YES;
+  [_progressView.leadingAnchor constraintEqualToAnchor:_webView.leadingAnchor].active = YES;
+  [_progressView.topAnchor constraintEqualToAnchor:_webView.topAnchor].active = YES;
 
   _webView.navigationDelegate = self;
 
