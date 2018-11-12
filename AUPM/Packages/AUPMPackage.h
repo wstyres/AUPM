@@ -14,7 +14,8 @@
 @property NSString *maintainer;
 @property NSString *filename;
 @property int installedSize;
-@property NSString *dependencies;
+@property NSString *depends;
+@property NSString *conflicts;
 @property NSString *repoVersion;
 @property BOOL installed;
 @property AUPMRepo *repo;

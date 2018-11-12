@@ -21,8 +21,8 @@
   package.tags = [dict[@"Tag"] substringToIndex:[dict[@"Tag"] length] - 1];
   package.maintainer = [dict[@"Maintainer"] substringToIndex:[dict[@"Maintainer"] length] - 1];
   package.installedSize = [[dict[@"Installed-Size"] substringToIndex:[dict[@"Installed-Size"] length] - 1] intValue];
-  package.dependencies = [dict[@"Depends"] substringToIndex:[dict[@"Depends"] length] - 1];
-
+  package.depends = [dict[@"Depends"] substringToIndex:[dict[@"Depends"] length] - 1];
+  package.conflicts = [dict[@"Conflicts"] substringToIndex:[dict[@"Conflicts"] length] - 1];
 
   NSString *urlString = [dict[@"Depiction"] stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
   urlString = [urlString substringToIndex:[urlString length] - 3]; //idk why this is here
