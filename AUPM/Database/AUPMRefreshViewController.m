@@ -34,6 +34,10 @@ CFArrayRef SBSCopyApplicationDisplayIdentifiers(bool onlyActive, bool debuggable
     return self;
 }
 
+/*
+  @todo Add autolayout
+  @body Use constraints to make sure the screen appears properly on all devices
+*/
 - (void)loadView {
     [super loadView];
 
