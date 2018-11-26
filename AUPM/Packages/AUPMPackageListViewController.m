@@ -142,15 +142,18 @@
 		NSArray *items = [section componentsSeparatedByString:@"("]; //Remove () from section
 		section = [items[0] substringToIndex:[items[0] length] - 1];
 	}
-	NSString *iconPath = [NSString stringWithFormat:@"/Applications/Cydia.app/Sections/%@.png", section];
-	NSError *error;
-	NSData *data = [NSData dataWithContentsOfFile:iconPath options:0 error:&error];
-	UIImage *sectionImage = [UIImage imageWithData:data];
+	// NSString *iconPath = [NSString stringWithFormat:@"/Applications/Cydia.app/Sections/%@.png", section];
+	// NSError *error;
+	// NSData *data = [NSData dataWithContentsOfFile:iconPath options:0 error:&error];
+	UIImage *sectionImage = [UIImage imageNamed:section];
 	if (sectionImage != NULL) {
 		cell.imageView.image = sectionImage;
 	}
 	else if (_repo != NULL) {
 		cell.imageView.image = [UIImage imageWithData:[_repo icon]];
+	}
+	else {
+		NSLog(@"[AUPM] Missing Section Icon: %@", section);
 	}
 #if TARGET_OS_SIMULATOR
 #else
