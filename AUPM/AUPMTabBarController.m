@@ -34,6 +34,23 @@
   [self performBackgroundRefresh:false];
 }
 
+// - (void)viewDidAppear:(BOOL)animated {
+//   [super viewDidAppear:animated];
+//
+//   NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
+//   NSString *cacheDirectory = [paths objectAtIndex:0];
+//
+//   UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"Cache Directory"
+//                            message:cacheDirectory
+//                            preferredStyle:UIAlertControllerStyleAlert];
+//
+//   UIAlertAction* defaultAction = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault
+//                                  handler:^(UIAlertAction * action) {}];
+//
+//   [alert addAction:defaultAction];
+//   [self presentViewController:alert animated:YES completion:nil];
+// }
+
 - (void)performBackgroundRefresh:(BOOL)requested {
   BOOL timePassed;
 

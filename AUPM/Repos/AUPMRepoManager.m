@@ -273,7 +273,11 @@ NSArray *packages_to_array(const char *path);
   NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
   NSString *cacheDirectory = [paths objectAtIndex:0];
 
-  NSString *filePath = [cacheDirectory stringByAppendingString:@"/aupm.list"];
+  NSString *filePath;
+  if ([cacheDirectory isEqualToString:@"/var/mobile/Library/Caches"])
+    filePath = [cacheDirectory stringByAppendingString:@"/xyz.willy.aupm/aupm.list"];
+  else
+    filePath = [cacheDirectory stringByAppendingString:@"/aupm.list"];
 
   NSError *error;
   [output writeToFile:filePath atomically:TRUE encoding:NSUTF8StringEncoding error:&error];
@@ -318,7 +322,11 @@ NSArray *packages_to_array(const char *path);
   NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
   NSString *cacheDirectory = [paths objectAtIndex:0];
 
-  NSString *filePath = [cacheDirectory stringByAppendingString:@"/aupm.list"];
+  NSString *filePath;
+  if ([cacheDirectory isEqualToString:@"/var/mobile/Library/Caches"])
+    filePath = [cacheDirectory stringByAppendingString:@"/xyz.willy.aupm/aupm.list"];
+  else
+    filePath = [cacheDirectory stringByAppendingString:@"/aupm.list"];
   NSLog(@"[AUPM] filePath %@", filePath);
 
   NSError *error;
@@ -361,7 +369,11 @@ NSArray *packages_to_array(const char *path);
   NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
   NSString *cacheDirectory = [paths objectAtIndex:0];
 
-  NSString *filePath = [cacheDirectory stringByAppendingString:@"/aupm.list"];
+  NSString *filePath;
+  if ([cacheDirectory isEqualToString:@"/var/mobile/Library/Caches"])
+    filePath = [cacheDirectory stringByAppendingString:@"/xyz.willy.aupm/aupm.list"];
+  else
+    filePath = [cacheDirectory stringByAppendingString:@"/aupm.list"];
 
   NSError *error;
   [output writeToFile:filePath atomically:TRUE encoding:NSUTF8StringEncoding error:&error];
@@ -408,7 +420,11 @@ NSArray *packages_to_array(const char *path);
   NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
   NSString *cacheDirectory = [paths objectAtIndex:0];
 
-  NSString *filePath = [cacheDirectory stringByAppendingString:@"/aupm.list"];
+  NSString *filePath;
+  if ([cacheDirectory isEqualToString:@"/var/mobile/Library/Caches"])
+    filePath = [cacheDirectory stringByAppendingString:@"/xyz.willy.aupm/aupm.list"];
+  else
+    filePath = [cacheDirectory stringByAppendingString:@"/aupm.list"];
 
   [output writeToFile:filePath atomically:TRUE encoding:NSUTF8StringEncoding error:&error];
   if (error != NULL) {
