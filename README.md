@@ -1,10 +1,6 @@
 # AUPM
 
-A Useless Package Manager for iOS.
-
-## TODO
-
-See https://github.com/wstyres/AUPM/projects
+A Useless Package Manager for iOS. Though it isn't useless, AUPM has been discontinued. However, that doesn't mean AUPM is done. Keep an eye out for 🦓.
 
 ## Installation
 
