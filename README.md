@@ -1,6 +1,6 @@
 # AUPM
 
-A Useless Package Manager for iOS. Though it isn't useless, AUPM has been discontinued. However, that doesn't mean AUPM is done. Keep an eye out for 🦓.
+A Useless Package Manager for iOS. Though it isn't useless, AUPM has been discontinued. However, that doesn't mean AUPM is done. Check out [Zebra](https://github.com/wstyres/Zebra)
 
 ## Installation
 
